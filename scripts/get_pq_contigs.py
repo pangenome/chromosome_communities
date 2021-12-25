@@ -10,31 +10,33 @@ import sys
 #- Also, the length of the longest (or average of longest)
 #- To give an impression of scale
 
+path_mappings_paf = sys.argv[1]
+#todo shift_coordinates = sys.argv[2]
+#print(path_mappings_paf, shift_coordinates)
+
 chromosome2centromere_dict = {
-	'chr13': {
+	'chm13#chr13': {
 		'p' : (16500000, 17700000),
 		'q' : (17700000, 18767509),
 	},
-	'chr14': {
+	'chm13#chr14': {
 		'p' : (16100000, 17200000),
 		'q' : (17200000, 18200000),
 	},
-	'chr15': {
+	'chm13#chr15': {
 		'p' : (17500000, 19000000),
 		'q' : (19000000, 20500000),
 	},
-	'chr21': {
+	'chm13#chr21': {
 		'p' : (10900000, 12000000),
 		'q' : (12000000, 12081303),
 	},
-	'chr22': {
+	'chm13#chr22': {
 		'p' : (13700000, 15000000),
 		'q' : (15000000, 17400000),
 	}
 }
 
-path_mappings_paf = sys.argv[1]
-print(path_mappings_paf)
 
 seq2len_dict = {}
 query2target2info_dict = {}
@@ -95,11 +97,11 @@ for query, target2info_dict in query2target2info_dict.items():
         for (query_start, query_end), strand, (target_start, target_end), num_matches, alignment_len, est_id in info_list:
             #print('\t\t\t\t',(query_start, query_end), strand, (target_start, target_end), num_matches, alignment_len, est_id)
 
-            if target_end <= chromosome2centromere_dict[target]['p'][0]:
+            if target_end <= chromosome2centromere_dict[target]['p'][1]:
                 arm = 'p'
-            elif target_start <= chromosome2centromere_dict[target]['p'][0] and target_end > chromosome2centromere_dict[target]['q'][1]:
+            elif target_start <= chromosome2centromere_dict[target]['p'][1] and target_end > chromosome2centromere_dict[target]['q'][0]:
                 arm = 'pq'
-            elif target_start > chromosome2centromere_dict[target]['q'][1]:
+            elif target_start > chromosome2centromere_dict[target]['q'][0]:
                 arm = 'q'
             else:
                 arm = 'p'
@@ -113,7 +115,8 @@ for query, target2info_dict in query2target2info_dict.items():
             )
 
 for query, arm2target2info_dict in query2arm2target2info_dict.items():
-    if len(arm2target2info_dict['pq']) > 0:
+    #print(query, arm2target2info_dict)
+    if len(arm2target2info_dict['pq']) > 0 or (len(arm2target2info_dict['p']) > 0 and len(arm2target2info_dict['q']) > 0):
         print(query)
 
 # path_output =path_xxx_paf + '.split.p_q_pq.paf'
