@@ -57,10 +57,40 @@ Map acrocentric contigs against the acrocentric CHM13's chromosomes:
 mkdir -p /lizardfs/guarracino/chromosome_communities/mappings
 cd /lizardfs/guarracino/chromosome_communities/mappings
 
-(seq 13 15; seq 21 22) | while read f; do
-  /gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash \
-  /lizardfs/guarracino/chromosome_communities/assemblies/chm13.chr$f.fa.gz /lizardfs/erikg/HPRC/year1v2genbank/parts/chr$f.pan.fa -s 50k -l 150k -p 90 -n 1 -t 48 -m > chr$f.vs.chm13.chr$f.s50k.l150k.p90.n1.paf
+for s in 200k 150k 100k 50k ; do
+  for p in 90 85; do
+    s_no_k=${s::-1}
+    l_no_k=$(echo $s_no_k '*' 3 | bc)
+    l=${l_no_k}k
+    
+    (seq 13 15; seq 21 22) | while read f; do
+      sbatch -p allnodes -c 24 --job-name acrovsref --wrap 'hostname; cd /scratch; \time -v /gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash /lizardfs/guarracino/chromosome_communities/assemblies/chm13.chr'$f'.fa.gz /lizardfs/erikg/HPRC/year1v2genbank/parts/chr'$f'.pan.fa -s '$s' -l '$l' -p '$p' -n 1 -t 24 -m > /lizardfs/guarracino/chromosome_communities/mappings/chr'$f'.vs.chm13.chr'$f'.s'$s'.l'$l'.p'$p'.n1.paf'
+    done
+  done
 done
+```
+
+```shell
+for s in 200k 150k 100k 50k ; do
+  for p in 90 85; do
+    s_no_k=${s::-1}
+    l_no_k=$(echo $s_no_k '*' 3 | bc)
+    l=${l_no_k}k
+    
+    (seq 13 15; seq 21 22) | while read f; do
+      num=$(python3 ../scripts/get_pq_contigs.py chr$f.vs.chm13.chr$f.s$s.l$l.p$p.n1.paf 0 | wc -l)
+      echo s$s l$l p$p chr$f "-->" $num
+      
+    done
+  done
+done
+
+```
+
+Take the contigs that go from one side of the centromere to the other:
+
+```shell
+
 ```
 
 ### Data preparation

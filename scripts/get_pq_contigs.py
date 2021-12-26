@@ -1,18 +1,18 @@
 import os
 import sys
 
-#- acro-contigs (from chr13,14,15,21,22) longer than 10Mbps vs CHM13 chr13,14,15,21,22 (wfmash -s 10k/20k/50k/100k -p 90/95/98/99/99.5 -l 3*s/0)
-#- for each run, count contigs that have trans / cys mappings
-#- using CHM13 centromere annotations, counts contigs trans that go from p to q
-#erikg
-#- Try to measure the average size of the trans mappings for each mapping run
-#- How long are the parts that don't map cys?
-#- Also, the length of the longest (or average of longest)
-#- To give an impression of scale
+# Notes:
+# - acro-contigs (from chr13,14,15,21,22) longer than 10Mbps vs CHM13 chr13,14,15,21,22 (wfmash -s 10k/20k/50k/100k -p 90/95/98/99/99.5 -l 3*s/0)
+# - for each run, count contigs that have trans / cys mappings
+# - using CHM13 centromere annotations, counts contigs trans that go from p to q
+# erikg
+# - Try to measure the average size of the trans mappings for each mapping run
+# - How long are the parts that don't map cys?
+# - Also, the length of the longest (or average of longest)
+# - To give an impression of scale
 
 path_mappings_paf = sys.argv[1]
-#todo shift_coordinates = sys.argv[2]
-#print(path_mappings_paf, shift_coordinates)
+shift_coordinates = int(sys.argv[2])
 
 chromosome2centromere_dict = {
 	'chm13#chr13': {
@@ -36,7 +36,6 @@ chromosome2centromere_dict = {
 		'q' : (15000000, 17400000),
 	}
 }
-
 
 seq2len_dict = {}
 query2target2info_dict = {}
@@ -71,23 +70,7 @@ with open(path_mappings_paf) as f:
 
 query2arm2target2info_dict = {}
 
-num_contigs_trans = 0
-num_contigs_cys = 0
 for query, target2info_dict in query2target2info_dict.items():
-#     if len(query2target2info_dict[query]) == 1:
-#         num_contigs_cys += 1
-#     else:
-#         num_contigs_trans += 1
-#
-#         path_output =path_xxx_paf + f'.split.{query}.paf'
-#         with open(path_output, 'w') as fw:
-#             for target, info_list in target2info_dict.items():
-#                 for (query_start, query_end), strand, (target_start, target_end), num_matches, alignment_len, est_id in info_list:
-#                     fw.write('\t'.join([str(x) for x in [query, seq2len_dict[query], query_start, query_end, strand, target, seq2len_dict[target], target_start, target_end, num_matches, alignment_len, 255, est_id]]) + '\n')
-#
-#
-#         #print(f'\t\t {query} --> targets: {set(query2target2info_dict[query].keys())}')
-
     query2arm2target2info_dict[query] = {'p' : {}, 'q': {}, 'pq': {}}
 
     #print('\t\t', query)
@@ -97,11 +80,11 @@ for query, target2info_dict in query2target2info_dict.items():
         for (query_start, query_end), strand, (target_start, target_end), num_matches, alignment_len, est_id in info_list:
             #print('\t\t\t\t',(query_start, query_end), strand, (target_start, target_end), num_matches, alignment_len, est_id)
 
-            if target_end <= chromosome2centromere_dict[target]['p'][1]:
+            if target_end <= chromosome2centromere_dict[target]['p'][0] - shift_coordinates:
                 arm = 'p'
-            elif target_start <= chromosome2centromere_dict[target]['p'][1] and target_end > chromosome2centromere_dict[target]['q'][0]:
+            elif target_start <= chromosome2centromere_dict[target]['p'][0] - shift_coordinates and target_end > chromosome2centromere_dict[target]['q'][1] + shift_coordinates:
                 arm = 'pq'
-            elif target_start > chromosome2centromere_dict[target]['q'][0]:
+            elif target_start > chromosome2centromere_dict[target]['q'][1] + shift_coordinates:
                 arm = 'q'
             else:
                 arm = 'p'
@@ -129,6 +112,20 @@ for query, arm2target2info_dict in query2arm2target2info_dict.items():
 #                     for (query_start, query_end), strand, (target_start, target_end), num_matches, alignment_len, est_id in info_list:
 #                         fw.write('\t'.join([str(x) for x in [query, seq2len_dict[query], query_start, query_end, strand, target, seq2len_dict[target], target_start, target_end, num_matches, alignment_len, 255, est_id]]) + '\n')
 
-#print('\t\t num. contigs trans|cys {:3}|{:3} --> ratio {:.3f}'.format(num_contigs_trans, num_contigs_cys, num_contigs_trans/num_contigs_cys))
-#print(query2targets_dict)
-
+# num_contigs_trans = 0
+# num_contigs_cys = 0
+# for query, target2info_dict in query2target2info_dict.items():
+#     if len(query2target2info_dict[query]) == 1:
+#         num_contigs_cys += 1
+#     else:
+#         num_contigs_trans += 1
+#
+#         path_output =path_xxx_paf + f'.split.{query}.paf'
+#         with open(path_output, 'w') as fw:
+#             for target, info_list in target2info_dict.items():
+#                 for (query_start, query_end), strand, (target_start, target_end), num_matches, alignment_len, est_id in info_list:
+#                     fw.write('\t'.join([str(x) for x in [query, seq2len_dict[query], query_start, query_end, strand, target, seq2len_dict[target], target_start, target_end, num_matches, alignment_len, 255, est_id]]) + '\n')
+#
+#         print(f'\t\t {query} --> targets: {set(query2target2info_dict[query].keys())}')
+#
+# print('\t\t num. contigs trans|cys {:3}|{:3} --> ratio {:.3f}'.format(num_contigs_trans, num_contigs_cys, num_contigs_trans/num_contigs_cys))
