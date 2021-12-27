@@ -71,7 +71,7 @@ with open(path_mappings_paf) as f:
 query2arm2target2info_dict = {}
 
 for query, target2info_dict in query2target2info_dict.items():
-    query2arm2target2info_dict[query] = {'p' : {}, 'q': {}, 'pq': {}}
+    query2arm2target2info_dict[query] = {'p' : {}, 'q': {}, 'pq': {}, 'not_good': {}}
 
     #print('\t\t', query)
     for target, info_list in target2info_dict.items():
@@ -82,12 +82,12 @@ for query, target2info_dict in query2target2info_dict.items():
 
             if target_end <= chromosome2centromere_dict[target]['p'][0] - shift_coordinates:
                 arm = 'p'
-            elif target_start <= chromosome2centromere_dict[target]['p'][0] - shift_coordinates and target_end > chromosome2centromere_dict[target]['q'][1] + shift_coordinates:
+            elif target_start <= chromosome2centromere_dict[target]['p'][0] - shift_coordinates and target_end >= chromosome2centromere_dict[target]['q'][1] + shift_coordinates:
                 arm = 'pq'
-            elif target_start > chromosome2centromere_dict[target]['q'][1] + shift_coordinates:
+            elif target_start >= chromosome2centromere_dict[target]['q'][1] + shift_coordinates:
                 arm = 'q'
             else:
-                arm = 'p'
+                arm = 'not_good'
 
             #print(arm, '\t\t\t\t',query, (query_start, query_end), strand, target, (target_start, target_end), num_matches, alignment_len, est_id)
 
@@ -102,15 +102,15 @@ for query, arm2target2info_dict in query2arm2target2info_dict.items():
     if len(arm2target2info_dict['pq']) > 0 or (len(arm2target2info_dict['p']) > 0 and len(arm2target2info_dict['q']) > 0):
         print(query)
 
-# path_output =path_xxx_paf + '.split.p_q_pq.paf'
-# with open(path_output, 'w') as fw:
-#     for query, arm2target2info_dict in query2arm2target2info_dict.items():
-#         if len(arm2target2info_dict['pq']) > 0 or (len(arm2target2info_dict['p']) > 0 and len(arm2target2info_dict['q']) > 0):
-#             #print(query)
-#             for arm, target2info_dict in arm2target2info_dict.items():
-#                 for target, info_list in target2info_dict.items():
-#                     for (query_start, query_end), strand, (target_start, target_end), num_matches, alignment_len, est_id in info_list:
-#                         fw.write('\t'.join([str(x) for x in [query, seq2len_dict[query], query_start, query_end, strand, target, seq2len_dict[target], target_start, target_end, num_matches, alignment_len, 255, est_id]]) + '\n')
+path_output = path_mappings_paf + '.pq_contigs.paf'
+with open(path_output, 'w') as fw:
+    for query, arm2target2info_dict in query2arm2target2info_dict.items():
+        if len(arm2target2info_dict['pq']) > 0 or (len(arm2target2info_dict['p']) > 0 and len(arm2target2info_dict['q']) > 0):
+            #print(query)
+            for arm, target2info_dict in arm2target2info_dict.items():
+                for target, info_list in target2info_dict.items():
+                    for (query_start, query_end), strand, (target_start, target_end), num_matches, alignment_len, est_id in info_list:
+                        fw.write('\t'.join([str(x) for x in [query, seq2len_dict[query], query_start, query_end, strand, target, seq2len_dict[target], target_start, target_end, num_matches, alignment_len, 255, est_id]]) + '\n')
 
 # num_contigs_trans = 0
 # num_contigs_cys = 0

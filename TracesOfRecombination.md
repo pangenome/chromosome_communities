@@ -57,8 +57,8 @@ Map acrocentric contigs against the acrocentric CHM13's chromosomes:
 mkdir -p /lizardfs/guarracino/chromosome_communities/mappings
 cd /lizardfs/guarracino/chromosome_communities/mappings
 
-for s in 200k 150k 100k 50k ; do
-  for p in 90 85; do
+for s in 200k 150k 100k 50k 20k ; do
+  for p in 98 95 90 85; do
     s_no_k=${s::-1}
     l_no_k=$(echo $s_no_k '*' 3 | bc)
     l=${l_no_k}k
@@ -70,22 +70,60 @@ for s in 200k 150k 100k 50k ; do
 done
 ```
 
+Take the contigs that go from one side of the centromere (-1Mbps) to the other (+1Mbsp):
+
 ```shell
-for s in 200k 150k 100k 50k ; do
-  for p in 90 85; do
+mkdir -p /lizardfs/guarracino/chromosome_communities/pq_contigs
+cd /lizardfs/guarracino/chromosome_communities/pq_contigs
+
+for s in 200k 150k 100k 50k 20k; do
+  for p in 98 95 90 85; do
     s_no_k=${s::-1}
     l_no_k=$(echo $s_no_k '*' 3 | bc)
     l=${l_no_k}k
     
     (seq 13 15; seq 21 22) | while read f; do
-      num=$(python3 ../scripts/get_pq_contigs.py chr$f.vs.chm13.chr$f.s$s.l$l.p$p.n1.paf 0 | wc -l)
-      echo s$s l$l p$p chr$f "-->" $num
-      
+      echo s$s l$l p$p chr$f
+      samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/parts/chr$f.pan.fa $(python3 ../scripts/get_pq_contigs.py ../mappings/chr$f.vs.chm13.chr$f.s$s.l$l.p$p.n1.paf 1000000) | pigz -c > chr$f.vs.chm13.chr$f.s$s.l$l.p$p.n1.pq_contigs.fa.gz
     done
   done
 done
-
 ```
+
+Put all together with the reference:
+
+```shell
+for s in 200k 150k 100k 50k 20k; do
+  for p in 98 95 90 85; do
+    s_no_k=${s::-1}
+    l_no_k=$(echo $s_no_k '*' 3 | bc)
+    l=${l_no_k}k
+    
+    echo s$s l$l p$p
+    zcat /lizardfs/guarracino/chromosome_communities/assemblies/chm13.chr*.fa.gz /lizardfs/guarracino/chromosome_communities/pq_contigs/chr*.vs.chm13.chr*.s$s.l$l.p$p.n1.pq_contigs.fa.gz | bgzip -@ 48 -c > /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+ref.s$s.l$l.p$p.n1.pq_contigs.fa.gz && samtools faidx /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+ref.s$s.l$l.p$p.n1.pq_contigs.fa.gz
+  done
+done
+```
+
+## Pangenome building
+
+Apply `pggb` on the pq-contigs:
+
+```shell
+mkdir -p /lizardfs/guarracino/chromosome_communities/graphs
+
+for s in 200k 150k 100k 50k 20k; do
+  for p in 98 95 90 85; do
+    s_no_k=${s::-1}
+    l_no_k=$(echo $s_no_k '*' 3 | bc)
+    l=${l_no_k}k
+    
+    sbatch -p workers -c 24 --job-name acropggb --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+ref.s'$s'.l'$l'.p'$p'.n1.pq_contigs.fa.gz -o chrACRO+ref.s'$s'.l'$l'.p'$p'.n1.pq_contigs -t 24 -p 98 -s '$s' -l '$l' -n 90 -k 311 -O 0.03 -T 24 -v -V chm13:# -Z ; mv /scratch/chrACRO+ref.s'$s'.l'$l'.p'$p'.n1.pq_contigs /lizardfs/guarracino/chromosome_communities/graphs';
+  done
+done
+```
+
+
 
 Take the contigs that go from one side of the centromere to the other:
 
