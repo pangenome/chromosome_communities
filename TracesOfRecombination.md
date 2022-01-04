@@ -12,6 +12,13 @@ cargo build --release
 mv target/release/fastix target/release/fastix-331c1159ea16625ee79d1a82522e800c99206834
 cd ..
 
+git clone --recursive https://github.com/pangenome/odgi.git
+cd odgi
+git checkout 358537678174adc975415a488b458725d8a213be
+cmake -H. -Bbuild && cmake --build build -- -j 48
+mv bin/odgi bin/odgi-358537678174adc975415a488b458725d8a213be
+cd ..
+
 (echo pggb wfmash seqwish smoothxg odgi gfaffix | tr ' ' '\n') | while read tool; do ls -l $(which $tool); done | cut -f 13 -d ' '
 /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb
 /gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash
@@ -236,29 +243,50 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/untangle
 path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n97/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.og
 prefix=$(basename $path_input_og .og)
 
-/gnu/store/2ln6zv8mk6aqqzcib39rgi11x2hn7mv9-odgi-0.6.2+9e9c481-13/bin/odgi untangle -t 32 -P \
-  -i $path_input_og \
-  -R <(grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1) \
-  -e 50000 -m 1000 > /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e50000.m1000.tsv
-
-grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1 | while read ref; do
-  echo $ref
-  /gnu/store/2ln6zv8mk6aqqzcib39rgi11x2hn7mv9-odgi-0.6.2+9e9c481-13/bin/odgi untangle -t 32 -P \
+for e in 5000 10000 20000 50000 100000; do
+  for m in 1000 10000; do
+    echo "-e $e -m $m"
+    
+    ~/tools/odgi/bin/odgi-358537678174adc975415a488b458725d8a213be untangle -t 8 -P \
       -i $path_input_og \
-      -r $ref \
-      -e 50000 -m 1000 \
-      -n 50 -j 0.8 > /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e50000.m1000.n50.j08.tsv
-done
-
-grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1 | while read ref; do
-  echo $ref
-    ( echo query query.begin query.end target target.begin target.end jaccard strand self.coverage ref ref.begin ref.end | tr ' ' '\t'
-    join \
-      <(cat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e50000.m1000.tsv | awk '{ print $1"_"$2, $0 }' | tr ' ' '\t' | sort -k 1,1) \
-      <(cat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e50000.m1000.n50.j08.tsv | awk '{ print $1"_"$2, $0 }' | tr ' ' '\t' | sort -k 1,1) | \
-      tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -9,14-16 ) | tr ' ' '\t' > /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e50000.m1000.n50.j08.grounded.tsv
+      -R <(grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1) \
+      -e $e -m $m \
+      --cut-points-output /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.cut_points.txt \
+      > /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.bed
+    
+    grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1 | while read ref; do
+      echo $ref
+      ~/tools/odgi/bin/odgi-358537678174adc975415a488b458725d8a213be untangle -t 8 -P \
+          -i $path_input_og \
+          -r $ref \
+          -e $e -m $m \
+          --cut-points-input /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.cut_points.txt \
+          -n 100 -j 0 > /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n100.j0.bed &
+    done
+    wait
+  done
 done
 ```
+
+```shell
+j=0.8
+j_str=$(echo $j | sed 's/\.//g')
+for e in 5000 10000 20000 50000 100000; do
+  for m in 1000 10000; do
+    echo "-e $e -m $m"
+    
+    grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1 | while read ref; do
+      echo $ref
+        ( echo query query.begin query.end target target.begin target.end jaccard strand self.coverage ref ref.begin ref.end | tr ' ' '\t'
+        join \
+          <(cat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.bed | awk '{ print $1"_"$2, $0 }' | tr ' ' '\t' | sort -k 1,1) \
+          <(cat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n100.j0.bed | awk -v j=$j '{ if($7 >= j) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) | \
+          tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -9,14-16 ) | tr ' ' '\t' > /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n100.j${j_str}.grounded.tsv
+    done
+  done
+done
+```
+
 
 Plotting:
 
@@ -313,13 +341,13 @@ jointly:
 
 - sex chromosomes (chrX and chrY).
 
-```
+```shell
 sbatch -p workers -c 48 -w octopus11 --wrap 'hostname; cd /scratch && /gnu/store/2rwrch6gc5r5pazikhfc25j2am2rh22a-pggb-0.2.0+531f85f-1/bin/pggb -i /lizardfs/guarracino/HPRC/chromosome_communities/data/chrS.pan+HG002chrXY.fa.gz -o chrS.pan+HG002chrXY -t 48 -p 98 -s 100000 -n 90 -k 311 -O 0.03 -T 48 -U -v -L -V chm13:#,grch38:# -Z ; mv /scratch/chrS.pan+HG002chrXY /lizardfs/guarracino/HPRC/chromosome_communities/'
 ```
 
 - acrocentric chromosomes (chr13, chr14, chr15, chr21, and chr22);
 
-```
+```shell
 ( echo A | tr ' ' '\n') | while read i; do sbatch -p workers -c 48 -w octopus02 --wrap 'hostname; cd /scratch && /gnu/store/2rwrch6gc5r5pazikhfc25j2am2rh22a-pggb-0.2.0+531f85f-1/bin/pggb -i /lizardfs/erikg/HPRC/year1v2genbank/parts/chr'$i'.pan.fa -o chr'$i'.pan -t 48 -p 98 -s 100000 -n 90 -k 311 -O 0.03 -T 48 -U -v -L -V chm13:#,grch38:# -Z ; mv /scratch/chr'$i'.pan /lizardfs/guarracino/HPRC/chromosome_communities/'; done # >>pggb.jobids
 ```
 
@@ -327,11 +355,10 @@ sbatch -p workers -c 48 -w octopus11 --wrap 'hostname; cd /scratch && /gnu/store
 
 Untangle all contigs in the sex graph by using the GRCh38 reference and the new HG002 _de novo_ assembly:
 
-```
+```shell
 bash untangle.sh chrS.pan+HG002chrY/chrS.pan+HG002chrY.fa.gz.a2fb268.4030258.6a1ecc2.smooth.og.gz grch38 "chrX chrY" 10000 sex
 bash untangle.sh chrS.pan+HG002chrY/chrS.pan+HG002chrY.fa.gz.a2fb268.4030258.6a1ecc2.smooth.og.gz "chm13 HG002" "chrX chrY" 10000 sex
 ```
-
 
 ### ...
 
