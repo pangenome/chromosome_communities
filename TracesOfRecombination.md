@@ -296,9 +296,7 @@ for e in 50000; do
             tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -9,14-16 ) | tr ' ' '\t' > ${path_grounded_tsv}
             
             # Add annotation
-            #zgrep rDNA data/chm13.CentromeresAndTelomeres.CenSatAnnotationtxt.gz | sed 's/chr/chm13#chr/g' | grep $ref | awk -v OFS='\t' '{print $4,$2,$3,$1,"","","","","","","",""}' > ${path_grounded_tsv}
-            zgrep rDNA data/chm13.CentromeresAndTelomeres.CenSatAnnotationtxt.gz | sed 's/chr/chm13#chr/g'  | awk -v OFS='\t' '{print $4,$2,$3,$1,"","","","","","","",""}' > ${path_grounded_tsv}
-
+            zgrep rDNA ../data/chm13.CentromeresAndTelomeres.CenSatAnnotationtxt.gz | sed 's/chr/chm13#chr/g'  | awk -v OFS='\t' '{print $1"#"$4,".",".",$1,".",".",".",".",".",".",$2,$3}' >> ${path_grounded_tsv}
       fi;
       
       Rscript ../scripts/plot_untangle.R ${path_grounded_tsv}
