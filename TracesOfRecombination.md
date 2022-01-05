@@ -247,11 +247,13 @@ for e in 5000 10000 20000 50000 100000; do
   for m in 1000 10000; do
     echo "-e $e -m $m"
     
+    path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.cut_points.txt
+    
     ~/tools/odgi/bin/odgi-358537678174adc975415a488b458725d8a213be untangle -t 8 -P \
       -i $path_input_og \
       -R <(grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1) \
       -e $e -m $m \
-      --cut-points-output /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.cut_points.txt \
+      --cut-points-output ${path_cut_points_txt} \
       > /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.bed
     
     grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1 | while read ref; do
@@ -260,7 +262,7 @@ for e in 5000 10000 20000 50000 100000; do
           -i $path_input_og \
           -r $ref \
           -e $e -m $m \
-          --cut-points-input /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.cut_points.txt \
+          --cut-points-input ${path_cut_points_txt} \
           -n 100 -j 0 > /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n100.j0.bed &
     done
     wait
@@ -269,10 +271,10 @@ done
 ```
 
 ```shell
-j=0.8
-j_str=$(echo $j | sed 's/\.//g')
-for e in 5000 10000 20000 50000 100000; do
-  for m in 1000 10000; do
+n=1
+j=0; j_str=$(echo $j | sed 's/\.//g')
+for e in 50000; do
+  for m in 10000; do
     echo "-e $e -m $m"
     
     grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1 | while read ref; do
@@ -280,8 +282,8 @@ for e in 5000 10000 20000 50000 100000; do
         ( echo query query.begin query.end target target.begin target.end jaccard strand self.coverage ref ref.begin ref.end | tr ' ' '\t'
         join \
           <(cat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.bed | awk '{ print $1"_"$2, $0 }' | tr ' ' '\t' | sort -k 1,1) \
-          <(cat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n100.j0.bed | awk -v j=$j '{ if($7 >= j) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) | \
-          tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -9,14-16 ) | tr ' ' '\t' > /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n100.j${j_str}.grounded.tsv
+          <(cat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n100.j0.bed | awk -v j=$j -v n=$n '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) | \
+          tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -9,14-16 ) | tr ' ' '\t' > /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.tsv
     done
   done
 done
