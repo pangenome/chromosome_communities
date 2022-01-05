@@ -270,7 +270,13 @@ for e in 5000 10000 20000 50000 100000; do
 done
 ```
 
+Grounding and plotting:
+
 ```shell
+path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n97/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.og
+prefix=$(basename $path_input_og .og)
+
+
 n=1
 j=0; j_str=$(echo $j | sed 's/\.//g')
 for e in 50000; do
@@ -279,41 +285,71 @@ for e in 50000; do
     
     grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1 | while read ref; do
       echo $ref
-        ( echo query query.begin query.end target target.begin target.end jaccard strand self.coverage ref ref.begin ref.end | tr ' ' '\t'
-        join \
-          <(cat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.bed | awk '{ print $1"_"$2, $0 }' | tr ' ' '\t' | sort -k 1,1) \
-          <(cat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n100.j0.bed | awk -v j=$j -v n=$n '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) | \
-          tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -9,14-16 ) | tr ' ' '\t' > /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.tsv
+      
+      path_grounded_tsv=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.tsv
+      
+      if [[ ! -s ${path_grounded_tsv} ]]; then
+          ( echo query query.begin query.end target target.begin target.end jaccard strand self.coverage ref ref.begin ref.end | tr ' ' '\t'
+            join \
+            <(cat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.bed | awk '{ print $1"_"$2, $0 }' | tr ' ' '\t' | sort -k 1,1) \
+            <(cat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n100.j0.bed | awk -v j=$j -v n=$n '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) | \
+            tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -9,14-16 ) | tr ' ' '\t' > ${path_grounded_tsv}
+            
+            # Add annotation
+            #zgrep rDNA data/chm13.CentromeresAndTelomeres.CenSatAnnotationtxt.gz | sed 's/chr/chm13#chr/g' | grep $ref | awk -v OFS='\t' '{print $4,$2,$3,$1,"","","","","","","",""}' > ${path_grounded_tsv}
+            zgrep rDNA data/chm13.CentromeresAndTelomeres.CenSatAnnotationtxt.gz | sed 's/chr/chm13#chr/g'  | awk -v OFS='\t' '{print $4,$2,$3,$1,"","","","","","","",""}' > ${path_grounded_tsv}
+
+      fi;
+      
+      Rscript ../scripts/plot_untangle.R ${path_grounded_tsv}
+    done
+  done
+done
+
+```
+
+
+Plotting:
+
+```shell
+# guix install r
+# guix install r-ggplot2
+
+n=2
+j=0; j_str=$(echo $j | sed 's/\.//g')
+for e in 50000; do
+  for m in 10000; do
+    echo "-e $e -m $m"
+    
+    grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1 | while read ref; do
+      
     done
   done
 done
 ```
 
 
-Plotting:
-
-```R
-library(ggplot2)
-x <- read.delim('/home/guarracino/Downloads/Pangenomics/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.untangle.chm13#chr22.e5000.m1000.n50.j08.grounded.tsv')
-p <- ggplot(x, aes(x=ref.begin+(ref.end-ref.begin)/2, width=ref.end-ref.begin-200, y=query, fill=target)) + geom_tile()
-ggsave(plot = p, 'chr22.e5000.m1000.n50.j08.grounded.pdf', width = 21, height = 14,  units = "cm", dpi = 300,  bg = "transparent")
-```
+--
 
 
-Take the contigs that go from one side of the centromere to the other:
+Prepare CHM13's acrocentric chromosomes:
 
 ```shell
-
+samtools faidx chm13.fa.gz $(grep 'chr13\|chr14\|chr15\|chr21\|chr22' chm13.fa.gz.fai | cut -f 1) | bgzip -@ 48 -c > chm13.ACRO.fa.gz && samtools faidx chm13.ACRO.fa.gz
+rm chm13.draft_v1.1.fasta.gz chm13.fa.gz*
 ```
 
-### Data preparation
+## Pangenome building
 
-ls HG002's chrY as an alternative reference, as GRCh38's chrY is incomplete. Include also HG002's chrX.
+# todo: to take the last chrY (check the differences)
 
-```
+Use HG002's chrY as an alternative reference, as GRCh38's chrY is incomplete. Include also HG002's chrX.
+
+```shell
 mkdir -p /lizardfs/guarracino/HPRC/chromosome_communities/data
 cd /lizardfs/guarracino/HPRC/chromosome_communities/data
 
+#2021-08-27T19:04:55.000Z        3.0 GB         v2.fasta
 wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/working/T2T/HG002XY/v2/v2.fasta
 wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/working/T2T/HG002XY/v2/v2.fasta.fai
 samtools faidx v2.fasta $(grep hg002 v2.fasta.fai | cut -f 1) | \
@@ -324,7 +360,7 @@ rm v2.fasta*
 
 Put HG002's chrX and chrY with the partitioned chrXs and chrYs.
 
-```
+```shell
 # Prepare sequence order, with all references on the top
 grep chr /lizardfs/erikg/HPRC/year1v2genbank/parts/chrS.pan.fa.fai | cut -f 1 > sequence_order.txt
 grep chr /lizardfs/erikg/HPRC/year1v2genbank/parts/chrS.pan.fa.fai -v | cut -f 1 >> sequence_order.txt
