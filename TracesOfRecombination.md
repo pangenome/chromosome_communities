@@ -234,15 +234,17 @@ for e in 5000 10000 20000 50000 100000; do
 done
 ```
 
-Grounding:
+Grounding and plotting:
 
 ```shell
 path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n97/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.og
 prefix=$(basename $path_input_og .og)
 
-n=1
-j=0; j_str=$(echo $j | sed 's/\.//g')
-for e in 50000; do
+n=20
+j=0.8
+
+j_str=$(echo $j | sed 's/\.//g')
+for e in 5000 10000 50000; do
   for m in 10000; do
     echo "-e $e -m $m -j $j -n $n"
     
@@ -261,16 +263,11 @@ for e in 50000; do
     done
   done
 done
-```
 
 
-Plotting:
-
-```shell
 # guix install r
 # guix install r-ggplot2
-
-for e in 50000; do
+for e in 5000 10000 50000; do
   for m in 10000; do
     echo "-e $e -m $m -j $j -n $n"
     
@@ -302,8 +299,8 @@ for e in 50000; do
              > ${path_grounded_pq_touching_tsv}
         
           # Add annotation
-          zgrep rDNA /lizardfs/guarracino/chromosome_communities/data/chm13.CentromeresAndTelomeres.CenSatAnnotation.txt.gz | sed 's/chr/chm13#chr/g' | awk -v OFS='\t' '{print $1"#"$4,".",".",$1,".",".",".",".",".",".",$2,$3}' >> ${path_grounded_pq_touching_tsv}
-          grep acen /lizardfs/guarracino/chromosome_communities/data/chm13.CytoBandIdeo.v2.txt | bedtools merge | grep 'chr13\|chr14\|chr15\|chr21\|chr22' | sed 's/chr/chm13#chr/g'  | awk -v OFS='\t' '{print $1"#centromere",".",".",$1,".",".",".",".",".",".",$2,$3}' >> ${path_grounded_pq_touching_tsv}
+          zgrep rDNA /lizardfs/guarracino/chromosome_communities/data/chm13.CentromeresAndTelomeres.CenSatAnnotation.txt.gz | sed 's/chr/chm13#chr/g' | grep $ref | awk -v OFS='\t' '{print $1"#"$4,".",".",$1,".",".",".",".",".",".",$2,$3}' >> ${path_grounded_pq_touching_tsv}
+          grep acen /lizardfs/guarracino/chromosome_communities/data/chm13.CytoBandIdeo.v2.txt | bedtools merge | grep 'chr13\|chr14\|chr15\|chr21\|chr22' | sed 's/chr/chm13#chr/g'  | grep $ref | awk -v OFS='\t' '{print $1"#centromere",".",".",$1,".",".",".",".",".",".",$2,$3}' >> ${path_grounded_pq_touching_tsv}
       fi;
       
       Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle.R ${path_grounded_pq_touching_tsv} "$ref -e $e -m $m -j $j -n $n"
@@ -314,8 +311,9 @@ done
 ```
 
 
---
 
+
+# OLD STUFF (TO DELETE OR FINISH)
 
 Prepare CHM13's acrocentric chromosomes:
 
