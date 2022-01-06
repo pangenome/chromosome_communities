@@ -10,4 +10,5 @@ p <- ggplot(x, aes(x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - 
   geom_tile() +
   ggtitle(title)
 
-ggsave(plot = p, paste0(path_untangle_grounded_tsv, '.pdf'), width = 40, height = 65, units = "cm", dpi = 300, bg = "transparent")
+num_queries <- length(unique(x$query))
+ggsave(plot = p, paste0(path_untangle_grounded_tsv, '.pdf'), width = 40, height = num_queries/2, units = "cm", dpi = 300, bg = "transparent")

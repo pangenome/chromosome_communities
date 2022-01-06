@@ -293,11 +293,12 @@ for e in 50000; do
               -b <(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/q_arms.bed | bedtools sort) | \
               #awk '$3-$2+1>=100000' | \
               cut -f 4 | sort | uniq) | \
-              grep 'chm13#\|grch38#' -v > tmp.txt
+              grep 'chm13#\|grch38#' -v > $ref.tmp.txt
         
           cat \
             <(head /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.tsv -n 1) \
-            <(grep /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.tsv -f tmp.txt) \
+            <(grep /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.tsv -f $ref.tmp.txt) \
+            <(grep '^grch38\|^chm13' /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.tsv) \
              > ${path_grounded_pq_touching_tsv}
         
           # Add annotation
@@ -309,6 +310,7 @@ for e in 50000; do
     done
   done
 done
+
 ```
 
 
