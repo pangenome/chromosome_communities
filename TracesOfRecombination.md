@@ -281,25 +281,31 @@ for e in 50000; do
       path_grounded_pq_touching_tsv=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.pq_touching.tsv
       
       if [[ ! -s ${path_grounded_pq_touching_tsv} ]]; then
-                  # "p-touching contigs" intersected "q-touching contigs"
+          # "p-touching contigs" intersected "q-touching contigs"
           comm -12 \
             <(bedtools intersect \
               -a <(cat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.tsv | awk -v OFS="\t" '{print $10,$11,$12,$1, "", "+"}' | grep query -v | bedtools sort) \
-              -b <(grep chr$f /lizardfs/guarracino/chromosome_communities/pq_contigs/p_arms.bed | bedtools sort) | \
+              -b <(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/p_arms.bed | bedtools sort) | \
               #awk '$3-$2+1>=100000' | \
               cut -f 4 | sort | uniq) \
             <(bedtools intersect \
               -a <(cat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.tsv | awk -v OFS="\t" '{print $10,$11,$12,$1, "", "+"}' | grep query -v | bedtools sort) \
-              -b <(grep chr$f /lizardfs/guarracino/chromosome_communities/pq_contigs/q_arms.bed | bedtools sort) | \
+              -b <(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/q_arms.bed | bedtools sort) | \
               #awk '$3-$2+1>=100000' | \
               cut -f 4 | sort | uniq) | \
-              grep 'chm13#\|grch38#' -v > ${path_grounded_pq_touching_tsv}
+              grep 'chm13#\|grch38#' -v > tmp.txt
         
-            # Add annotation
-            zgrep rDNA ../data/chm13.CentromeresAndTelomeres.CenSatAnnotation.txt.gz | sed 's/chr/chm13#chr/g'  | awk -v OFS='\t' '{print $1"#"$4,".",".",$1,".",".",".",".",".",".",$2,$3}' >> ${path_grounded_pq_touching_tsv}
+          cat \
+            <(head /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.tsv -n 1) \
+            <(grep /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.tsv -f tmp.txt) \
+             > ${path_grounded_pq_touching_tsv}
+        
+          # Add annotation
+          zgrep rDNA /lizardfs/guarracino/chromosome_communities/data/chm13.CentromeresAndTelomeres.CenSatAnnotation.txt.gz | sed 's/chr/chm13#chr/g' | awk -v OFS='\t' '{print $1"#"$4,".",".",$1,".",".",".",".",".",".",$2,$3}' >> ${path_grounded_pq_touching_tsv}
+          grep acen /lizardfs/guarracino/chromosome_communities/data/chm13.CytoBandIdeo.v2.txt | bedtools merge | grep 'chr13\|chr14\|chr15\|chr21\|chr22' | sed 's/chr/chm13#chr/g'  | awk -v OFS='\t' '{print $1"#centromere",".",".",$1,".",".",".",".",".",".",$2,$3}' >> ${path_grounded_pq_touching_tsv}
       fi;
       
-      Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle.R ${path_grounded_pq_touching_tsv}
+      Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle.R ${path_grounded_pq_touching_tsv} "$ref -e $e -m $m -j $j -n $n"
     done
   done
 done
