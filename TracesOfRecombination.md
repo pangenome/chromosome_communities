@@ -199,6 +199,41 @@ sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && /gn
 ## Untangling
 
 ```shell
+# WIP
+e=5000
+m=1000
+j=0.8
+n=1
+
+path_chr6_smooth=chr6.pan.fa.a2fb268.4030258.6a1ecc2.smooth.og
+path_fasta=${path_chr6_smooth}.fasta
+path_untangle_all_paf_gz=chr6.pan.fa.a2fb268.4030258.6a1ecc2.smooth.mhc.both.e$e.m$m.paf.gz
+path_untangle_single_paf_gz=chr6.pan.fa.a2fb268.4030258.6a1ecc2.smooth.mhc.chm13.e$e.m$m.n$n.j$j.paf.gz
+path_untangle_grounded_tsv_gz=chr6.mhc.untangle.chm13.e$e.m$m.n$n.j$j.grounded.tsv.gz
+path_untangle_grounded_paf_gz=chr6.mhc.untangle.chm13.e$e.m$m.n$n.j$j.grounded.paf.gz
+path_untangle_grounded_wfmash_paf_gz=chr6.mhc.untangle.chm13.e$e.m$m.n$n.j$j.grounded.wfmash.paf.gz
+
+odgi paths -i ${path_chr6_smooth} -f > ${path_fasta}
+samtools faidx ${path_fasta}
+
+odgi untangle -i ${path_chr6_smooth} -t 16 -P -R <(echo chm13#chr6:28874656-33821293; echo grch38#chr6:28999849-34000009) -e $e -m $m -d cut_points.txt -p | pigz -c > ${path_untangle_all_paf_gz}
+odgi untangle -i ${path_chr6_smooth} -t 16 -P -r chm13#chr6:28874656-33821293 -n $n -j $j -e $e -m $m -c cut_points.txt -p | pigz -c > ${path_untangle_single_paf_gz}
+
+( echo query query.length query.begin query.end strand target target.length target.begin target.end num.res alignment.length map.q id jaccard self.coverage nb ref ref.length ref.begin ref.end | tr ' ' '\t' ; \
+  join \
+    <(zcat ${path_untangle_all_paf_gz} | awk '{ print $1"_"$3, $0 }' | tr ' ' '\t' | sort  -k 1,1) \
+    <(zcat ${path_untangle_single_paf_gz} | awk -v OFS="\t" -v j=$j -v n=$n '{gsub("jc:f:", "", $14); gsub("nb:i:", "", $16); if($14 >= j && $16 <= n) {print $1"_"$3, $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,"jc:f:"$14,$15,"nb:i:"$16}}' | tr ' ' '\t' | sort  -k 1,1) | \
+  tr ' ' '\t' | cut -f 2- | cut -f -16,23,24,25,26) | 
+  tr ' ' '\t' | pigz -c > ${path_untangle_grounded_tsv_gz}
+
+zgrep query -v ${path_untangle_grounded_tsv_gz} | awk -v OFS='\t' '{print $1,$2,$3,$4,$5,$17,$18,$19,$20,$10,$11,$12,$13,$14,$15,$16}' | pigz -c > ${path_untangle_grounded_paf_gz}
+#zcat chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.untangle.chm13#chr13.e50000.m1000.n1.j08.grounded.paf.gz | -v OFS='\t' '{print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,"id:f:99.99999",$14,$15,$16}' > chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.untangle.chm13#chr13.e50000.m1000.n1.j08.grounded.9999999.paf.gz
+wfmash ${path_fasta} ${path_fasta} -i ${path_untangle_grounded_paf_gz} -t 6 | pigz -c > ${path_untangle_grounded_wfmash_paf_gz}
+
+~/git/rustybam/target/release/rustybam stats -p <(zcat ${path_untangle_grounded_wfmash_paf_gz}) > chr6.mhc.untangle.chm13.e$e.m$m.n$n.j$j.grounded.wfmash.stats.bed
+```
+
+```shell
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle
 
 #!/bin/bash
