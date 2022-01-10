@@ -193,7 +193,7 @@ num_of_haplotypes=$(cut -f 1,2 -d '#' /lizardfs/guarracino/chromosome_communitie
 sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz -o chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n'$num_of_haplotypes' -t 48 -s 100k -l 300k -p 98 -n '$num_of_haplotypes' -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n'$num_of_haplotypes' /lizardfs/guarracino/chromosome_communities/graphs';
 
 # Saturate the alignments (-n 200)
-sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz -o chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n200 -t 48 -s 100k -l 300k -p 98 -n 200 -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n200 /lizardfs/guarracino/chromosome_communities/graphs';
+#sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz -o chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n200 -t 48 -s 100k -l 300k -p 98 -n 200 -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n200 /lizardfs/guarracino/chromosome_communities/graphs';
 ```
 
 ## Untangling
@@ -321,7 +321,7 @@ for e in 5000 10000 20000 30000 40000 50000 100000; do
               path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz
               path_grounded_pq_touching_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv
               
-              if [[ ! -s ${path_grounded_pq_touching_tsv} ]]; then
+              if [[ ! -s ${path_grounded_pq_touching_tsv}.gz ]]; then
                   # "p-touching contigs" intersected "q-touching contigs"
                   comm -12 \
                     <(bedtools intersect \
@@ -354,17 +354,27 @@ for e in 5000 10000 20000 30000 40000 50000 100000; do
                     sed 's/chr/chm13#chr/g'  | \
                     grep $ref | \
                     awk -v OFS='\t' -v ref=$ref '{print $1"#centromere",".",".",$1,".",".",".",".",".",".",$2,$3, ref}' >> ${path_grounded_pq_touching_tsv}
+                  
+                  pigz ${path_grounded_pq_touching_tsv}
               fi;
             done
         done
       done
     done
 done
+```
 
-# Plotting
-#guix install r
-#guix install r-ggplot2
-#guix install r-ggforce
+Plotting:
+
+```shell
+# Dependencies
+guix install r
+guix install r-ggplot2
+guix install r-ggforce
+```
+
+```shell
+# Single plots
 for e in 5000 10000 20000 30000 40000 50000 100000; do
   for m in 1000 10000; do
       for j in 0 0.8; do
@@ -373,13 +383,39 @@ for e in 5000 10000 20000 30000 40000 50000 100000; do
             echo "-e $e -m $m -j $j -n $n"
     
             grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1 | while read ref; do
-      echo $ref
-      
-      path_grounded_pq_touching_tsv=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.pq_touching.tsv
+              echo $ref
+              
+              path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
             
-      Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle.R ${path_grounded_pq_touching_tsv} "$ref -e $e -m $m -j $j -n $n"
+              Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle.R ${path_grounded_pq_touching_tsv_gz} "$ref -e $e -m $m -j $j -n $n"
+            done
+        done
+      done
     done
-  done
+done
+
+# Merged plots
+for e in 5000 10000 20000 30000 40000 50000 100000; do
+  for m in 1000 10000; do
+      for j in 0 0.8; do
+        j_str=$(echo $j | sed 's/\.//g')
+        (seq 1 10; seq 15 5 100) | while read n; do 
+            echo "-e $e -m $m -j $j -n $n"
+    
+            path_grounded_pq_touching_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
+            if [[ ! -s ${path_grounded_pq_touching_all_chromosomes_tsv_gz} ]]; then
+                # Merge all acros together
+                cat \
+                  <(cat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.*.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv | head -n 1) \
+                  <(cat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.*.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv | grep query -v) |\
+                  pigz -c > x.tsv.gz
+                mv x.tsv.gz ${path_grounded_pq_touching_all_chromosomes_tsv_gz}
+            fi;
+
+            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R ${path_grounded_pq_touching_all_chromosomes_tsv_gz} "$ref -e $e -m $m -j $j -n $n"
+        done
+      done
+    done
 done
 
 ```
