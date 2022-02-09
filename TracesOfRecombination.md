@@ -40,6 +40,19 @@ cd /lizardfs/guarracino/
 git clone --recursive https://github.com/pangenome/chromosome_communities.git
 ```
 
+## Get coverage analysis BED files
+
+```shell
+mkdir -p /lizardfs/guarracino/chromosome_communities/coverage_analysis_y1_genbank
+cd /lizardfs/guarracino/chromosome_communities/coverage_analysis_y1_genbank
+
+prefix=https://s3-us-west-2.amazonaws.com/human-pangenomics/submissions/e9ad8022-1b30-11ec-ab04-0a13c5208311--COVERAGE_ANALYSIS_Y1_GENBANK/FLAGGER/JAN_09_2022/FINAL_HIFI_BASED/FLAGGER_HIFI_ASM_BEDS/
+
+cut -f 1 /lizardfs/erikg/HPRC/year1v2genbank/parts/HPRCy1.pan.fa.gz.fai | cut -f 1 -d '#' | grep 'chm13\|grch38' -v | sort | uniq | while read sample; do
+  wget -c $prefix$sample.hifi.flagger_final.bed
+done
+```
+
 ## Collect contigs running from the p-arm to the q-arm of the acrocentric chromosomes
 
 Prepare CHM13's acrocentric chromosomes:
@@ -454,8 +467,8 @@ path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.10
 prefix=$(basename $path_input_og .og)
 
 # Grounding (applying filters)
-for e in 5000 10000 20000 30000 40000 50000 100000; do
-  for m in 1000 10000; do
+for e in 50000; do
+  for m in 1000; do
       for j in 0 0.8; do
         j_str=$(echo $j | sed 's/\.//g')
         (seq 1 10; seq 15 5 100) | while read n; do 
@@ -478,6 +491,27 @@ for e in 5000 10000 20000 30000 40000 50000 100000; do
       done
     done
 done
+
+# Take only reliable blocks (flagged with "Hh" or "Hc", https://github.com/human-pangenomics/hpp_production_workflows/blob/asset/coverage/README.md#components)
+#for e in 5000; do
+#  for m in 1000; do
+#      for j in 0.8; do
+#        j_str=$(echo $j | sed 's/\.//g')
+#        (seq 1 1) | while read n; do 
+#            echo "-e $e -m $m -j $j -n $n"
+#    
+#            grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1 | while read ref; do
+#              echo -e "\t"$ref
+#              
+#              path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz
+#  
+#              echo $path_grounded_tsv_gz
+#             zcat $path_grounded_tsv_gz | awk '{print $0 >> $1".bed"}' example.bed
+#            done
+#        done
+#      done
+#    done
+#done
 
 # Take pq-untangling contigs
 for e in 5000 10000 20000 30000 40000 50000 100000; do
@@ -548,8 +582,11 @@ guix install poppler # For pdfunite
 
 ```shell
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
+```
 
-# Single plots
+Single plots:
+
+```shell
 for e in 5000 10000 20000 30000 40000 50000 100000; do
   for m in 1000 10000; do
       for j in 0 0.8; do
@@ -568,8 +605,11 @@ for e in 5000 10000 20000 30000 40000 50000 100000; do
       done
     done
 done
+```
 
-# Merged plots
+Merged plots:
+
+```shell
 for e in 5000 10000 20000 30000 40000 50000 100000; do
   for m in 1000 10000; do
       for j in 0 0.8; do
@@ -630,19 +670,359 @@ sbatch -p workers -c 48 --wrap 'vg deconstruct -P chm13 -H '?' -e -a -t 48 /liza
 sbatch -p workers -c 48 --wrap 'vg deconstruct -P grch38 -H '?' -e -a -t 48 /lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n97/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.gfa | bgzip -@ 48 > /lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n97/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.grch38.vcf.gz && tabix /lizardfs/guarracino/chromosome_communities/graphs/chrA.pan.s100k.l300k.p97.n200/chrA.pan.fa.4825454.4030258.0517e7e.smooth.fix.grch38.vcf.gz'
 ```
 
-Prepare the references:
 
-```shell
-mkdir -p /lizardfs/guarracino/chromosome_communities/recombination
-cd /lizardfs/guarracino/chromosome_communities/recombination
-
-samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa $(grep 'chr13\|chr14\|chr15\|chr21\|chr22' /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa.fai | grep '_' -v | cut -f 1) > chm13.ACRO.fa
-samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/assemblies/grch38.fa $(grep 'chr13\|chr14\|chr15\|chr21\|chr22' /lizardfs/erikg/HPRC/year1v2genbank/assemblies/grch38.fa.fai | grep '_' -v | cut -f 1) > grch38.ACRO.fa
-```
 
 ```shell
 VCF=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n97/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.chm13.vcf.gz
 VCF_NAME=$(basename $VCF .vcf.gz)
+
+# Prepare VCF files with only SNPs
+
+# guix install vcftools
+for i in 13 14 15 21 22; do
+  chr=chm13#chr$i
+  echo $chr
+  
+  # Take SNPs and normalize
+  vcftools --gzvcf $VCF --chr $chr --remove-indels --recode --recode-INFO-all --stdout |\
+    bcftools norm -f /lizardfs/guarracino/chromosome_communities/assemblies/chm13.chr$i.fa.gz -c s -m - |\
+    bgzip -@ 48 > $VCF_NAME.$chr.snps.tmp.vcf.gz
+
+  sample_with_variants=$(bcftools stats -s '-' $VCF_NAME.$chr.snps.tmp.vcf.gz | awk '$1=="PSC" && $12+$13>0 {print $3}' | paste -s -d',')
+  bcftools view --samples $sample_with_variants $VCF_NAME.$chr.snps.tmp.vcf.gz |\
+   bgzip -@ 48 > /lizardfs/guarracino/chromosome_communities/recombination/$VCF_NAME.$chr.snps.vcf.gz
+  tabix /lizardfs/guarracino/chromosome_communities/recombination/$VCF_NAME.$chr.snps.vcf.gz
+
+  rm $VCF_NAME.$chr.snps.tmp.vcf.gz
+done
+
+
+
+pathLDhat=~/tools/LDhat
+runPhi=~/tools/PhiPack/src/Phi
+i=22
+chr=chm13#chr$i
+VCF_SNPS=/lizardfs/guarracino/chromosome_communities/recombination/$VCF_NAME.$chr.snps.vcf.gz
+VCF_SNPS_NAME=$(basename $VCF_SNPS .vcf.gz)
+
+path_reference=/lizardfs/guarracino/chromosome_communities/assemblies/chm13.chr$i.fa.gz
+
+chr=chm13#chr$i
+seg_length=10000 # 1kb is recommended for LDJump
+length_of_seq=$(cut -f 2 ${path_reference}.fai)
+
+startofseq=0,
+endofseq=$length_of_seq
+
+num_of_segs=$(echo $length_of_seq / $seg_length | bc)
+num_of_segs_plus1=$(echo $length_of_seq / $seg_length + 1 | bc)
+
+N=$(zgrep '^#CHROM' $VCF_SNPS -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v | wc -l)
+
+
+TEMP_DIR=/lizardfs/guarracino/chromosome_communities/recombination/temp
+
+min_pos=$(zgrep '^#' $VCF_SNPS -v | cut -f 2 | sort -k 1n | head -n 1)
+max_pos=$(zgrep '^#' $VCF_SNPS -v | cut -f 2 | sort -k 1n | tail -n 1)
+
+
+mkdir -p $TEMP_DIR
+
+y=0
+seq 1 $num_of_segs_plus1 | while read x; do
+  # Compute range
+  ix=$(echo "($x - 1) * $seg_length + $y" | bc)
+  ex=$(echo "$ix + $seg_length - $y" | bc)
+  y=1
+  fa_start=$(echo "($x - 1) * $seg_length + $y" | bc)
+  fa_end=$(echo "$fa_start + $seg_length - $y" | bc)
+  if [ $x == $num_of_segs_plus1 ]; then
+    ix=$(echo "($x - 1) * $seg_length + $y" | bc)
+    ex=$endofseq
+    fa_start=$(echo "($x - 1) * $seg_length + $y" | bc)
+    fa_end=$(echo "$fa_start + ($length_of_seq - $fa_start)" | bc)
+  fi;
+  
+  # Check if the range makes sense
+  xx=$(echo "$ex - $ix" | bc)
+  if (( $xx < 1 )); then
+    continue
+  fi
+  
+  # Check if there could be variants in the range
+  if (( $ex < $min_pos )); then
+    continue
+  fi
+    if (( $ix > $max_pos )); then
+    continue
+  fi
+  
+  
+  # Extract reference in the range
+  echo $x $ix $ex
+  samtools faidx $path_reference ${chr}:$fa_start-$fa_end > $TEMP_DIR/${chr}_$ix-$ex.fa
+
+  # Extract variants in the range
+  vcftools --gzvcf $VCF_SNPS --chr $chr \
+    --from-bp $ix --to-bp $ex \
+    --recode --recode-INFO-all \
+    --stdout | bgzip -@ 48 -c > ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz
+  tabix ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz
+
+  num_variants=$(zgrep '^#' ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz -vc)
+
+  if [ $num_variants == 0 ]; then
+    echo -e "Segregating sites=0\nAverage PWD=0\nWatterson theta=0\nTajima D statistic=0\nFu and Li D* statistic=0\nVariance PWD=0\n" > Sums_part_main_job$x.txt 
+  else
+      # Generate the FASTA chunk
+      zgrep '^#CHROM' ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v | while read SAMPLE; do
+        echo $SAMPLE
+    
+        bcftools consensus -s $SAMPLE \
+          -f $TEMP_DIR/${chr}_$ix-$ex.fa \
+          ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz |\
+          sed "s/$chr/$SAMPLE/g" >> ${TEMP_DIR}/sel_${ix}_${ex}.fa
+        #samtools faidx ${TEMP_DIR}/sel_${ix}_${ex}.fa
+      done
+      
+      lpart=$(echo "$ex - $ix + 1" | bc)
+      # Output: Sums_part_main_job$x.txt
+      /lizardfs/guarracino/chromosome_communities/scripts/Sums_LDHat_pack.sh \
+        ${TEMP_DIR}/sel_${ix}_${ex}.fa \
+        $N \
+        $lpart \
+        $pathLDhat \
+        $x \
+        "job"
+  fi
+  
+  
+  
+  
+   # guix install r-ape
+   # guix install r-pegas
+   # guix install r-adegenet
+  Rscript get_indexes.R $x ${TEMP_DIR}/sel_${ix}_${ex}.fa $runPhi job | tail -n 1 > temp.indexes.$x.tsv
+  
+  if (( $x > 350 )); then
+    break
+  fi
+
+done
+
+cat temp.indexes.*.tsv > temp.indexes.all.tsv
+
+
+# guix install r-data-table
+```
+
+
+```r
+# Usage: Rscript uffa.R temp.indexes.all.tsv $seg_length $N $length_of_seq out
+
+args <- commandArgs()
+path_indexes_tsv <- args[6]
+segLength <- args[7]
+nn <- args[8]
+ll <- args[9]
+out <- args[10]
+
+
+
+
+path_indexes_tsv='temp.indexes.all.tsv'
+segLength=10000
+nn=136
+ll=51324926
+out='job'
+
+
+impute <- function (data, index, two, segs)
+{
+  while (!(length(index) == 0) || (length(index) == segs)) {
+    data.to.impute = sapply(index, get_impute_data, data,
+                            two = two, segs = segs)
+    help.ind = which(colSums(apply(data.to.impute, 2, is.na)) ==
+                       0)
+    if (length(help.ind) > 0) {
+      data[index[help.ind]] = apply(matrix(data.to.impute[,
+                                             help.ind], nrow = 2), 2, mean)
+      index = as.numeric(which(is.na(data)))
+    }
+    else {
+      data.to.impute = sapply(index, get_impute_data,
+                              data, two = F, segs = segs)
+      ct = 1
+      help.ind = c()
+      while (length(help.ind) == 0) {
+        help.ind = which(colSums(apply(data.to.impute,
+                                       2, is.na)) == ct)
+        ct = ct + 1
+      }
+      if (length(help.ind) == 1) {
+        imp.ind = help.ind
+      }
+      else {
+        imp.ind = help.ind[colSums(apply(data.to.impute[1:2,
+                                                        help.ind], 2, is.na)) < 2][1]
+        if (is.na(imp.ind)) {
+          imp.ind = help.ind[1]
+        }
+      }
+      data[index[imp.ind]] = weighted.mean(data.to.impute[,
+                                             imp.ind], c(1/3, 1/3, 1/6, 1/6), na.rm = T)
+      index = as.numeric(which(is.na(data)))
+    }
+  }
+  return(data)
+}
+
+get_smuce <- function (help, segs, alpha, ll, quant = 0.35, rescale, constant,
+          demography, regMod)
+{
+  gam <- 0.5
+  eps <- 0
+  help$MaxChi[is.infinite(help$MaxChi)] <- NA
+
+  if (length(regMod) == 1 && !demography) {
+    pr1 = predict(object = mod.full, newdata = help)
+  }
+  # ToDo: I can''t install LDJump on octopus, but for now I am using regMod = '' and demography = F
+  # if (length(regMod) == 1 && demography) {
+  #   pr1 = predict(object = LDJump::mod.full.demo, newdata = help)
+  # }
+  # if (length(regMod) > 1) {
+  #   pr1 = predict(object = regMod, newdata = help)
+  # }
+  pr1[is.na(pr1)] = -1/gam
+  ind.na = is.na(pr1)
+  ind.q = which(round(seq(0.1, 0.5, by = 0.05), 2) == quant)
+  pr.cor = predict(object = LDJump::list.quantile.regs[[ind.q]], newdata = data.frame(x = pr1))
+  pr.cor = ifelse(pr.cor < -1/gam, -1/gam, pr.cor)
+  pr.cor.nat = (pr.cor * gam + 1)^(1/gam) - eps
+  help = help[, 1:8]
+  if (length(regMod) == 0) {
+    ind = as.numeric(which(is.na(rowSums(help))))
+  }
+  else {
+    ind = as.numeric(which(is.na(rowSums(help[, -c(ncol(help) -
+                                                     1, ncol(help))]))))
+  }
+  ind = c(ind, as.numeric(which(is.infinite(rowSums(help)))),
+          as.numeric(which(rowSums(help) == 0)))
+  ind = sort(unique(ind))
+  pr.cor.nat[ind] = NA
+  pr.cor.nat = impute(pr.cor.nat, ind, two = T, segs = segs)
+  if (constant) {
+    return(list(pr.cor.nat))
+  }
+  else {
+    idx = c(1, 2, 4:9, 11, 13)
+    if (length(alpha) > 1) {
+      temp.cor.back = list()
+      for (i in 1:length(alpha)) {
+        temp = stepR::stepFit(pr.cor.nat, alpha = alpha[i],
+                              family = "gauss", confband = T)
+        if (rescale) {
+          for (idxs in idx) {
+            temp[[idxs]] = temp[[idxs]]/segs * ll
+          }
+        }
+        temp.cor.back[[i]] = temp
+      }
+    }
+    else {
+      temp.cor.back = stepR::stepFit(pr.cor.nat, alpha = alpha,
+                                     family = "gauss", confband = T)
+      if (rescale) {
+        for (idxs in idx) {
+          temp.cor.back[[idxs]] = temp.cor.back[[idxs]]/segs *
+            ll
+        }
+      }
+    }
+    return(list(temp.cor.back, pr.cor.nat, ind))
+  }
+}
+
+helper_new = c()
+demography = F
+regMod = ""
+alpha = 0.05
+quant = 0.35
+rescale = F
+constant = F
+status = T
+polyThres = 0
+
+helper <- read.table(path_indexes_tsv, sep = '\t')
+hahe <- helper[, 1]
+tajd <- helper[, 2]
+haps <- helper[, 3]/segLength/nn
+
+l.files <- list.files(pattern = paste0("Sums_part_main_", out))
+l.files <- l.files[
+  order(as.numeric(regmatches(l.files, regexpr("[0-9]+", l.files))))
+]
+named.list <- lapply(l.files, read.table, sep = "=")
+sums <- data.table::rbindlist(named.list)
+
+indices <- seq(1, nrow(sums), by = 6)
+apwd <- sums[indices + 1, 2]/segLength
+vapw <- sums[indices + 5, 2]/segLength
+colnames(apwd) <- "apwd"
+colnames(vapw) <- "vapw"
+
+wath <- helper[, 6]/segLength
+MaxChi <- helper[, 7]
+NSS <- helper[, 8]
+phi.mean <- helper[, 9]
+phi.var <- helper[, 10]
+helper <- data.frame(
+  cbind(hahe, tajd, haps, apwd, vapw, wath, MaxChi, NSS, phi.mean, phi.var),
+  row.names = 1:nrow(helper)
+)
+helper_new <- rbind(helper_new, helper)
+full.list <- get_smuce(
+  helper_new, segs, alpha, quant = quant,
+  ll, rescale = rescale,
+  constant = constant, demography = demography,
+  regMod = regMod
+)
+if (!constant) {
+  seq.full.cor <- full.list[[1]]
+  pr.full.cor <- full.list[[2]]
+  ind <- full.list[[3]]
+  if (length(ind) > 0) {
+    warning(paste(
+      "Recombination rates were imputed for the following segments:",
+      toString(ind), sep = "")
+    )
+  }
+  results <- list(`Estimated recombination map` = seq.full.cor,
+                  `Constant estimates:` = pr.full.cor, `Summary Statistics` = helper_new,
+                  alpha = alpha, `Sample Size` = nn, `Sequence Length` = ll,
+                  `Segment Length` = segLength, `Imputed Segments` = ind)
+} else {
+  pr.full.cor <- full.list[[1]]
+  results <- list(`Constant estimates` = pr.full.cor, `Summary Statistics` = helper_new,
+                  alpha = alpha, `Sample Size` = nn, `Sequence Length` = ll,
+                  `Segment Length` = segLength)
+}
+
+postscript("Results.eps", horiz = F)
+plot(results[[1]], xlab = "Segments", ylab = "Estimated Recombination Rate", main = "Estimated recombination map with LDJump")
+dev.off()
+
+
+
+
+
+
+system(paste0("for f in Sums_part_main_", out, "*; do rm -f $f; done"))
+```
+
+```shell
 
 ####cat $VCF|  vcflib vcfsnps | bgzip -c > $VCF_NAME.snps.vcf.gz && tabix $VCF_NAME.snps.vcf.gz
 #vcftools --gzvcf $VCF --remove-indels --recode --recode-INFO-all --stdout | bcftools norm -f chm13.ACRO.fa -c s -m - | bgzip -@ 48 > $VCF_NAME.snps.vcf.gz
@@ -690,8 +1070,33 @@ done
 
 
 ```shell
-( echo A | tr ' ' '\n') | while read i; do sbatch -p headnode -w octopus01 -c 32 --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/erikg/HPRC/year1v2genbank/parts/chr'$i'.pan.fa -o chr'$i'.pan.s100k.l300k.p97.n200 -t 32 -p 97 -s 100000 -l 300000 -n 200 -k 311 -G 13117,13219 -O 0.03 -T 32 -v -V chm13:#,grch38:# --resume; mv /scratch/chr'$i'.pan /lizardfs/guarracino/chromosome_communities/graphs'; done # >>pggb.jobids
+( echo A | tr ' ' '\n') | while read i; do
+  sbatch -p headnode -w octopus01 -c 32 --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/erikg/HPRC/year1v2genbank/parts/chr'$i'.pan.fa -o chr'$i'.pan.s100k.l300k.p97.n200 -t 32 -p 97 -s 100000 -l 300000 -n 200 -k 311 -G 13117,13219 -O 0.03 -T 32 -v -V chm13:#,grch38:# --resume; mv /scratch/chr'$i'.pan /lizardfs/guarracino/chromosome_communities/graphs';
+done # >>pggb.jobids
 ```
+
+
+
+
+
+
+Prepare the references:
+
+```shell
+mkdir -p /lizardfs/guarracino/chromosome_communities/recombination
+cd /lizardfs/guarracino/chromosome_communities/recombination
+
+samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa \
+  $(grep 'chr13\|chr14\|chr15\|chr21\|chr22' /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa.fai | grep '_' -v | cut -f 1) > chm13.ACRO.fa
+samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/assemblies/grch38.fa \
+  $(grep 'chr13\|chr14\|chr15\|chr21\|chr22' /lizardfs/erikg/HPRC/year1v2genbank/assemblies/grch38.fa.fai | grep '_' -v | cut -f 1) > grch38.ACRO.fa
+```
+
+
+
+
+
+
 
 [comment]: <> (```shell)
 
