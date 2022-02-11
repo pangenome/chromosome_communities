@@ -5,11 +5,12 @@ x <- args[6]
 seqNamePart <- args[7]
 pathPhi <- args[8]
 out <- args[9]
+output_dir <- args[10]
 
 if (file.exists(seqNamePart)) {
   getPhi <- function (seqName, pathPhi, out)
   {
-    phiName <- paste0("Phi", out, ".log")
+    phiName <- paste0(output_dir, "/Phi", out, ".log")
     system(paste0(pathPhi, " -f ", seqName, " -o -v >", phiName))
     MaxChi <- as.numeric(strsplit(system(paste0("grep 'Value of maximum breakpoint is:' ",
                                                 phiName), intern = T), ": ")[[1]][2])
@@ -31,7 +32,7 @@ if (file.exists(seqNamePart)) {
   temp <- try(adegenet::DNAbin2genind(samp, polyThres = 0))
   hahe <- adegenet::Hs(temp)
 
-  pathTmpFile <- paste0("tmpfile", x, out, ".fa")
+  pathTmpFile <- paste0(output_dir, "/tmpfile", x, out, ".fa")
   system(paste0("sed '1d' ", seqNamePart, " > ", pathTmpFile))
   phis <- getPhi(
     seqName = pathTmpFile,
