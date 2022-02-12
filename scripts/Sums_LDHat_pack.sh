@@ -5,7 +5,8 @@ lpart=$3
 pathLDhat=$4
 jobId=$5
 out=$6
-output_dir=$(pwd)
+output_dir=$7
+
 # sed -i "1i $nn $lpart 1" $seqName
 
 awk -v n=1 -v s="$nn $lpart 1" 'NR == n {print s} {print}' $seqName > ${output_dir}/"FastaTemp_${out}${jobId}.fa"
