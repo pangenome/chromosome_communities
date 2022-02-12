@@ -84,7 +84,7 @@ if [ $num_variants == 0 ]; then
   echo -e "0\t0\t0\t0\t0\t0\t\n" > Sums_part_main_job${padded_x}.txt
 else
     # Generate the FASTA chunk
-    zgrep '^#CHROM' ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz -m 1 | cut -f 10- | tr '\t' '\n' | while read SAMPLE; do
+    zgrep '^#CHROM' ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v | while read SAMPLE; do
       #echo $SAMPLE
 
       bcftools consensus -s $SAMPLE \
@@ -94,7 +94,7 @@ else
       #samtools faidx ${TEMP_DIR}/sel_${ix}_${ex}.fa
     done
     # Add also the reference itself
-    cat ${TEMP_DIR}/${REF_NAME}_$ix-$ex.fa >> ${TEMP_DIR}/sel_${ix}_${ex}.fa
+    #cat ${TEMP_DIR}/${REF_NAME}_$ix-$ex.fa >> ${TEMP_DIR}/sel_${ix}_${ex}.fa
 
     lpart=$(echo "$ex - $ix + 1" | bc)
     # Output: Sums_part_main_job$x.txt
