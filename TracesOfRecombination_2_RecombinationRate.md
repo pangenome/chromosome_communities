@@ -105,8 +105,8 @@ cat ref_names.txt | while read REF_NAME; do
     
     N=$(zgrep '^#CHROM' $PATH_VCF_SNPS -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v | wc -l)
     
-    MIN_POS=$(zgrep '^#' $PATH_VCF_SNPS -v | cut -f 2 | sort -k 1n | head -n 1)
-    MAX_POS=$(zgrep '^#' $PATH_VCF_SNPS -v | cut -f 2 | sort -k 1n | tail -n 1)
+#    MIN_POS=$(zgrep '^#' $PATH_VCF_SNPS -v | cut -f 2 | sort -k 1n | head -n 1)
+#    MAX_POS=$(zgrep '^#' $PATH_VCF_SNPS -v | cut -f 2 | sort -k 1n | tail -n 1)
 
     cd /scratch/
     mkdir -p ${REF_NAME}-recomb
@@ -118,8 +118,6 @@ cat ref_names.txt | while read REF_NAME; do
       $NUM_OF_SEGS_PLUS_1 \
       $END_OF_SEQ \
       $N \
-      $MIN_POS \
-      $MAX_POS \
       $PATH_REF_FASTA \
       $REF_NAME \
       $TEMP_DIR \

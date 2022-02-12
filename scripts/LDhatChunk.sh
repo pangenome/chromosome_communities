@@ -5,8 +5,6 @@ SEG_LENGTH=$2
 NUM_OF_SEGS_PLUS_1=$3
 END_OF_SEQ=$4
 N=$5
-MIN_POS=$6
-MAX_POS=$7
 PATH_REF_FASTA=$8
 REF_NAME=$9
 TEMP_DIR=${10}
@@ -22,8 +20,6 @@ pathGetIndexesR=${15}
 #echo "NUM_OF_SEGS_PLUS_1 - $NUM_OF_SEGS_PLUS_1"
 #echo "END_OF_SEQ - $END_OF_SEQ"
 #echo "N - $N"
-#echo "MIN_POS - $MIN_POS"
-#echo "MAX_POS - $MAX_POS"
 #echo "PATH_REF_FASTA - $PATH_REF_FASTA"
 #echo "REF_NAME - $REF_NAME"
 #echo "TEMP_DIR - $TEMP_DIR"
@@ -53,15 +49,6 @@ if (( $xx < 1 )); then
   exit
 fi
 
-# Check if there could be variants in the range
-if (( $ex < $MIN_POS )); then
-  exit
-fi
-  if (( $ix > $MAX_POS )); then
-  exit
-fi
-
-
 # Extract reference in the range
 echo $x $ix $ex
 samtools faidx $PATH_REF_FASTA ${REF_NAME}:$fa_start-$fa_end > ${TEMP_DIR}/${REF_NAME}_$ix-$ex.fa
@@ -70,7 +57,7 @@ samtools faidx $PATH_REF_FASTA ${REF_NAME}:$fa_start-$fa_end > ${TEMP_DIR}/${REF
 vcftools --gzvcf $PATH_VCF_SNPS --chr $REF_NAME \
   --from-bp $ix --to-bp $ex \
   --recode --recode-INFO-all \
-  --stdout | bgzip -@ 16 -c > ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz
+  --stdout | bgzip -@ 1 -c > ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz
 tabix ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz
 
 num_variants=$(zgrep '^#' ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz -vc)
