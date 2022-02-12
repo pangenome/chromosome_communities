@@ -3,7 +3,6 @@
 ```shell
 ###################################
 # Octopus
-######################
 THREADS=48
 pathLDhat=~/tools/LDhat
 runPhi=~/tools/PhiPack/src/Phi
@@ -12,13 +11,11 @@ pathLDhatChunk=/lizardfs/guarracino/chromosome_communities/scripts/LDhatChunk.sh
 pathGetIndexesR=/lizardfs/guarracino/chromosome_communities/scripts/get_indexes.R
 pathGetRecombinationRatePlotR=/lizardfs/guarracino/chromosome_communities/scripts/get_recombination_rate_plot.R
 
-OUTPUT_DIR=/lizardfs/guarracino/chromosome_communities/recombination
-PATH_VCF=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n97/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.chm13.vcf.gz
+OUTPUT_DIR=/lizardfs/guarracino/chromosome_communities/recombination_rate
 ####################
 
 ###################################
 # Locally (for testing)
-######################
 THREADS=16
 pathLDhat=~/git/LDhat/
 runPhi=~/Downloads/Pangenomics/LDhat/PhiPack/src/Phi
@@ -28,12 +25,7 @@ pathGetIndexesR=~/git/chromosome_communities/scripts/get_indexes.R
 pathGetRecombinationRatePlotR=~/git/chromosome_communities/scripts/get_recombination_rate_plot.R
 
 OUTPUT_DIR=~/Downloads/Pangenomics/LDhat/recombination_rate
-PATH_VCF=~/Downloads/Pangenomics/LDhat/SimulatedPopulations/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.pggb/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.fixed.fa.5c3c9a3.7bdde5a.a933754.smooth.fix.gfa.vcf.gz
 ###################################
-
-
-VCF_NAME=$(basename $PATH_VCF .vcf.gz)
-SEG_LENGTH=1000 # 1kb is recommended for LDJump
 ```
 
 Call variants in a haploid setting:
@@ -49,11 +41,24 @@ sbatch -p workers -c 48 --wrap 'vg deconstruct -P grch38 -H '?' -e -a -t 48 /liz
 Prepare the VCF file with only SNPs:
 
 ```shell
+PATH_VCF=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n97/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.chm13.vcf.gz
+#PATH_VCF=~/Downloads/Pangenomics/LDhat/SimulatedPopulations/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.pggb/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.fixed.fa.5c3c9a3.7bdde5a.a933754.smooth.fix.gfa.vcf.gz
+
+VCF_NAME=$(basename $PATH_VCF .vcf.gz)
+SEG_LENGTH=1000 # 1kb is recommended for LDJump
+
+
+mkdir -p $OUTPUT_DIR
+cd $OUTPUT_DIR
+
+# Get reference names
+zgrep '^#' $PATH_VCF -v | cut -f 1 | sort | uniq > ref_names.txt
+
 # guix install vcftools
-zgrep '^#' $PATH_VCF -v | cut -f 1 | sort | uniq | while read REF_NAME; do
+cat ref_names.txt | while read REF_NAME; do
   echo $REF_NAME
   
-  #PATH_REF_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/chm13.$REF_NAME.fa.gz
+  #PATH_REF_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/$(echo $REF_NAME | tr '#' '.').fa.gz
   PATH_REF_FASTA=~/Downloads/Pangenomics/LDhat/SimulatedPopulations/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.fixed.$REF_NAME.fa
 
   PATH_VCF_SNPS=$OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.vcf.gz
@@ -82,11 +87,11 @@ In parallel:
 - get indexes for the FASTA
 
 ```shell
-zgrep '^#' $PATH_VCF -v | cut -f 1 | sort | uniq | while read REF_NAME; do
+cat ref_names.txt | while read REF_NAME; do
     echo $REF_NAME
     
-    #PATH_REF_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/chm13.$REF_NAME.fa.gz
-    PATH_REF_FASTA=~/Downloads/Pangenomics/LDhat/SimulatedPopulations/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.fixed.$REF_NAME.fa
+    PATH_REF_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/$(echo $REF_NAME | tr '#' '.').fa.gz
+    #PATH_REF_FASTA=~/Downloads/Pangenomics/LDhat/SimulatedPopulations/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.fixed.$REF_NAME.fa
     
     LENGTH_OF_SEQ=$(cut -f 2 ${PATH_REF_FASTA}.fai)
     START_OF_SEQ=0
@@ -102,13 +107,12 @@ zgrep '^#' $PATH_VCF -v | cut -f 1 | sort | uniq | while read REF_NAME; do
     
     MIN_POS=$(zgrep '^#' $PATH_VCF_SNPS -v | cut -f 2 | sort -k 1n | head -n 1)
     MAX_POS=$(zgrep '^#' $PATH_VCF_SNPS -v | cut -f 2 | sort -k 1n | tail -n 1)
-    
-    TEMP_DIR=$OUTPUT_DIR/$REF_NAME-temp
-    INDEXES_DIR=$OUTPUT_DIR/$REF_NAME-indexes
-    
+
+    cd /scratch/
+    mkdir -p ${REF_NAME}-recomb
+    TEMP_DIR=${REF_NAME}-recomb/$REF_NAME-temp
     mkdir -p $TEMP_DIR
-    mkdir -p $INDEXES_DIR
-    
+
     seq 1 $NUM_OF_SEGS_PLUS_1 | parallel -j $THREADS bash $pathLDhatChunk {} \
       $SEG_LENGTH \
       $NUM_OF_SEGS_PLUS_1 \
@@ -125,19 +129,44 @@ zgrep '^#' $PATH_VCF -v | cut -f 1 | sort | uniq | while read REF_NAME; do
       $runPhi \
       $pathGetIndexesR
     
-    cat ${TEMP_DIR}/${REF_NAME}.indexes.*.tsv > ${INDEXES_DIR}/indexes.tsv
-    mv Sums_part_main_job*.txt ${INDEXES_DIR}
+    INDEXES_DIR=$OUTPUT_DIR/$REF_NAME-indexes
+    mkdir -p $INDEXES_DIR
+    
+    # With cat we can have 'Argument list too long'
+    # Retrieve files in order
+    for file in $(find ${TEMP_DIR} -name '*.indexes.*.tsv' -type f | sort); do
+        cat $file >> ${INDEXES_DIR}/indexes.tsv
+    done
+    for file in $(find ${TEMP_DIR} -name 'Sums_part_main_job*.txt' -type f | sort); do
+        cat $file >> ${INDEXES_DIR}/Sums_part_main_job.txt
+    done
+    
+    # Cleaning the working directory
     rm Phi*
     rm out.log
-    
-    # guix install r-data-table
-    Rscript $pathGetRecombinationRatePlotR ${INDEXES_DIR} $SEG_LENGTH $N $LENGTH_OF_SEQ "job" ${INDEXES_DIR}
 done
-
-
 ```
 
+Recombination plots:
 
+```shell
+cat ref_names.txt | while read REF_NAME; do
+    echo $REF_NAME
+    
+    PATH_REF_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/$(echo $REF_NAME | tr '#' '.').fa.gz
+    #PATH_REF_FASTA=~/Downloads/Pangenomics/LDhat/SimulatedPopulations/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.fixed.$REF_NAME.fa
+    
+    LENGTH_OF_SEQ=$(cut -f 2 ${PATH_REF_FASTA}.fai)
+    
+    PATH_VCF_SNPS=$OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.vcf.gz
+    N=$(zgrep '^#CHROM' $PATH_VCF_SNPS -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v | wc -l)
+    
+    INDEXES_DIR=$OUTPUT_DIR/$REF_NAME-indexes
+
+    # guix install r-data-table
+    Rscript $pathGetRecombinationRatePlotR ${INDEXES_DIR} $SEG_LENGTH $N $LENGTH_OF_SEQ $REF_NAME
+done
+```
 
 ```shell
 

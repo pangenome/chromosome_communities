@@ -1,11 +1,10 @@
-# Usage: Rscript get_recombination_rate_plot.R S1-indexes/ $SEG_LENGTH $N $LENGTH_OF_SEQ out ./
-
+# Usage: Rscript get_recombination_rate_plot.R S1-indexes/ $SEG_LENGTH $N $LENGTH_OF_SEQ $REF_NAME
 args <- commandArgs()
 dir_with_indexes_and_sumsldhat <- args[6]
 segLength <- as.numeric(args[7])
 nn <- as.numeric(args[8])
 ll <- as.numeric(args[9])
-out <- args[10]
+prefix <- args[10]
 
 segs <- ll/segLength
 
@@ -133,16 +132,9 @@ hahe <- helper[, 1]
 tajd <- helper[, 2]
 haps <- helper[, 3] / segLength / nn
 
-l.files <- list.files(path=dir_with_indexes_and_sumsldhat, pattern = paste0("Sums_part_main_", out))
-l.files <- l.files[
-  order(as.numeric(regmatches(l.files, regexpr("[0-9]+", l.files))))
-]
-named.list <- lapply(l.files, read.table, sep = "=")
-sums <- data.table::rbindlist(named.list)
-
-indices <- seq(1, nrow(sums), by = 6)
-apwd <- sums[indices + 1, 2] / segLength
-vapw <- sums[indices + 5, 2] / segLength
+sums <- read.table('Sums_part_main_job.txt', sep = '\t')
+apwd <- as.data.frame(sums$V2/segLength)
+vapw <- as.data.frame(sums$V6/segLength)
 colnames(apwd) <- "apwd"
 colnames(vapw) <- "vapw"
 
@@ -183,9 +175,7 @@ if (!constant) {
                   `Segment Length` = segLength)
 }
 
-postscript("Results.eps", horiz = F)
+#postscript("Results.eps", horiz = F)
+png(paste0(prefix, ".png"), width = 1000, height = 500)
 plot(results[[1]], xlab = "Segments", ylab = "Estimated Recombination Rate", main = "Estimated recombination map with LDJump")
 dev.off()
-
-
-#system(paste0("for f in Sums_part_main_", out, "*; do rm -f $f; done"))

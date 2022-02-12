@@ -75,13 +75,17 @@ tabix ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz
 
 num_variants=$(zgrep '^#' ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz -vc)
 
+# Padded counter to be able to retrieve the files already in order (with ls *.txt, cat *.txt, etc...)
+num_of_digits=$(echo "${#NUM_OF_SEGS_PLUS_1}")
+printf -v padded_x "%0${num_of_digits}d" $x
+
+#Output (TAB-separated) : Segregating sites, Average PWD, Watterson theta, Tajima D statistic, Fu and Li D* statistic, Variance PWD
 if [ $num_variants == 0 ]; then
-  echo -e "Segregating sites=0\nAverage PWD=0\nWatterson theta=0\nTajima D statistic=0\nFu and Li D* statistic=0\nVariance PWD=0\n" \
-    > Sums_part_main_job$x.txt
+  echo -e "0\t0\t0\t0\t0\t0\t\n" > Sums_part_main_job${padded_x}.txt
 else
     # Generate the FASTA chunk
     zgrep '^#CHROM' ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz -m 1 | cut -f 10- | tr '\t' '\n' | while read SAMPLE; do
-      echo $SAMPLE
+      #echo $SAMPLE
 
       bcftools consensus -s $SAMPLE \
         -f ${TEMP_DIR}/${REF_NAME}_$ix-$ex.fa \
@@ -89,6 +93,8 @@ else
         sed "s/${REF_NAME}/$SAMPLE/g" >> ${TEMP_DIR}/sel_${ix}_${ex}.fa
       #samtools faidx ${TEMP_DIR}/sel_${ix}_${ex}.fa
     done
+    # Add also the reference itself
+    cat ${TEMP_DIR}/${REF_NAME}_$ix-$ex.fa >> ${TEMP_DIR}/sel_${ix}_${ex}.fa
 
     lpart=$(echo "$ex - $ix + 1" | bc)
     # Output: Sums_part_main_job$x.txt
@@ -97,7 +103,7 @@ else
       $N \
       $lpart \
       $pathLDhat \
-      $x \
+      ${padded_x} \
       "job" \
       ${TEMP_DIR}
 fi
@@ -106,4 +112,4 @@ fi
 # guix install r-pegas
 # guix install r-adegenet
 Rscript $pathGetIndexesR $x ${TEMP_DIR}/sel_${ix}_${ex}.fa $runPhi "job" ${TEMP_DIR} | tail -n 1 \
-  > ${TEMP_DIR}/${REF_NAME}.indexes.$x.tsv
+  > ${TEMP_DIR}/${REF_NAME}.indexes.${padded_x}.tsv
