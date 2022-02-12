@@ -81,7 +81,7 @@ printf -v padded_x "%0${num_of_digits}d" $x
 
 #Output (TAB-separated) : Segregating sites, Average PWD, Watterson theta, Tajima D statistic, Fu and Li D* statistic, Variance PWD
 if [ $num_variants == 0 ]; then
-  echo -e "0\t0\t0\t0\t0\t0\t\n" > Sums_part_main_job${padded_x}.txt
+  echo -e "0\t0\t0\t0\t0\t0\t" > Sums_part_main_job${padded_x}.txt
 else
     # Generate the FASTA chunk
     zgrep '^#CHROM' ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v | while read SAMPLE; do
