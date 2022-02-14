@@ -63,7 +63,7 @@ tabix ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz
 num_variants=$(zgrep '^#' ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz -vc)
 
 # Padded counter to be able to retrieve the files already in order (with ls *.txt, cat *.txt, etc...)
-num_of_digits=$(echo "${#NUM_OF_SEGS_PLUS_1}")
+num_of_digits=$(echo "${#NUM_OF_SEGS_PLUS_1} + 1" | bc)
 printf -v padded_x "%0${num_of_digits}d" $x
 
 #Output (TAB-separated) : Segregating sites, Average PWD, Watterson theta, Tajima D statistic, Fu and Li D* statistic, Variance PWD
@@ -98,5 +98,5 @@ fi
 # guix install r-ape
 # guix install r-pegas
 # guix install r-adegenet
-Rscript $pathGetIndexesR $x ${TEMP_DIR}/sel_${ix}_${ex}.fa $runPhi "job" ${TEMP_DIR} | tail -n 1 \
+Rscript $pathGetIndexesR ${padded_x} ${TEMP_DIR}/sel_${ix}_${ex}.fa $runPhi "job" ${TEMP_DIR} | tail -n 1 \
   > ${TEMP_DIR}/${REF_NAME}.indexes.${padded_x}.tsv
