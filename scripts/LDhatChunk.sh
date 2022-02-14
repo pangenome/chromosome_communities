@@ -66,10 +66,13 @@ vcftools --gzvcf "$PATH_VCF_SNPS" --chr "$REF_NAME" \
   --stdout | bgzip -@ 1 -c > "${TEMP_DIR}"/sel_${ix}_${ex}.${padded_x}.vcf.gz
 tabix "${TEMP_DIR}"/sel_${ix}_${ex}.${padded_x}.vcf.gz
 
-num_variants=$(zgrep '^#' "${TEMP_DIR}"/sel_${ix}_${ex}.${padded_x}.vcf.gz -vc)
+#It is possible to have variants, but no samples with that variants (all genotypes '.' or '0')
+# so it is better to check the number of samples with genotype equals to '1'.
+###num_variants=$(zgrep '^#' "${TEMP_DIR}"/sel_${ix}_${ex}.${padded_x}.vcf.gz -vc)
+sample_with_alternate_variants=$(bcftools stats -s '-' "${TEMP_DIR}"/sel_${ix}_${ex}.${padded_x}.vcf.gz | awk '$1=="PSC" && $13>0 {print $3}' | wc -l)
 
 #Output (TAB-separated) : Segregating sites, Average PWD, Watterson theta, Tajima D statistic, Fu and Li D* statistic, Variance PWD
-if [ $num_variants == 0 ]; then
+if [ $sample_with_alternate_variants == 0 ]; then
   echo -e "0\t0\t0\t0\t0\t0\t" > "${TEMP_DIR}"/"${REF_NAME}".sums_part_main.${padded_x}.txt
   echo -e "0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t" > "${TEMP_DIR}"/"${REF_NAME}".indexes.${padded_x}.tsv
 else
