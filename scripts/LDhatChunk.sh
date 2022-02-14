@@ -5,14 +5,15 @@ SEG_LENGTH=$2
 NUM_OF_SEGS_PLUS_1=$3
 END_OF_SEQ=$4
 N=$5
-PATH_REF_FASTA=$6
-REF_NAME=$7
-TEMP_DIR=$8
-PATH_VCF_SNPS=$9
-runSumsLDhat=${10}
-pathLDhat=${11}
-runPhi=${12}
-pathGetIndexesR=${13}
+ALL_VCF_POSITIONS=$6
+PATH_REF_FASTA=$7
+REF_NAME=$8
+TEMP_DIR=$9
+PATH_VCF_SNPS=${10}
+runSumsLDhat=${11}
+pathLDhat=${12}
+runPhi=${13}
+pathGetIndexesR=${14}
 
 
 #echo "x - $x"
@@ -20,6 +21,7 @@ pathGetIndexesR=${13}
 #echo "NUM_OF_SEGS_PLUS_1 - $NUM_OF_SEGS_PLUS_1"
 #echo "END_OF_SEQ - $END_OF_SEQ"
 #echo "N - $N"
+#echo "ALL_VCF_POSITIONS - $ALL_VCF_POSITIONS"
 #echo "PATH_REF_FASTA - $PATH_REF_FASTA"
 #echo "REF_NAME - $REF_NAME"
 #echo "TEMP_DIR - $TEMP_DIR"
@@ -69,6 +71,7 @@ printf -v padded_x "%0${num_of_digits}d" $x
 #Output (TAB-separated) : Segregating sites, Average PWD, Watterson theta, Tajima D statistic, Fu and Li D* statistic, Variance PWD
 if [ $num_variants == 0 ]; then
   echo -e "0\t0\t0\t0\t0\t0\t" > Sums_part_main_job${padded_x}.txt
+  echo -e "0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t" > ${TEMP_DIR}/${REF_NAME}.indexes.${padded_x}.tsv
 else
     # Generate the FASTA chunk
     zgrep '^#CHROM' ${TEMP_DIR}/sel_${ix}_${ex}.vcf.gz -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v | while read SAMPLE; do
@@ -93,10 +96,18 @@ else
       ${padded_x} \
       "job" \
       ${TEMP_DIR}
+
+    # guix install r-ape
+    # guix install r-pegas
+    # guix install r-adegenet
+    Rscript $pathGetIndexesR ${padded_x} ${TEMP_DIR}/sel_${ix}_${ex}.fa $runPhi "job" ${TEMP_DIR} | tail -n 1 \
+      > ${TEMP_DIR}/${REF_NAME}.indexes.${padded_x}.tsv
 fi
 
-# guix install r-ape
-# guix install r-pegas
-# guix install r-adegenet
-Rscript $pathGetIndexesR ${padded_x} ${TEMP_DIR}/sel_${ix}_${ex}.fa $runPhi "job" ${TEMP_DIR} | tail -n 1 \
-  > ${TEMP_DIR}/${REF_NAME}.indexes.${padded_x}.tsv
+#cat $ALL_VCF_POSITIONS | while read pos; do
+#  if (($pos >= $ix && $pos <= $ex)); then
+#
+#
+#    break
+#  fi
+#done
