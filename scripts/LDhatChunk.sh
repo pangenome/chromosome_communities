@@ -70,7 +70,7 @@ num_variants=$(zgrep '^#' "${TEMP_DIR}"/sel_${ix}_${ex}.${padded_x}.vcf.gz -vc)
 
 #Output (TAB-separated) : Segregating sites, Average PWD, Watterson theta, Tajima D statistic, Fu and Li D* statistic, Variance PWD
 if [ $num_variants == 0 ]; then
-  echo -e "0\t0\t0\t0\t0\t0\t" > "${TEMP_DIR}"/"${REF_NAME}".sums_part_main.$x.txt
+  echo -e "0\t0\t0\t0\t0\t0\t" > "${TEMP_DIR}"/"${REF_NAME}".sums_part_main.${padded_x}.txt
   echo -e "0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t" > "${TEMP_DIR}"/"${REF_NAME}".indexes.${padded_x}.tsv
 else
     # Generate the FASTA chunk
