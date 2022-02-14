@@ -1,19 +1,18 @@
-# Usage: Rscript get_indexes.R 348 temp/sel_3480001_3490000.fa ~/tools/PhiPack/src/Phi out
-
 args <- commandArgs()
 x <- args[6]
 seqNamePart <- args[7]
 pathPhi <- args[8]
-out <- args[9]
+prefix <- args[9]
 output_dir <- args[10]
 
 if (file.exists(seqNamePart)) {
-  getPhi <- function (seqName, pathPhi, out)
+  getPhi <- function (seqName, pathPhi, prefix)
   {
-    phiName <- paste0(output_dir, "/Phi", out, ".log")
+    phiName <- paste0(output_dir, "/", prefix, ".phi.log")
     system(paste0(pathPhi, " -f ", seqName, " -o -v >", phiName))
-    MaxChi <- as.numeric(strsplit(system(paste0("grep 'Value of maximum breakpoint is:' ",
-                                                phiName), intern = T), ": ")[[1]][2])
+    MaxChi <- as.numeric(
+      strsplit(system(paste0("grep 'Value of maximum breakpoint is:' ", phiName), intern = T), ": ")[[1]][2]
+    )
     if (is.infinite(MaxChi)) {
       MaxChi <- NA
     }
@@ -32,12 +31,12 @@ if (file.exists(seqNamePart)) {
   temp <- try(adegenet::DNAbin2genind(samp, polyThres = 0))
   hahe <- adegenet::Hs(temp)
 
-  pathTmpFile <- paste0(output_dir, "/tmpfile", x, out, ".fa")
+  pathTmpFile <- paste0(output_dir, "/", prefix, ".tmpfile.", x, ".fa")
   system(paste0("sed '1d' ", seqNamePart, " > ", pathTmpFile))
   phis <- getPhi(
     seqName = pathTmpFile,
     pathPhi = pathPhi,
-    out = paste0(x, out)
+    out = paste0(prefix, ".", x)
   )
   system((paste0("rm ", pathTmpFile)))
 

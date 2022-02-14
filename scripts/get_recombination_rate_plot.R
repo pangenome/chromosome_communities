@@ -126,7 +126,7 @@ polyThres <- 0
 
 setwd(dir_with_indexes_and_sumsldhat)
 
-helper <- read.table('indexes.tsv', sep = '\t')
+helper <- read.table('Indexes.tsv', sep = '\t')
 
 hahe <- helper[, 1]
 tajd <- helper[, 2]
