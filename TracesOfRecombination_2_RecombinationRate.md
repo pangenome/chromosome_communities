@@ -1,8 +1,7 @@
 ## Recombination rate
 
 ```shell
-###################################
-# Octopus
+# Octopus#################################################
 THREADS=48
 pathLDhat=~/tools/LDhat
 runPhi=~/tools/PhiPack/src/Phi
@@ -12,10 +11,9 @@ pathGetIndexesR=/lizardfs/guarracino/chromosome_communities/scripts/get_indexes.
 pathGetRecombinationRatePlotR=/lizardfs/guarracino/chromosome_communities/scripts/get_recombination_rate_plot.R
 
 OUTPUT_DIR=/lizardfs/guarracino/chromosome_communities/recombination_rate
-####################
-
 ###################################
-# Locally (for testing)
+
+# Locally (for testing) ##################################
 THREADS=16
 pathLDhat=~/git/LDhat/
 runPhi=~/Downloads/Pangenomics/LDhat/PhiPack/src/Phi
@@ -105,11 +103,9 @@ cat ref_names.txt | while read REF_NAME; do
     
     N=$(zgrep '^#CHROM' $PATH_VCF_SNPS -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v | wc -l)
     
-#    MIN_POS=$(zgrep '^#' $PATH_VCF_SNPS -v | cut -f 2 | sort -k 1n | head -n 1)
-#    MAX_POS=$(zgrep '^#' $PATH_VCF_SNPS -v | cut -f 2 | sort -k 1n | tail -n 1)
-
+    zgrep '^#' $PATH_VCF_SNPS -v | cut -f 2 | sort -k 1n > $VCF_SNPS_NAME.all.positions.txt
+   
     cd /scratch/
-    mkdir -p ${REF_NAME}-recomb
     TEMP_DIR=${REF_NAME}-recomb/$REF_NAME-temp
     mkdir -p $TEMP_DIR
 
@@ -118,6 +114,7 @@ cat ref_names.txt | while read REF_NAME; do
       $NUM_OF_SEGS_PLUS_1 \
       $END_OF_SEQ \
       $N \
+      $VCF_SNPS_NAME.all.positions.txt \
       $PATH_REF_FASTA \
       $REF_NAME \
       $TEMP_DIR \
@@ -140,8 +137,33 @@ cat ref_names.txt | while read REF_NAME; do
     done
     
     # Cleaning the working directory
-    rm Phi*
-    rm out.log
+    ####rm Phi*
+done
+```
+
+Retrieve chunk outputs and put all together in two matrices:
+
+```shell
+cat ref_names.txt | while read REF_NAME; do
+    echo $REF_NAME
+
+    cd /scratch/
+    TEMP_DIR=${REF_NAME}-recomb/$REF_NAME-temp
+    
+    INDEXES_DIR=$OUTPUT_DIR/$REF_NAME-indexes
+    mkdir -p $INDEXES_DIR
+    
+    # With cat we can have 'Argument list too long'
+    # Retrieve files in order
+    for file in $(find ${TEMP_DIR} -name "${REF_NAME}.indexes.*.tsv" -type f | sort); do
+        cat $file >> Indexes.tsv
+    done
+    mv indexes.tsv ${INDEXES_DIR}/
+    
+    for file in $(find ${TEMP_DIR} -name "$REF_NAME.sums_part_main.*.txt" -type f | sort); do
+        cat $file >> Sums_part_main_job.txt
+    done
+    mv Sums_part_main_job.txt ${INDEXES_DIR}/
 done
 ```
 

@@ -36,7 +36,7 @@ if (file.exists(seqNamePart)) {
   phis <- getPhi(
     seqName = pathTmpFile,
     pathPhi = pathPhi,
-    out = paste0(prefix, ".", x)
+    prefix = paste0(prefix, ".", x)
   )
   system((paste0("rm ", pathTmpFile)))
 
