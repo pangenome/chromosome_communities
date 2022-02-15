@@ -10,17 +10,24 @@ if (file.exists(seqNamePart)) {
   {
     phiName <- paste0(output_dir, "/", prefix, ".phi.log")
     system(paste0(pathPhi, " -f ", seqName, " -o -v >", phiName))
-    MaxChi <- as.numeric(
-      strsplit(system(paste0("grep 'Value of maximum breakpoint is:' ", phiName), intern = T), ": ")[[1]][2]
-    )
-    if (is.infinite(MaxChi)) {
-      MaxChi <- NA
+
+    results <- system(paste0("grep 'Value of maximum breakpoint is:' ", phiName, ' -c'), intern = T)[[1]]
+    if (results != "0") {
+      MaxChi <- as.numeric(
+        strsplit(system(paste0("grep 'Value of maximum breakpoint is:' ", phiName), intern = T), ": ")[[1]][2]
+      )
+      if (is.infinite(MaxChi)) {
+        MaxChi <- NA
+      }
+      NSS <- as.numeric(strsplit(system(paste("grep 'The Neighbour Similarity score is ' ", phiName), intern = T), " ")[[1]][6])
+      phi.mean <- unlist(strsplit(system(paste0("grep 'Mean: ' ", phiName), intern = T), " "))
+      phi.mean <- as.numeric(phi.mean[phi.mean != ""][2])
+      phi.var <- unlist(strsplit(system(paste0("grep 'Variance: ' ", phiName), intern = T), " "))
+      phi.var <- as.numeric(phi.var[phi.var != ""][2])
+    } else {
+      MaxChi <- NSS <- phi.mean <- phi.var <- 0
     }
-    NSS <- as.numeric(strsplit(system(paste("grep 'The Neighbour Similarity score is ' ", phiName), intern = T), " ")[[1]][6])
-    phi.mean <- unlist(strsplit(system(paste0("grep 'Mean: ' ", phiName), intern = T), " "))
-    phi.mean <- as.numeric(phi.mean[phi.mean != ""][2])
-    phi.var <- unlist(strsplit(system(paste0("grep 'Variance: ' ", phiName), intern = T), " "))
-    phi.var <- as.numeric(phi.var[phi.var != ""][2])
+
     return(c(MaxChi, NSS, phi.mean, phi.var))
   }
 
