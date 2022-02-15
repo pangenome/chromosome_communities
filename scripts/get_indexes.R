@@ -36,7 +36,11 @@ if (file.exists(seqNamePart)) {
   samp <- ape::read.dna(seqNamePart, as.matrix = T, format = "fasta")
   tajd <- pegas::tajima.test(samp)$D
   temp <- try(adegenet::DNAbin2genind(samp, polyThres = 0))
-  hahe <- adegenet::Hs(temp)
+  if (!is.null(temp)) {
+    hahe <- adegenet::Hs(temp)
+  } else {
+    hahe <- 0
+  }
 
   pathTmpFile <- paste0(output_dir, "/", prefix, ".tmpfile.", x, ".fa")
   system(paste0("sed '1d' ", seqNamePart, " > ", pathTmpFile))
