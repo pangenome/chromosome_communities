@@ -1,17 +1,15 @@
 # Usage: Rscript get_recombination_rate_plot.R S1-indexes/ $SEG_LENGTH $N $LENGTH_OF_SEQ $REF_NAME
 args <- commandArgs()
-dir_with_indexes_and_sumsldhat <- args[6]
-segLength <- as.numeric(args[7])
-nn <- as.numeric(args[8])
-ll <- as.numeric(args[9])
-prefix <- args[10]
-
-segs <- ll/segLength
+path_indexes_tsv <- args[6]
+path_sums_part_txt <- args[7]
+path_information <- args[8]
+prefix <- args[9]
+title <- args[10]
 
 impute <- function(data, index, two, segs)
 {
   while (!(length(index) == 0) || (length(index) == segs)) {
-    data.to.impute <- sapply(index, get_impute_data, data,
+    data.to.impute <- sapply(index, LDJump::get_impute_data, data,
                             two = two, segs = segs)
     help.ind <- which(colSums(apply(data.to.impute, 2, is.na)) ==
                        0)
@@ -21,7 +19,7 @@ impute <- function(data, index, two, segs)
       index <- as.numeric(which(is.na(data)))
     }
     else {
-      data.to.impute <- sapply(index, get_impute_data,
+      data.to.impute <- sapply(index, LDJump::get_impute_data,
                               data, two = F, segs = segs)
       ct <- 1
       help.ind <- c()
@@ -124,21 +122,27 @@ constant <- F
 status <- T
 polyThres <- 0
 
-setwd(dir_with_indexes_and_sumsldhat)
+info_df <- read.table(
+  path_information,
+  sep = '\t', header = F,
+  col.names=c("seg_len", "num_seq", "seq_len")
+)
 
-helper <- read.table('Indexes.tsv', sep = '\t')
+segs <- info_df$seq_len/info_df$seg_len
+
+helper <- read.table(path_indexes_tsv, sep = '\t')
 
 hahe <- helper[, 1]
 tajd <- helper[, 2]
-haps <- helper[, 3] / segLength / nn
+haps <- helper[, 3] / info_df$seg_len / info_df$num_seq
 
-sums <- read.table('Sums_part_main_job.txt', sep = '\t')
-apwd <- as.data.frame(sums$V2/segLength)
-vapw <- as.data.frame(sums$V6/segLength)
+sums <- read.table(path_sums_part_txt, sep = '\t')
+apwd <- as.data.frame(sums$V2/info_df$seg_len)
+vapw <- as.data.frame(sums$V6/info_df$seg_len)
 colnames(apwd) <- "apwd"
 colnames(vapw) <- "vapw"
 
-wath <- helper[, 6] / segLength
+wath <- helper[, 6] / info_df$seg_len
 MaxChi <- helper[, 7]
 NSS <- helper[, 8]
 phi.mean <- helper[, 9]
@@ -166,16 +170,25 @@ if (!constant) {
   }
   results <- list(`Estimated recombination map` = seq.full.cor,
                   `Constant estimates:` = pr.full.cor, `Summary Statistics` = helper_new,
-                  alpha = alpha, `Sample Size` = nn, `Sequence Length` = ll,
-                  `Segment Length` = segLength, `Imputed Segments` = ind)
+                  alpha = alpha, `Sample Size` = info_df$num_seq, `Sequence Length` = info_df$seg_len,
+                  `Segment Length` = info_df$seg_len, `Imputed Segments` = ind)
 } else {
   pr.full.cor <- full.list[[1]]
   results <- list(`Constant estimates` = pr.full.cor, `Summary Statistics` = helper_new,
-                  alpha = alpha, `Sample Size` = nn, `Sequence Length` = ll,
-                  `Segment Length` = segLength)
+                  alpha = alpha, `Sample Size` = info_df$num_seq, `Sequence Length` = info_df$seg_len,
+                  `Segment Length` = info_df$seg_len)
 }
 
 #postscript("Results.eps", horiz = F)
 png(paste0(prefix, ".png"), width = 1000, height = 500)
-plot(results[[1]], xlab = "Segments", ylab = "Estimated Recombination Rate", main = "Estimated recombination map with LDJump")
+plot(
+  results[[1]],
+  xlab = "Segments",
+  ylab = "Estimated Recombination Rate",
+  main = paste0(
+    title,
+    "\nSegment length: ", info_df$seg_len, " Number of sequences: ", info_df$num_seq,
+    "\nEstimated recombination map with LDJump"
+  )
+)
 dev.off()

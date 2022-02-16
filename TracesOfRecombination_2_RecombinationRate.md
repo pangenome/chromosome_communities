@@ -39,15 +39,16 @@ sbatch -p workers -c 48 --wrap 'vg deconstruct -P grch38 -H '?' -e -a -t 48 /liz
 Prepare the VCF file with only SNPs:
 
 ```shell
+mkdir -p $OUTPUT_DIR
+cd $OUTPUT_DIR
+
 PATH_VCF=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n97/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.chm13.vcf.gz
 #PATH_VCF=~/Downloads/Pangenomics/LDhat/SimulatedPopulations/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.pggb/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.fixed.fa.5c3c9a3.7bdde5a.a933754.smooth.fix.gfa.vcf.gz
+#PATH_VCF=/lizardfs/guarracino/chromosome_communities/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.fixed.fa.5c3c9a3.7bdde5a.a933754.smooth.fix.gfa.vcf.gz
 
 VCF_NAME=$(basename $PATH_VCF .vcf.gz)
 SEG_LENGTH=1000 # 1kb is recommended for LDJump
 
-
-mkdir -p $OUTPUT_DIR
-cd $OUTPUT_DIR
 
 # Get reference names
 zgrep '^#' $PATH_VCF -v | cut -f 1 | sort | uniq > ref_names.txt
@@ -56,8 +57,7 @@ zgrep '^#' $PATH_VCF -v | cut -f 1 | sort | uniq > ref_names.txt
 cat ref_names.txt | while read REF_NAME; do
   echo $REF_NAME
   
-  #PATH_REF_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/$(echo $REF_NAME | tr '#' '.').fa.gz
-  PATH_REF_FASTA=~/Downloads/Pangenomics/LDhat/SimulatedPopulations/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.fixed.$REF_NAME.fa
+  PATH_REF_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/$(echo $REF_NAME | tr '#' '.').fa.gz
 
   PATH_VCF_SNPS=$OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.vcf.gz
 
@@ -67,9 +67,9 @@ cat ref_names.txt | while read REF_NAME; do
     bgzip -@ $THREADS > $OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.tmp.vcf.gz
   rm out.log
   
-  # Take only samples with at least 1 variants in the VCF file
+  # Take only samples with at least 1 genotype in the VCF file
   sample_with_variants=$(bcftools stats -s '-' $OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.tmp.vcf.gz | awk '$1=="PSC" && $12+$13>0 {print $3}' | paste -s -d',')
-  bcftools view --samples $sample_with_variants $OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.tmp.vcf.gz |\
+  bcftools view --samples $sample_with_genotypes $OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.tmp.vcf.gz |\
    bgzip -@ $THREADS > $PATH_VCF_SNPS
   tabix $PATH_VCF_SNPS
 
@@ -89,8 +89,7 @@ cat ref_names.txt | while read REF_NAME; do
     echo $REF_NAME
     
     PATH_REF_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/$(echo $REF_NAME | tr '#' '.').fa.gz
-    #PATH_REF_FASTA=~/Downloads/Pangenomics/LDhat/SimulatedPopulations/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.fixed.$REF_NAME.fa
-    
+
     LENGTH_OF_SEQ=$(cut -f 2 ${PATH_REF_FASTA}.fai)
     START_OF_SEQ=0
     END_OF_SEQ=$LENGTH_OF_SEQ
@@ -106,8 +105,9 @@ cat ref_names.txt | while read REF_NAME; do
     zgrep '^#' $PATH_VCF_SNPS -v | cut -f 2 | sort -k 1n > $VCF_SNPS_NAME.all.positions.txt
    
     cd /scratch/
-    TEMP_DIR=${REF_NAME}-recomb/$REF_NAME-temp
-    mkdir -p $TEMP_DIR
+    TEMP_DIR=${REF_NAME}_s${SEG_LENGTH}-temp
+    mkdir -p ${REF_NAME}_s${SEG_LENGTH}-recomb/${TEMP_DIR}
+    cd ${REF_NAME}_s${SEG_LENGTH}-recomb
 
     seq 1 $NUM_OF_SEGS_PLUS_1 | parallel -j $THREADS bash $pathLDhatChunk {} \
       $SEG_LENGTH \
@@ -123,34 +123,19 @@ cat ref_names.txt | while read REF_NAME; do
       $pathLDhat \
       $runPhi \
       $pathGetIndexesR
-    
-    INDEXES_DIR=$OUTPUT_DIR/$REF_NAME-indexes
-    mkdir -p $INDEXES_DIR
-    
-    # With cat we can have 'Argument list too long'
-    # Retrieve files in order
-    for file in $(find ${TEMP_DIR} -name '*.indexes.*.tsv' -type f | sort); do
-        cat $file >> ${INDEXES_DIR}/indexes.tsv
-    done
-    for file in $(find ${TEMP_DIR} -name 'Sums_part_main_job*.txt' -type f | sort); do
-        cat $file >> ${INDEXES_DIR}/Sums_part_main_job.txt
-    done
-    
-    # Cleaning the working directory
-    ####rm Phi*
 done
 ```
 
-Retrieve chunk outputs and put all together in two matrices:
+Retrieve chunk outputs and put all together in two matrices plus a file with additional information:
 
 ```shell
 cat ref_names.txt | while read REF_NAME; do
     echo $REF_NAME
 
     cd /scratch/
-    TEMP_DIR=${REF_NAME}-recomb/$REF_NAME-temp
+    TEMP_DIR=${REF_NAME}_s${SEG_LENGTH}-recomb/${REF_NAME}_s${SEG_LENGTH}-temp
     
-    INDEXES_DIR=$OUTPUT_DIR/$REF_NAME-indexes
+    INDEXES_DIR=$OUTPUT_DIR/${REF_NAME}_s${SEG_LENGTH}-indexes
     mkdir -p $INDEXES_DIR
     
     # With cat we can have 'Argument list too long'
@@ -158,12 +143,18 @@ cat ref_names.txt | while read REF_NAME; do
     for file in $(find ${TEMP_DIR} -name "${REF_NAME}.indexes.*.tsv" -type f | sort); do
         cat $file >> Indexes.tsv
     done
-    mv indexes.tsv ${INDEXES_DIR}/
+    mv Indexes.tsv ${INDEXES_DIR}/
     
     for file in $(find ${TEMP_DIR} -name "$REF_NAME.sums_part_main.*.txt" -type f | sort); do
         cat $file >> Sums_part_main_job.txt
     done
     mv Sums_part_main_job.txt ${INDEXES_DIR}/
+    
+    PATH_REF_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/$(echo $REF_NAME | tr '#' '.').fa.gz
+    PATH_VCF_SNPS=$OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.vcf.gz
+    N=$(zgrep '^#CHROM' $PATH_VCF_SNPS -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v | wc -l)
+    LENGTH_OF_SEQ=$(cut -f 2 ${PATH_REF_FASTA}.fai)
+    printf $SEG_LENGTH"\t"$N"\t"$LENGTH_OF_SEQ"\n" > ${INDEXES_DIR}/Information.txt
 done
 ```
 
@@ -172,24 +163,22 @@ Recombination plots:
 ```shell
 cat ref_names.txt | while read REF_NAME; do
     echo $REF_NAME
-    
-    PATH_REF_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/$(echo $REF_NAME | tr '#' '.').fa.gz
-    #PATH_REF_FASTA=~/Downloads/Pangenomics/LDhat/SimulatedPopulations/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.fixed.$REF_NAME.fa
-    
-    LENGTH_OF_SEQ=$(cut -f 2 ${PATH_REF_FASTA}.fai)
-    
-    PATH_VCF_SNPS=$OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.vcf.gz
-    N=$(zgrep '^#CHROM' $PATH_VCF_SNPS -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v | wc -l)
-    
-    INDEXES_DIR=$OUTPUT_DIR/$REF_NAME-indexes
+        
+    #INDEXES_DIR=$OUTPUT_DIR/${REF_NAME}_s${SEG_LENGTH}-indexes
+    INDEXES_DIR=~/Downloads/Pangenomics/LDhat/recombination_rate/${REF_NAME}_s${SEG_LENGTH}-indexes
 
     # guix install r-data-table
-    Rscript $pathGetRecombinationRatePlotR ${INDEXES_DIR} $SEG_LENGTH $N $LENGTH_OF_SEQ $REF_NAME
+    Rscript $pathGetRecombinationRatePlotR \
+      ${INDEXES_DIR}/Indexes.tsv \
+      ${INDEXES_DIR}/Sums_part_main_job.txt \
+      ${INDEXES_DIR}/Information.txt \
+      ${INDEXES_DIR}/$REF_NAME \
+      $REF_NAME
 done
 ```
 
-```shell
 
+```shell
 ####cat $VCF|  vcflib vcfsnps | bgzip -c > $VCF_NAME.snps.vcf.gz && tabix $VCF_NAME.snps.vcf.gz
 #vcftools --gzvcf $VCF --remove-indels --recode --recode-INFO-all --stdout | bcftools norm -f chm13.ACRO.fa -c s -m - | bgzip -@ 48 > $VCF_NAME.snps.vcf.gz
 #tabix $VCF_NAME.snps.vcf.gz
@@ -204,7 +193,7 @@ for i in 13 14 15 21 22; do
     bcftools norm -f /lizardfs/guarracino/chromosome_communities/assemblies/chm13.chr$i.fa.gz -c s -m - |\
     bgzip -@ 48 > $VCF_NAME.$chr.snps.tmp.vcf.gz
 
-  sample_with_variants=$(bcftools stats -s '-' $VCF_NAME.$chr.snps.tmp.vcf.gz | awk '$1=="PSC" && $12+$13>0 {print $3}' | paste -s -d',')
+  sample_with_genotypes=$(bcftools stats -s '-' $VCF_NAME.$chr.snps.tmp.vcf.gz | awk '$1=="PSC" && $12+$13>0 {print $3}' | paste -s -d',')
   bcftools view --samples $sample_with_variants $VCF_NAME.$chr.snps.tmp.vcf.gz | bgzip -@ 48 > $VCF_NAME.$chr.snps.vcf.gz
   tabix $VCF_NAME.$chr.snps.vcf.gz
   
@@ -230,4 +219,3 @@ done
 #guix install dos2unix
 
 ```
-
