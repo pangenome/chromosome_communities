@@ -18,7 +18,7 @@ for i, path_contigs_chrX_txt in enumerate([path_contigs_chr13_txt, path_contigs_
 		for line in f:
 			contig = line.split('\t')[0]
 			if 'chr' not in contig:
-				contigs_list[i].append(contig)
+				contigs_list[i].append(contig.strip())
 
 
 

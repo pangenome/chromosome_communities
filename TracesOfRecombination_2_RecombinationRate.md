@@ -47,7 +47,7 @@ PATH_VCF=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.100kbps
 #PATH_VCF=/lizardfs/guarracino/chromosome_communities/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.fixed.fa.5c3c9a3.7bdde5a.a933754.smooth.fix.gfa.vcf.gz
 
 VCF_NAME=$(basename $PATH_VCF .vcf.gz)
-SEG_LENGTH=1000 # 1kb is recommended for LDJump
+SEG_LENGTH=10000 # 1kb is recommended for LDJump
 
 
 # Get reference names
@@ -188,16 +188,38 @@ NUM_ITERATIONS=10
 mkdir -p /lizardfs/guarracino/chromosome_communities/boostraps
 cd /lizardfs/guarracino/chromosome_communities/boostraps
 
-python3 /lizardfs/guarracino/chromosome_communities/scripts/sample_contigs.py \
-  /lizardfs/guarracino/chromosome_communities/pq_contigs/chr13.vs.chm13.100kbps.pq_contigs.union.fa.gz.fai \
-  /lizardfs/guarracino/chromosome_communities/pq_contigs/chr14.vs.chm13.100kbps.pq_contigs.union.fa.gz.fai \
-  /lizardfs/guarracino/chromosome_communities/pq_contigs/chr15.vs.chm13.100kbps.pq_contigs.union.fa.gz.fai \
-  /lizardfs/guarracino/chromosome_communities/pq_contigs/chr21.vs.chm13.100kbps.pq_contigs.union.fa.gz.fai \
-  /lizardfs/guarracino/chromosome_communities/pq_contigs/chr22.vs.chm13.100kbps.pq_contigs.union.fa.gz.fai \
-  ${NUM_ITERATIONS} | sort | uniq > bootstrap.${NUM_ITERATIONS}_sets.txt
+# Take contigs that are in the VCF files (that is, that have at least one valid genotype, 0 or 1)
+cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt | while read REF_NAME; do
+  echo $REF_NAME
+
+  PATH_VCF_SNPS=$OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.vcf.gz
+  
+  cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt | while read REF_NAME_CONTIGS; do
+    comm -12 \
+      <(zgrep '^#CHROM' $PATH_VCF_SNPS -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v) \
+      <(cut -f 1 /lizardfs/guarracino/chromosome_communities/pq_contigs/$(echo $REF_NAME_CONTIGS | cut -f 2 -d '#').vs.chm13.100kbps.pq_contigs.union.fa.gz.fai) \
+      > $VCF_NAME.$REF_NAME.snp.contigs.$REF_NAME_CONTIGS.txt
+  done
+done
+
+# Sample contigs
+
+
+
+cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt | while read REF_NAME; do
+  echo $REF_NAME
+
+  python3 /lizardfs/guarracino/chromosome_communities/scripts/sample_contigs.py \
+    chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.chm13.$REF_NAME.snp.contigs.chm13#chr13.txt \
+    chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.chm13.$REF_NAME.snp.contigs.chm13#chr14.txt \
+    chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.chm13.$REF_NAME.snp.contigs.chm13#chr15.txt \
+    chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.chm13.$REF_NAME.snp.contigs.chm13#chr21.txt \
+    chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.chm13.$REF_NAME.snp.contigs.chm13#chr22.txt \
+    ${NUM_ITERATIONS} | sort | uniq > bootstrap.$REF_NAME.${NUM_ITERATIONS}_sets.txt
+done
 
 # Check (with lots of sets there could be duplicates)
-cat bootstrap.${NUM_ITERATIONS}_sets.txt | wc -l
+ls bootstrap*.txt | while read f; do num=$(cat $f | wc -l); echo "$f $num"; done
 ```
 
 Prepare VCF files:
@@ -209,16 +231,17 @@ cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt
     PATH_VCF_SNPS=$OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.vcf.gz
     
     i=1
-    cat bootstrap.${NUM_ITERATIONS}_sets.txt | while read contigs; do
-      #echo $(cat $f | paste -s -d',')
+    cat bootstrap.$REF_NAME.${NUM_ITERATIONS}_sets.txt | while read contigs; do
+      echo "$REF_NAME - $i --- $contigs"
           
       bcftools view --samples $contigs $PATH_VCF_SNPS |\
-       bgzip -@ $THREADS > /lizardfs/guarracino/chromosome_communities/boostraps/vcfs/bootstrap.1000sets.$REF_NAME.$i.vcf.gz
-      tabix $PATH_VCF_SNPS
+       bgzip -@ $THREADS > /lizardfs/guarracino/chromosome_communities/boostraps/vcfs/bootstrap.$REF_NAME.${NUM_ITERATIONS}_sets.$i.vcf.gz
+      tabix /lizardfs/guarracino/chromosome_communities/boostraps/vcfs/bootstrap.$REF_NAME.${NUM_ITERATIONS}_sets.$i.vcf.gz
       
       i=$((i+1))
     done  
 done
+
 ```
 
 In parallel:
