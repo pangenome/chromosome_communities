@@ -98,11 +98,12 @@ cat ref_names.txt | while read REF_NAME; do
     NUM_OF_SEGS_PLUS_1=$(echo $LENGTH_OF_SEQ / $SEG_LENGTH + 1 | bc)
     
     PATH_VCF_SNPS=$OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.vcf.gz
-    VCF_SNPS_NAME=$(basename $PATH_VCF_SNPS .vcf.gz)
     
     N=$(zgrep '^#CHROM' $PATH_VCF_SNPS -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v | wc -l)
-    
-    zgrep '^#' $PATH_VCF_SNPS -v | cut -f 2 | sort -k 1n > $VCF_SNPS_NAME.all.positions.txt
+ 
+    #Unused   
+    #VCF_SNPS_NAME=$(basename $PATH_VCF_SNPS .vcf.gz)
+    #zgrep '^#' $PATH_VCF_SNPS -v | cut -f 2 | sort -k 1n > $VCF_SNPS_NAME.all.positions.txt
    
     cd /scratch/
     TEMP_DIR=${REF_NAME}_s${SEG_LENGTH}-temp
@@ -114,7 +115,6 @@ cat ref_names.txt | while read REF_NAME; do
       $NUM_OF_SEGS_PLUS_1 \
       $END_OF_SEQ \
       $N \
-      $VCF_SNPS_NAME.all.positions.txt \
       $PATH_REF_FASTA \
       $REF_NAME \
       $TEMP_DIR \
@@ -176,6 +176,106 @@ cat ref_names.txt | while read REF_NAME; do
       $REF_NAME
 done
 ```
+
+### Bootstrap
+
+Sample 1 contig for each acrocentric chromosomes, for 1000 times:
+
+```shell
+# Sample 1 contig for each acros
+NUM_ITERATIONS=10
+
+mkdir -p /lizardfs/guarracino/chromosome_communities/boostraps
+cd /lizardfs/guarracino/chromosome_communities/boostraps
+
+python3 /lizardfs/guarracino/chromosome_communities/scripts/sample_contigs.py \
+  /lizardfs/guarracino/chromosome_communities/pq_contigs/chr13.vs.chm13.100kbps.pq_contigs.union.fa.gz.fai \
+  /lizardfs/guarracino/chromosome_communities/pq_contigs/chr14.vs.chm13.100kbps.pq_contigs.union.fa.gz.fai \
+  /lizardfs/guarracino/chromosome_communities/pq_contigs/chr15.vs.chm13.100kbps.pq_contigs.union.fa.gz.fai \
+  /lizardfs/guarracino/chromosome_communities/pq_contigs/chr21.vs.chm13.100kbps.pq_contigs.union.fa.gz.fai \
+  /lizardfs/guarracino/chromosome_communities/pq_contigs/chr22.vs.chm13.100kbps.pq_contigs.union.fa.gz.fai \
+  ${NUM_ITERATIONS} | sort | uniq > bootstrap.${NUM_ITERATIONS}_sets.txt
+
+# Check (with lots of sets there could be duplicates)
+cat bootstrap.${NUM_ITERATIONS}_sets.txt | wc -l
+```
+
+Prepare VCF files:
+
+```shell
+mkdir -p /lizardfs/guarracino/chromosome_communities/boostraps/vcfs
+
+cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt | while read REF_NAME; do
+    PATH_VCF_SNPS=$OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.vcf.gz
+    
+    i=1
+    cat bootstrap.${NUM_ITERATIONS}_sets.txt | while read contigs; do
+      #echo $(cat $f | paste -s -d',')
+          
+      bcftools view --samples $contigs $PATH_VCF_SNPS |\
+       bgzip -@ $THREADS > /lizardfs/guarracino/chromosome_communities/boostraps/vcfs/bootstrap.1000sets.$REF_NAME.$i.vcf.gz
+      tabix $PATH_VCF_SNPS
+      
+      i=$((i+1))
+    done  
+done
+```
+
+In parallel:
+
+```shell
+cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt | while read REF_NAME; do
+    echo $REF_NAME
+    
+    PATH_REF_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/$(echo $REF_NAME | tr '#' '.').fa.gz
+
+    LENGTH_OF_SEQ=$(cut -f 2 ${PATH_REF_FASTA}.fai)
+    START_OF_SEQ=0
+    END_OF_SEQ=$LENGTH_OF_SEQ
+    
+    NUM_OF_SEGS=$(echo $LENGTH_OF_SEQ / $SEG_LENGTH | bc)
+    NUM_OF_SEGS_PLUS_1=$(echo $LENGTH_OF_SEQ / $SEG_LENGTH + 1 | bc)
+    
+    
+    seq 1 1000 | while read contigs; do
+        #echo $(cat $f | paste -s -d',')
+              
+        PATH_VCF_SNPS=/lizardfs/guarracino/chromosome_communities/boostraps/vcfs/bootstrap.1000sets.$REF_NAME.$i.vcf.gz
+        
+        PATH_VCF_SNPS=$OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.vcf.gz
+        
+        N=$(zgrep '^#CHROM' $PATH_VCF_SNPS -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v | wc -l)
+        
+        #Unused   
+        #VCF_SNPS_NAME=$(basename $PATH_VCF_SNPS .vcf.gz)
+        #zgrep '^#' $PATH_VCF_SNPS -v | cut -f 2 | sort -k 1n > $VCF_SNPS_NAME.all.positions.txt
+       
+        cd /scratch/
+        TEMP_DIR=${REF_NAME}_s${SEG_LENGTH}-temp
+        mkdir -p ${REF_NAME}_s${SEG_LENGTH}-recomb/${TEMP_DIR}
+        cd ${REF_NAME}_s${SEG_LENGTH}-recomb
+    
+        seq 1 $NUM_OF_SEGS_PLUS_1 | parallel -j $THREADS bash $pathLDhatChunk {} \
+          $SEG_LENGTH \
+          $NUM_OF_SEGS_PLUS_1 \
+          $END_OF_SEQ \
+          $N \
+          $PATH_REF_FASTA \
+          $REF_NAME \
+          $TEMP_DIR \
+          $PATH_VCF_SNPS \
+          $runSumsLDhat \
+          $pathLDhat \
+          $runPhi \
+          $pathGetIndexesR
+        done
+    done
+done
+```
+
+
+
+
 
 
 ```shell

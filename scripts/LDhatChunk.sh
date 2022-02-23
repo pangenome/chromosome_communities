@@ -5,15 +5,14 @@ SEG_LENGTH=$2
 NUM_OF_SEGS_PLUS_1=$3
 END_OF_SEQ=$4
 N=$5
-ALL_VCF_POSITIONS=$6
-PATH_REF_FASTA=$7
-REF_NAME=$8
-TEMP_DIR=$9
-PATH_VCF_SNPS=${10}
-runSumsLDhat=${11}
-pathLDhat=${12}
-runPhi=${13}
-pathGetIndexesR=${14}
+PATH_REF_FASTA=$6
+REF_NAME=$7
+TEMP_DIR=$8
+PATH_VCF_SNPS=$9
+runSumsLDhat=${10}
+pathLDhat=${11}
+runPhi=${12}
+pathGetIndexesR=${13}
 
 
 #echo "x - $x"
