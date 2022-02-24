@@ -6,6 +6,18 @@ path_information <- args[8]
 prefix <- args[9]
 title <- args[10]
 
+#path_indexes_tsv <- '/home/guarracino/Downloads/Pangenomics/LDhat/bootstraps/chm13#chr13_s10000_i2-indexes/Indexes.tsv'
+#path_sums_part_txt <- '/home/guarracino/Downloads/Pangenomics/LDhat/bootstraps/chm13#chr13_s10000_i2-indexes/Sums_part_main_job.txt'
+#path_information <- '/home/guarracino/Downloads/Pangenomics/LDhat/bootstraps/chm13#chr13_s10000_i2-indexes/Information.txt'
+#prefix <- '/home/guarracino/Downloads/Pangenomics/LDhat/bootstraps/chm13#chr13'
+#title <- 'chm13#chr13 - iteration 2'
+
+#path_indexes_tsv <- '/home/guarracino/Downloads/Pangenomics/LDhat/recombination_rate/chm13#chr13_s10000-indexes/Indexes.tsv'
+#path_sums_part_txt <- '/home/guarracino/Downloads/Pangenomics/LDhat/recombination_rate/chm13#chr13_s10000-indexes/Sums_part_main_job.txt'
+#path_information <- '/home/guarracino/Downloads/Pangenomics/LDhat/recombination_rate/chm13#chr13_s10000-indexes/Information.txt'
+#prefix <- '/home/guarracino/Downloads/Pangenomics/LDhat/recombination_rate/chm13#chr13'
+#title <- 'chm13#chr13'
+
 impute <- function(data, index, two, segs)
 {
   while (!(length(index) == 0) || (length(index) == segs)) {

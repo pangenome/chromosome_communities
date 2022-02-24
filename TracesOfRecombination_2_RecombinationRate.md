@@ -36,12 +36,9 @@ sbatch -p workers -c 48 --wrap 'vg deconstruct -P chm13 -H '?' -e -a -t 48 /liza
 sbatch -p workers -c 48 --wrap 'vg deconstruct -P grch38 -H '?' -e -a -t 48 /lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n97/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.gfa | bgzip -@ 48 > /lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n97/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.grch38.vcf.gz && tabix /lizardfs/guarracino/chromosome_communities/graphs/chrA.pan.s100k.l300k.p97.n200/chrA.pan.fa.4825454.4030258.0517e7e.smooth.fix.grch38.vcf.gz'
 ```
 
-Prepare the VCF file with only SNPs:
+Choose the VCF file:
 
 ```shell
-mkdir -p $OUTPUT_DIR
-cd $OUTPUT_DIR
-
 PATH_VCF=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n97/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.chm13.vcf.gz
 #PATH_VCF=~/Downloads/Pangenomics/LDhat/SimulatedPopulations/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.pggb/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.fixed.fa.5c3c9a3.7bdde5a.a933754.smooth.fix.gfa.vcf.gz
 #PATH_VCF=/lizardfs/guarracino/chromosome_communities/HatLandscapeN16Len1000000Nrhs15_th0.01_540_1.fixed.fa.5c3c9a3.7bdde5a.a933754.smooth.fix.gfa.vcf.gz
@@ -49,9 +46,15 @@ PATH_VCF=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.100kbps
 VCF_NAME=$(basename $PATH_VCF .vcf.gz)
 SEG_LENGTH=10000 # 1kb is recommended for LDJump
 
-
 # Get reference names
 zgrep '^#' $PATH_VCF -v | cut -f 1 | sort | uniq > ref_names.txt
+```
+
+Prepare the VCF file with only SNPs:
+
+```shell
+mkdir -p $OUTPUT_DIR
+cd $OUTPUT_DIR
 
 # guix install vcftools
 cat ref_names.txt | while read REF_NAME; do
@@ -185,8 +188,8 @@ Sample 1 contig for each acrocentric chromosomes, for 1000 times:
 # Sample 1 contig for each acros
 NUM_ITERATIONS=10
 
-mkdir -p /lizardfs/guarracino/chromosome_communities/boostraps
-cd /lizardfs/guarracino/chromosome_communities/boostraps
+mkdir -p /lizardfs/guarracino/chromosome_communities/bootstraps
+cd /lizardfs/guarracino/chromosome_communities/bootstraps
 
 # Take contigs that are in the VCF files (that is, that have at least one valid genotype, 0 or 1)
 cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt | while read REF_NAME; do
@@ -203,9 +206,6 @@ cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt
 done
 
 # Sample contigs
-
-
-
 cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt | while read REF_NAME; do
   echo $REF_NAME
 
@@ -225,7 +225,7 @@ ls bootstrap*.txt | while read f; do num=$(cat $f | wc -l); echo "$f $num"; done
 Prepare VCF files:
 
 ```shell
-mkdir -p /lizardfs/guarracino/chromosome_communities/boostraps/vcfs
+mkdir -p /lizardfs/guarracino/chromosome_communities/bootstraps/vcfs
 
 cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt | while read REF_NAME; do
     PATH_VCF_SNPS=$OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.vcf.gz
@@ -233,22 +233,22 @@ cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt
     i=1
     cat bootstrap.$REF_NAME.${NUM_ITERATIONS}_sets.txt | while read contigs; do
       echo "$REF_NAME - $i --- $contigs"
-          
+      
+      PATH_VCF_SNPS_REF_SET_I=/lizardfs/guarracino/chromosome_communities/bootstraps/vcfs/bootstrap.$REF_NAME.${NUM_ITERATIONS}_sets.$i.vcf.gz
       bcftools view --samples $contigs $PATH_VCF_SNPS |\
-       bgzip -@ $THREADS > /lizardfs/guarracino/chromosome_communities/boostraps/vcfs/bootstrap.$REF_NAME.${NUM_ITERATIONS}_sets.$i.vcf.gz
-      tabix /lizardfs/guarracino/chromosome_communities/boostraps/vcfs/bootstrap.$REF_NAME.${NUM_ITERATIONS}_sets.$i.vcf.gz
+       bgzip -@ $THREADS > $PATH_VCF_SNPS_REF_SET_I
+      tabix $PATH_VCF_SNPS_REF_SET_I
       
       i=$((i+1))
     done  
 done
-
 ```
 
 In parallel:
 
 ```shell
 cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt | while read REF_NAME; do
-    echo $REF_NAME
+    #echo $REF_NAME
     
     PATH_REF_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/$(echo $REF_NAME | tr '#' '.').fa.gz
 
@@ -259,24 +259,21 @@ cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt
     NUM_OF_SEGS=$(echo $LENGTH_OF_SEQ / $SEG_LENGTH | bc)
     NUM_OF_SEGS_PLUS_1=$(echo $LENGTH_OF_SEQ / $SEG_LENGTH + 1 | bc)
     
-    
-    seq 1 1000 | while read contigs; do
-        #echo $(cat $f | paste -s -d',')
-              
-        PATH_VCF_SNPS=/lizardfs/guarracino/chromosome_communities/boostraps/vcfs/bootstrap.1000sets.$REF_NAME.$i.vcf.gz
+    seq 1 ${NUM_ITERATIONS} | while read i; do
+        echo "$REF_NAME: iteration $i"
+        PATH_VCF_SNPS_REF_SET_I=/lizardfs/guarracino/chromosome_communities/bootstraps/vcfs/bootstrap.$REF_NAME.${NUM_ITERATIONS}_sets.$i.vcf.gz
         
-        PATH_VCF_SNPS=$OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.vcf.gz
-        
-        N=$(zgrep '^#CHROM' $PATH_VCF_SNPS -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v | wc -l)
-        
+        #N=$(zgrep '^#CHROM' $PATH_VCF_SNPS_REF_SET_I -m 1 | cut -f 10- | tr '\t' '\n' | grep grch38 -v | wc -l)
+        N=5 # We are sampling 5 contigs for each set
+
         #Unused   
         #VCF_SNPS_NAME=$(basename $PATH_VCF_SNPS .vcf.gz)
         #zgrep '^#' $PATH_VCF_SNPS -v | cut -f 2 | sort -k 1n > $VCF_SNPS_NAME.all.positions.txt
        
         cd /scratch/
-        TEMP_DIR=${REF_NAME}_s${SEG_LENGTH}-temp
-        mkdir -p ${REF_NAME}_s${SEG_LENGTH}-recomb/${TEMP_DIR}
-        cd ${REF_NAME}_s${SEG_LENGTH}-recomb
+        TEMP_DIR=${REF_NAME}_s${SEG_LENGTH}_i$i-temp
+        mkdir -p ${REF_NAME}_s${SEG_LENGTH}_i$i-recomb/${TEMP_DIR}
+        cd ${REF_NAME}_s${SEG_LENGTH}_i$i-recomb
     
         seq 1 $NUM_OF_SEGS_PLUS_1 | parallel -j $THREADS bash $pathLDhatChunk {} \
           $SEG_LENGTH \
@@ -286,7 +283,7 @@ cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt
           $PATH_REF_FASTA \
           $REF_NAME \
           $TEMP_DIR \
-          $PATH_VCF_SNPS \
+          $PATH_VCF_SNPS_REF_SET_I \
           $runSumsLDhat \
           $pathLDhat \
           $runPhi \
@@ -294,7 +291,67 @@ cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt
         done
     done
 done
+
+
 ```
+
+```shell
+BOOTSTRAP_OUTPUT_DIR=/lizardfs/guarracino/chromosome_communities/bootstraps
+
+cat /lizardfs/guarracino/chromosome_communities/recombination_rate/ref_names.txt | while read REF_NAME; do
+    #echo $REF_NAME
+    
+    seq 1 ${NUM_ITERATIONS} | while read i; do
+        echo "$REF_NAME: iteration $i"
+
+        cd /scratch/
+        TEMP_DIR=${REF_NAME}_s${SEG_LENGTH}_i$i-recomb/${REF_NAME}_s${SEG_LENGTH}_i$i-temp
+        
+        INDEXES_DIR=${BOOTSTRAP_OUTPUT_DIR}/${REF_NAME}_s${SEG_LENGTH}_i$i-indexes
+        mkdir -p $INDEXES_DIR
+        
+        # With cat we can have 'Argument list too long'
+        # Retrieve files in order
+        for file in $(find ${TEMP_DIR} -name "${REF_NAME}.indexes.*.tsv" -type f | sort); do
+            cat $file >> Indexes.tsv
+        done
+        mv Indexes.tsv ${INDEXES_DIR}/
+        
+        for file in $(find ${TEMP_DIR} -name "$REF_NAME.sums_part_main.*.txt" -type f | sort); do
+            cat $file >> Sums_part_main_job.txt
+        done
+        mv Sums_part_main_job.txt ${INDEXES_DIR}/
+        
+        PATH_REF_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/$(echo $REF_NAME | tr '#' '.').fa.gz
+        N=5 # We are sampling 5 contigs for each set
+        LENGTH_OF_SEQ=$(cut -f 2 ${PATH_REF_FASTA}.fai)
+        printf $SEG_LENGTH"\t"$N"\t"$LENGTH_OF_SEQ"\n" > ${INDEXES_DIR}/Information.txt
+    done
+done
+```
+
+
+Recombination plots:
+
+```shell
+#scp -r guarracino@octopus04:/lizardfs/guarracino/chromosome_communities/bootstraps/chm13#chr*_s*_i*-indexes /home/guarracino/Downloads/Pangenomics/LDhat/bootstraps/
+
+pathGetRecombinationRatePlotSh=/home/guarracino/git/chromosome_communities/scripts/GetRecombinationPlot.sh
+
+#BASE_DIR=$BOOTSTRAP_OUTPUT_DIR
+BASE_DIR=/home/guarracino/Downloads/Pangenomics/LDhat/bootstraps
+
+cat ../recombination_rate/ref_names.txt | while read REF_NAME; do
+    seq 1 ${NUM_ITERATIONS} | parallel -j $THREADS bash $pathGetRecombinationRatePlotSh {} \
+      $SEG_LENGTH \
+      $REF_NAME \
+      $BASE_DIR \
+      $pathGetRecombinationRatePlotR
+    done
+done
+
+```
+
 
 
 
