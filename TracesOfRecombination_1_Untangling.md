@@ -112,7 +112,7 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/pq_contigs
 cd /lizardfs/guarracino/chromosome_communities/pq_contigs
 
 bedtools slop \
-    -i <(grep acen /lizardfs/guarracino/chromosome_communities/data/chm13.centromeres.approximate.bed | bedtools merge | sed 's/chr/chm13#chr/g' | bedtools sort) \
+    -i <(sed 's/chr/chm13#chr/g' /lizardfs/guarracino/chromosome_communities/data/chm13.centromeres.approximate.bed | bedtools sort) \
     -g <(cut -f 1,2 /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa.fai | sort) \
     -b 1000000 | \
   bedtools sort | \
