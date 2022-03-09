@@ -28,7 +28,7 @@ cd ..
 /gnu/store/ccw48k7h8v1brz3ap0sj3bcwvvmk6xra-gfaffix-0.1.2.2/bin/gfaffix
 
 vg
-vg: variation graph tool, version v1.36.0 "Cibottola"
+vg: variation graph tool, version v1.38.0 "Canossa"
 ```
 
 ## Preparation
@@ -40,18 +40,23 @@ cd /lizardfs/guarracino/
 git clone --recursive https://github.com/pangenome/chromosome_communities.git
 ```
 
-## Get coverage analysis BED files
+[comment]: <> (## Get coverage analysis BED files)
 
-```shell
-mkdir -p /lizardfs/guarracino/chromosome_communities/coverage_analysis_y1_genbank
-cd /lizardfs/guarracino/chromosome_communities/coverage_analysis_y1_genbank
+[comment]: <> (```shell)
 
-prefix=https://s3-us-west-2.amazonaws.com/human-pangenomics/submissions/e9ad8022-1b30-11ec-ab04-0a13c5208311--COVERAGE_ANALYSIS_Y1_GENBANK/FLAGGER/JAN_09_2022/FINAL_HIFI_BASED/FLAGGER_HIFI_ASM_BEDS/
+[comment]: <> (mkdir -p /lizardfs/guarracino/chromosome_communities/coverage_analysis_y1_genbank)
 
-cut -f 1 /lizardfs/erikg/HPRC/year1v2genbank/parts/HPRCy1.pan.fa.gz.fai | cut -f 1 -d '#' | grep 'chm13\|grch38' -v | sort | uniq | while read sample; do
-  wget -c $prefix$sample.hifi.flagger_final.bed
-done
-```
+[comment]: <> (cd /lizardfs/guarracino/chromosome_communities/coverage_analysis_y1_genbank)
+
+[comment]: <> (prefix=https://s3-us-west-2.amazonaws.com/human-pangenomics/submissions/e9ad8022-1b30-11ec-ab04-0a13c5208311--COVERAGE_ANALYSIS_Y1_GENBANK/FLAGGER/JAN_09_2022/FINAL_HIFI_BASED/FLAGGER_HIFI_ASM_BEDS/)
+
+[comment]: <> (cut -f 1 /lizardfs/erikg/HPRC/year1v2genbank/parts/HPRCy1.pan.fa.gz.fai | cut -f 1 -d '#' | grep 'chm13\|grch38' -v | sort | uniq | while read sample; do)
+
+[comment]: <> (  wget -c $prefix$sample.hifi.flagger_final.bed)
+
+[comment]: <> (done)
+
+[comment]: <> (```)
 
 ## Collect contigs running from the p-arm to the q-arm of the acrocentric chromosomes
 
@@ -62,7 +67,8 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/assemblies
 cd /lizardfs/guarracino/chromosome_communities/assemblies
 
 wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/working/HPRC_PLUS/CHM13/assemblies/chm13.draft_v1.1.fasta.gz
-~/tools/fastix/target/release/fastix-331c1159ea16625ee79d1a82522e800c99206834 -p 'chm13#' <(zcat chm13.draft_v1.1.fasta.gz) | bgzip -@ 48 -c >chm13.fa.gz
+~/tools/fastix/target/release/fastix-331c1159ea16625ee79d1a82522e800c99206834 -p 'chm13#' <(zcat chm13.draft_v1.1.fasta.gz) |\
+ bgzip -@ 48 -c >chm13.fa.gz
 samtools faidx chm13.fa.gz
 rm chm13.draft_v1.1.fasta.gz
 
@@ -106,10 +112,10 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/pq_contigs
 cd /lizardfs/guarracino/chromosome_communities/pq_contigs
 
 bedtools slop \
-    -i <(grep acen /lizardfs/guarracino/chromosome_communities/data/chm13.CytoBandIdeo.v2.txt | bedtools merge | sed 's/chr/chm13#chr/g' | sort) \
+    -i <(grep acen /lizardfs/guarracino/chromosome_communities/data/chm13.centromeres.approximate.bed | bedtools merge | sed 's/chr/chm13#chr/g' | bedtools sort) \
     -g <(cut -f 1,2 /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa.fai | sort) \
     -b 1000000 | \
-  sort | \
+  bedtools sort | \
   bedtools complement \
     -i - \
     -g <(cut -f 1,2 /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa.fai | sort) | \
