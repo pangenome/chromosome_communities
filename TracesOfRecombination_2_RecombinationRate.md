@@ -71,7 +71,7 @@ cat ref_names.txt | while read REF_NAME; do
   rm out.log
   
   # Take only samples with at least 1 genotype in the VCF file
-  sample_with_variants=$(bcftools stats -s '-' $OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.tmp.vcf.gz | awk '$1=="PSC" && $12+$13>0 {print $3}' | paste -s -d',')
+  sample_with_genotypes=$(bcftools stats -s '-' $OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.tmp.vcf.gz | awk '$1=="PSC" && $12+$13>0 {print $3}' | paste -s -d',')
   bcftools view --samples $sample_with_genotypes $OUTPUT_DIR/$VCF_NAME.$REF_NAME.snps.tmp.vcf.gz |\
    bgzip -@ $THREADS > $PATH_VCF_SNPS
   tabix $PATH_VCF_SNPS
@@ -374,7 +374,7 @@ for i in 13 14 15 21 22; do
     bgzip -@ 48 > $VCF_NAME.$chr.snps.tmp.vcf.gz
 
   sample_with_genotypes=$(bcftools stats -s '-' $VCF_NAME.$chr.snps.tmp.vcf.gz | awk '$1=="PSC" && $12+$13>0 {print $3}' | paste -s -d',')
-  bcftools view --samples $sample_with_variants $VCF_NAME.$chr.snps.tmp.vcf.gz | bgzip -@ 48 > $VCF_NAME.$chr.snps.vcf.gz
+  bcftools view --samples $sample_with_genotypes $VCF_NAME.$chr.snps.tmp.vcf.gz | bgzip -@ 48 > $VCF_NAME.$chr.snps.vcf.gz
   tabix $VCF_NAME.$chr.snps.vcf.gz
   
   rm $VCF_NAME.$chr.snps.tmp.vcf.gz
