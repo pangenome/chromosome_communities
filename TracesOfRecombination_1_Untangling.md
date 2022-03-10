@@ -68,7 +68,7 @@ cd /lizardfs/guarracino/chromosome_communities/assemblies
 
 wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/working/HPRC_PLUS/CHM13/assemblies/chm13.draft_v1.1.fasta.gz
 ~/tools/fastix/target/release/fastix-331c1159ea16625ee79d1a82522e800c99206834 -p 'chm13#' <(zcat chm13.draft_v1.1.fasta.gz) |\
- bgzip -@ 48 -c >chm13.fa.gz
+  bgzip -@ 48 -c >chm13.fa.gz
 samtools faidx chm13.fa.gz
 rm chm13.draft_v1.1.fasta.gz
 
@@ -168,6 +168,9 @@ Take the union of pq-contigs found with all combinations of parameters:
   cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chr$f.vs.chm13.chr$f.s$s.l$l.p$p.n1.50kbps.pq_contigs.txt |\
    sort | uniq > /lizardfs/guarracino/chromosome_communities/pq_contigs/chr$f.vs.chm13.50kbps.pq_contigs.union.txt
 done
+
+# Num. of pq-contigs
+#(seq 13 15; seq 21 22) | while read f; do echo -n "$f -> "; cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chr$f.vs.chm13.50kbps.pq_contigs.union.txt | wc -l; done
 ```
 
 Prepare verkko's HG002 contigs:
@@ -219,6 +222,9 @@ cd /lizardfs/guarracino/chromosome_communities/pq_contigs
     samtools faidx $path_pq_contigs_fa_gz
   fi;
 done
+
+# Num. of contigs
+#(seq 13 15; seq 21 22) | while read f; do echo -n "$f -> "; cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chr$f.vs.chm13.50kbps.pq_contigs.union.hg002prox.fa.gz.fai | wc -l; done
 ```
 
 Put all together with both the human references:
@@ -556,8 +562,8 @@ done
 
 # Take pq-untangling contigs
 
-for e in 5000  ; do
-  for m in 500  ; do
+for e in 5000 50000 100000; do
+  for m in 500 1000 10000; do
       for j in 0 0.8; do
         j_str=$(echo $j | sed 's/\.//g')
         (seq 1 10; seq 20 10 50) | while read n; do 
@@ -574,29 +580,36 @@ for e in 5000  ; do
                   comm -12 \
                     <(bedtools intersect \
                       -a <(zcat ${path_grounded_tsv_gz} | awk -v OFS="\t" '{print $10,$11,$12,$1, "", "+"}' | grep query -v | bedtools sort) \
-                      -b <(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/p_arms.bed | bedtools sort) | \
+                      -b <(grep $ref /lizardfs/guarracino/chromosome_communities/pq_contigs/p_arms.bed | bedtools sort) | \
                       #awk '$3-$2+1>=100000' | \
                       cut -f 4 | sort | uniq) \
                     <(bedtools intersect \
                       -a <(zcat ${path_grounded_tsv_gz} | awk -v OFS="\t" '{print $10,$11,$12,$1, "", "+"}' | grep query -v | bedtools sort) \
-                      -b <(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/q_arms.bed | bedtools sort) | \
+                      -b <(grep $ref /lizardfs/guarracino/chromosome_communities/pq_contigs/q_arms.bed | bedtools sort) | \
                       #awk '$3-$2+1>=100000' | \
                       cut -f 4 | sort | uniq) | \
                       grep 'chm13#\|grch38#' -v > $ref.tmp.txt
                 
+                  comm -12 \
+                    <(sort $ref.tmp.txt) \
+                    <(cut -f 1 /lizardfs/guarracino/chromosome_communities/pq_contigs/`echo $ref | sed 's/chm13#//g'`.vs.chm13.50kbps.pq_contigs.union.hg002prox.fa.gz.fai | sort)  \
+                    > $ref.tmp2.txt
+                  rm $ref.tmp.txt
+                
                   # Put header (with a new 'target' column), take intersection, and re-add other acrocentric references
                   cat \
                     <(zcat ${path_grounded_tsv_gz} | head -n 1 | awk -v OFS='\t' '{print $0, "grounded.target"}') \
-                    <(zgrep ${path_grounded_tsv_gz} -f $ref.tmp.txt | awk -v OFS='\t' -v ref=$ref '{print $0, ref}') \
+                    <(zgrep ${path_grounded_tsv_gz} -f $ref.tmp2.txt | awk -v OFS='\t' -v ref=$ref '{print $0, ref}') \
                     <(zgrep '^grch38\|^chm13' ${path_grounded_tsv_gz}  | awk -v OFS='\t' -v ref=$ref '{print $0, ref}') \
                      > ${path_grounded_pq_touching_tsv}
-                
+                  rm $ref.tmp2.txt
+                  
                   # Add annotation
                   zgrep rDNA /lizardfs/guarracino/chromosome_communities/data/chm13.CentromeresAndTelomeres.CenSatAnnotation.txt.gz | \
                     sed 's/chr/chm13#chr/g' | \
                     grep $ref | \
                     awk -v OFS='\t' -v ref=$ref '{print $1"#"$4,".",".",$1,".",".",".",".",".",".",$2,$3, ref}' >> ${path_grounded_pq_touching_tsv}
-                  grep acen /lizardfs/guarracino/chromosome_communities/data/chm13.centromeres.approximate.bed | \
+                  cat /lizardfs/guarracino/chromosome_communities/data/chm13.centromeres.approximate.bed | \
                     bedtools merge | \
                     grep 'chr13\|chr14\|chr15\|chr21\|chr22' | \
                     sed 's/chr/chm13#chr/g'  | \
@@ -629,14 +642,14 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
 Single plots:
 
 ```shell
-for e in 5000 10000 20000 30000 40000 50000 100000; do
-  for m in 1000 10000; do
+for e in 5000 50000 100000; do
+  for m in 500 1000 10000; do
       for j in 0 0.8; do
         j_str=$(echo $j | sed 's/\.//g')
-        (seq 1 10; seq 15 5 100) | while read n; do 
+        (seq 1 10; seq 20 10 50) | while read n; do 
             echo "-e $e -m $m -j $j -n $n"
     
-            grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1 | while read ref; do
+            grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.fai | cut -f 1 | while read ref; do
               echo $ref
               
               path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
@@ -652,11 +665,11 @@ done
 Merged plots:
 
 ```shell
-for e in 5000 10000 20000 30000 40000 50000 100000; do
-  for m in 1000 10000; do
-      for j in 0 0.8; do
+for e in 5000; do
+  for m in 500; do
+      for j in 0.8; do
         j_str=$(echo $j | sed 's/\.//g')
-        (seq 1 10; seq 15 5 100) | while read n; do 
+        (seq 10 10) | while read n; do 
             echo "-e $e -m $m -j $j -n $n"
     
             path_grounded_pq_touching_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
