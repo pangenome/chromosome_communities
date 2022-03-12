@@ -58,7 +58,9 @@ git clone --recursive https://github.com/pangenome/chromosome_communities.git
 
 [comment]: <> (```)
 
-## Collect contigs running from the p-arm to the q-arm of the acrocentric chromosomes
+## Acrocentric chromosomes
+
+### Collect contigs running from the p-arm to the q-arm of the acrocentric chromosomes
 
 Prepare CHM13's acrocentric chromosomes:
 
@@ -242,7 +244,7 @@ zcat \
 samtools faidx /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz
 ```
 
-## Pangenome building
+### Pangenome building
 
 Apply `pggb` on the pq-contigs:
 
@@ -253,7 +255,7 @@ num_of_haplotypes=$(cut -f 1,2 -d '#' /lizardfs/guarracino/chromosome_communitie
 sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz -o chrACRO+refs.50kbps.pq_contigs.union.hg002prox.s100k.l300k.p98.n'$num_of_haplotypes' -t 48 -s 100k -l 300k -p 98 -n '$num_of_haplotypes' -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.s100k.l300k.p98.n'$num_of_haplotypes' /lizardfs/guarracino/chromosome_communities/graphs';
 ```
 
-## Untangling
+### Untangling
 
 ```shell
 # WIP (TO IGNORE)
@@ -518,7 +520,7 @@ for e in 5000 50000 100000; do
   for m in 500 1000 10000; do
       for j in 0 0.8; do
         j_str=$(echo $j | sed 's/\.//g')
-        (seq 1 10; seq 20 10 50) | while read n; do 
+        (seq 1 5; seq 10 10 50) | while read n; do 
             echo "-e $e -m $m -j $j -n $n"
             
             grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.fai | cut -f 1 | while read ref; do
@@ -539,34 +541,14 @@ for e in 5000 50000 100000; do
     done
 done
 
-# Take only reliable blocks (flagged with "Hh" or "Hc", https://github.com/human-pangenomics/hpp_production_workflows/blob/asset/coverage/README.md#components)
-#for e in 5000; do
-#  for m in 1000; do
-#      for j in 0.8; do
-#        j_str=$(echo $j | sed 's/\.//g')
-#        (seq 1 1) | while read n; do 
-#            echo "-e $e -m $m -j $j -n $n"
-#    
-#            grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1 | while read ref; do
-#              echo -e "\t"$ref
-#              
-#              path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz
-#  
-#              echo $path_grounded_tsv_gz
-#             zcat $path_grounded_tsv_gz | awk '{print $0 >> $1".bed"}' example.bed
-#            done
-#        done
-#      done
-#    done
-#done
+# Take only reliable blocks (flagged with "Hh" or "Hc", https://github.com/human-pangenomics/hpp_production_workflows/blob/asset/coverage/README.md#components)???
 
 # Take pq-untangling contigs
-
 for e in 5000 50000 100000; do
   for m in 500 1000 10000; do
       for j in 0 0.8; do
         j_str=$(echo $j | sed 's/\.//g')
-        (seq 1 10; seq 20 10 50) | while read n; do 
+        (seq 1 5; seq 10 10 50) | while read n; do 
             echo "-e $e -m $m -j $j -n $n"
     
             grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.fai | cut -f 1 | while read ref; do
@@ -646,7 +628,7 @@ for e in 5000 50000 100000; do
   for m in 500 1000 10000; do
       for j in 0 0.8; do
         j_str=$(echo $j | sed 's/\.//g')
-        (seq 1 10; seq 20 10 50) | while read n; do 
+        (seq 1 5; seq 10 10 50) | while read n; do 
             echo "-e $e -m $m -j $j -n $n"
     
             grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.fai | cut -f 1 | while read ref; do
@@ -665,11 +647,11 @@ done
 Merged plots:
 
 ```shell
-for e in 5000; do
-  for m in 500; do
-      for j in 0.8; do
+for e in 5000 50000 100000; do
+  for m in 500 1000 10000; do
+      for j in 0 0.8; do
         j_str=$(echo $j | sed 's/\.//g')
-        (seq 10 10) | while read n; do 
+        (seq 1 5; seq 10 10 50) | while read n; do 
             echo "-e $e -m $m -j $j -n $n"
     
             path_grounded_pq_touching_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
@@ -690,13 +672,13 @@ done
 
 mv /lizardfs/guarracino/chromosome_communities/untangle/grounded/*.pdf /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
 
-for e in 5000 10000 20000 30000 40000 50000 100000; do
-  for m in 1000 10000; do
+for e in 5000 50000 100000; do
+  for m in 500 1000 10000; do
       for j in 0 0.8; do
         echo "-e $e -m $m -j $j"
         
         j_str=$(echo $j | sed 's/\.//g')
-        PDFs=$((seq 1 10; seq 15 5 100) | while read n; do \
+        PDFs=$((seq 1 5; seq 10 10 50) | while read n; do \
           echo /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz.pdf
         done | tr '\n' ' ')
         #echo $PDFs
@@ -713,115 +695,22 @@ for e in 5000 10000 20000 30000 40000 50000 100000; do
 done
 ```
 
-
-
-
-
-```shell
-( echo A | tr ' ' '\n') | while read i; do
-  sbatch -p headnode -w octopus01 -c 32 --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/erikg/HPRC/year1v2genbank/parts/chr'$i'.pan.fa -o chr'$i'.pan.s100k.l300k.p97.n200 -t 32 -p 97 -s 100000 -l 300000 -n 200 -k 311 -G 13117,13219 -O 0.03 -T 32 -v -V chm13:#,grch38:# --resume; mv /scratch/chr'$i'.pan /lizardfs/guarracino/chromosome_communities/graphs';
-done # >>pggb.jobids
-```
-
-
-
-
-
-
-Prepare the references:
-
-```shell
-mkdir -p /lizardfs/guarracino/chromosome_communities/recombination
-cd /lizardfs/guarracino/chromosome_communities/recombination
-
-samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa \
-  $(grep 'chr13\|chr14\|chr15\|chr21\|chr22' /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa.fai | grep '_' -v | cut -f 1) > chm13.ACRO.fa
-samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/assemblies/grch38.fa \
-  $(grep 'chr13\|chr14\|chr15\|chr21\|chr22' /lizardfs/erikg/HPRC/year1v2genbank/assemblies/grch38.fa.fai | grep '_' -v | cut -f 1) > grch38.ACRO.fa
-```
-
-
-
-
-
-
-
-[comment]: <> (```shell)
-
-[comment]: <> (perl ~/git/vcf-conversion-tools/vcf2MS.pl example.vcf example.ms 629)
-
-[comment]: <> (perl ~/git/vcf-conversion-tools/MS2LDhat.pl example.ms example.ldhat 629)
-
-[comment]: <> (#or)
-
-[comment]: <> (perl ~/git/vcf-conversion-tools/vcf2MS.pl example.10samples.vcf example.ms 11)
-
-[comment]: <> (perl ~/git/vcf-conversion-tools/MS2LDhat.pl example.ms example 11)
-
-[comment]: <> (~/git/LDhat/pairwise -seq example.ldhat.sites -loc example.ldhat.locs)
-
-[comment]: <> (pip3 install biopython)
-
-[comment]: <> (pip3 install pyfaidx)
-
-[comment]: <> (pip3 install PyVCF)
-
-[comment]: <> (python3 vcf2alignedFasta.py example.10samples.vcf.gz chr17.fasta )
-
-[comment]: <> (# hack output &#40;num seq, length seq, 1 &#40;haploid&#41; / 2 &#40;diploid&#41;)
-
-[comment]: <> (~/git/LDhat/convert -seq example.fasta )
-
-[comment]: <> (~/git/LDhat/pairwise -seq sites.txt -loc locs.txt )
-
-[comment]: <> (path_vcf=example.10samples.vcf)
-
-[comment]: <> (path_vcf=pggb.wgg.88.chm13.1-22+X.norm.max50.vcf)
-
-[comment]: <> (vk phylo fasta ${path_vcf} > ${path_vcf}.tmp.fasta # todo to improve)
-
-[comment]: <> (seq_num=$&#40;grep '^>' ${path_vcf}.tmp.fasta -c&#41;)
-
-[comment]: <> (seq_length=$&#40;head ${path_vcf}.tmp.fasta -n 2 | tail -n 1 | awk '{print length&#40;$0&#41;}'&#41;)
-
-[comment]: <> (# 1 &#40;haploid&#41; / 2 &#40;diploid&#41;)
-
-[comment]: <> (cat <&#40;echo -e $seq_num"\t"$seq_length"\t"1&#41; <&#40;cat ${path_vcf}.tmp.fasta&#41; > ${path_vcf}.fasta)
-
-[comment]: <> (rm ${path_vcf}.tmp.fasta)
-
-[comment]: <> (~/git/LDhat/convert -seq ${path_vcf}.fasta)
-
-[comment]: <> (~/git/LDhat/pairwise -seq sites.txt -loc locs.txt )
-
-[comment]: <> (```)
-
-# OLD STUFF (TO DELETE OR FINISH)
-
-Prepare CHM13's acrocentric chromosomes:
-
-```shell
-samtools faidx chm13.fa.gz $(grep 'chr13\|chr14\|chr15\|chr21\|chr22' chm13.fa.gz.fai | cut -f 1) | bgzip -@ 48 -c > chm13.ACRO.fa.gz && samtools faidx chm13.ACRO.fa.gz
-rm chm13.draft_v1.1.fasta.gz chm13.fa.gz*
-```
-
-## Pangenome building
-
-# todo: to take the last chrY (check the differences)
+## Sex chromosome
 
 Use HG002's chrY as an alternative reference, as GRCh38's chrY is incomplete. Include also HG002's chrX.
 
 ```shell
-mkdir -p /lizardfs/guarracino/HPRC/chromosome_communities/data
-cd /lizardfs/guarracino/HPRC/chromosome_communities/data
+cd /lizardfs/guarracino/chromosome_communities/assemblies
 
-#2021-08-27T19:04:55.000Z        3.0 GB         v2.fasta
-wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/working/T2T/HG002XY/v2/v2.fasta
-wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/working/T2T/HG002XY/v2/v2.fasta.fai
-samtools faidx v2.fasta $(grep hg002 v2.fasta.fai | cut -f 1) | \
- sed 's/>chrX_hg002_v2/>HG002#chrX/g' | sed 's/>chrY_hg002_v2/>HG002#chrY/g' > H002.chrXY.fa
+# Get HG002 chromosome X and Y
+wget https://s3-us-west-2.amazonaws.com/human-pangenomics/submissions/21edcb42-02c4-4e9f-b226-6773e62484a4--RU-HG002-commons/assembly/curated_round2/HG002.mat.cur.20211005.fasta.gz
+gunzip HG002.mat.cur.20211005.fasta.gz
+samtools faidx HG002.mat.cur.20211005.fasta
+samtools faidx HG002.mat.cur.20211005.fasta SX | sed 's/SX/HG002#MAT#chrX/g' |\
+  bgzip -@ 48 -c > hg002.chrX.fa.gz
 
-rm v2.fasta*
+~/tools/fastix/target/release/fastix-331c1159ea16625ee79d1a82522e800c99206834 -p 'HG002#PAT#' /lizardfs/erikg/T2T/liftover/split_chrY/chm13v2.0_chrY.fasta |\
+  bgzip -@ 48 -c > hg002.chrY.fa.gz
 ```
 
 Put HG002's chrX and chrY with the partitioned chrXs and chrYs.
@@ -830,40 +719,40 @@ Put HG002's chrX and chrY with the partitioned chrXs and chrYs.
 # Prepare sequence order, with all references on the top
 grep chr /lizardfs/erikg/HPRC/year1v2genbank/parts/chrS.pan.fa.fai | cut -f 1 > sequence_order.txt
 grep chr /lizardfs/erikg/HPRC/year1v2genbank/parts/chrS.pan.fa.fai -v | cut -f 1 >> sequence_order.txt
-rm sequence_order.txt
 
-cat H002.chrXY.fa <(samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/parts/chrS.pan.fa $(cat sequence_order.txt)) | bgzip -@ 48 > chrS.pan+HG002chrXY.fa.gz
+cat \
+  <(zcat hg002.chrX.fa.gz) \
+  <(zcat hg002.chrY.fa.gz) \
+  <(samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/parts/chrS.pan.fa $(cat sequence_order.txt)) |\
+   bgzip -@ 48 > chrS.pan+HG002chrXY.fa.gz
 samtools faidx chrS.pan+HG002chrXY.fa.gz
 
-cd /lizardfs/guarracino/HPRC/chromosome_communities/
+rm sequence_order.txt
 ```
 
-### Build graphs
+### Pangenome building
 
-Apply `pggb` on the chromosome-partitioned HPRC dataset. We make two graphs considering the following chromosome
-jointly:
-
-- sex chromosomes (chrX and chrY).
+Apply `pggb` on the chromosome-partitioned HPRC dataset:
 
 ```shell
-sbatch -p workers -c 48 -w octopus11 --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/guarracino/HPRC/chromosome_communities/data/chrS.pan+HG002chrXY.fa.gz -o chrS.pan+HG002chrXY -t 48 -p 98 -s 100000 -n 90 -k 311 -O 0.03 -T 48 -U -v -L -V chm13:#,grch38:# -Z ; mv /scratch/chrS.pan+HG002chrXY /lizardfs/guarracino/HPRC/chromosome_communities/'
+mkdir -p /lizardfs/guarracino/chromosome_communities/graphs
+
+num_of_haplotypes=$(cut -f 1,2 -d '#' /lizardfs/guarracino/chromosome_communities/assemblies/chrS.pan+HG002chrXY.fa.gz.fai | sort | uniq | wc -l)
+sbatch -p highmem -c 48 --job-name sexpggb --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/guarracino/chromosome_communities/assemblies/chrS.pan+HG002chrXY.fa.gz -o chrS.pan+HG002chrXY.s100k.l300k.p98.n'$num_of_haplotypes' -t 48 -s 100k -l 300k -p 98 -n '$num_of_haplotypes' -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrS.pan+HG002chrXY.s100k.l300k.p98.n'$num_of_haplotypes' /lizardfs/guarracino/chromosome_communities/graphs';
 ```
 
-- acrocentric chromosomes (chr13, chr14, chr15, chr21, and chr22);
 
-```shell
-( echo A | tr ' ' '\n') | while read i; do sbatch -p workers -c 32 -w octopus02 --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/erikg/HPRC/year1v2genbank/parts/chr'$i'.pan.fa -o chr'$i'.pan.s100k.l300k.p97.n200 -t 32 -p 97 -s 100000 -l 300000 -n 200 -k 311 -O 0.03 -T 32 -U -v -L -V chm13:#,grch38:#; mv /scratch/chr'$i'.pan /lizardfs/guarracino/chromosome_communities/graphs'; done # >>pggb.jobids
-```
 
-### Untangling
 
-Untangle all contigs in the sex graph by using the GRCh38 reference and the new HG002 _de novo_ assembly:
 
-```shell
-bash untangle.sh chrS.pan+HG002chrY/chrS.pan+HG002chrY.fa.gz.a2fb268.4030258.6a1ecc2.smooth.og.gz grch38 "chrX chrY" 10000 sex
-bash untangle.sh chrS.pan+HG002chrY/chrS.pan+HG002chrY.fa.gz.a2fb268.4030258.6a1ecc2.smooth.og.gz "chm13 HG002" "chrX chrY" 10000 sex
-```
 
-### ...
 
-ToDo
+
+
+
+
+
+
+
+
+

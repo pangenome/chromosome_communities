@@ -397,5 +397,56 @@ done
 
 #guix install r-remotes
 #guix install dos2unix
-
 ```
+
+
+
+[comment]: <> (```shell)
+
+[comment]: <> (perl ~/git/vcf-conversion-tools/vcf2MS.pl example.vcf example.ms 629)
+
+[comment]: <> (perl ~/git/vcf-conversion-tools/MS2LDhat.pl example.ms example.ldhat 629)
+
+[comment]: <> (#or)
+
+[comment]: <> (perl ~/git/vcf-conversion-tools/vcf2MS.pl example.10samples.vcf example.ms 11)
+
+[comment]: <> (perl ~/git/vcf-conversion-tools/MS2LDhat.pl example.ms example 11)
+
+[comment]: <> (~/git/LDhat/pairwise -seq example.ldhat.sites -loc example.ldhat.locs)
+
+[comment]: <> (pip3 install biopython)
+
+[comment]: <> (pip3 install pyfaidx)
+
+[comment]: <> (pip3 install PyVCF)
+
+[comment]: <> (python3 vcf2alignedFasta.py example.10samples.vcf.gz chr17.fasta )
+
+[comment]: <> (# hack output &#40;num seq, length seq, 1 &#40;haploid&#41; / 2 &#40;diploid&#41;)
+
+[comment]: <> (~/git/LDhat/convert -seq example.fasta )
+
+[comment]: <> (~/git/LDhat/pairwise -seq sites.txt -loc locs.txt )
+
+[comment]: <> (path_vcf=example.10samples.vcf)
+
+[comment]: <> (path_vcf=pggb.wgg.88.chm13.1-22+X.norm.max50.vcf)
+
+[comment]: <> (vk phylo fasta ${path_vcf} > ${path_vcf}.tmp.fasta # todo to improve)
+
+[comment]: <> (seq_num=$&#40;grep '^>' ${path_vcf}.tmp.fasta -c&#41;)
+
+[comment]: <> (seq_length=$&#40;head ${path_vcf}.tmp.fasta -n 2 | tail -n 1 | awk '{print length&#40;$0&#41;}'&#41;)
+
+[comment]: <> (# 1 &#40;haploid&#41; / 2 &#40;diploid&#41;)
+
+[comment]: <> (cat <&#40;echo -e $seq_num"\t"$seq_length"\t"1&#41; <&#40;cat ${path_vcf}.tmp.fasta&#41; > ${path_vcf}.fasta)
+
+[comment]: <> (rm ${path_vcf}.tmp.fasta)
+
+[comment]: <> (~/git/LDhat/convert -seq ${path_vcf}.fasta)
+
+[comment]: <> (~/git/LDhat/pairwise -seq sites.txt -loc locs.txt )
+
+[comment]: <> (```)
