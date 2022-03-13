@@ -14,9 +14,9 @@ cd ..
 
 git clone --recursive https://github.com/pangenome/odgi.git
 cd odgi
-git checkout 358537678174adc975415a488b458725d8a213be
+git checkout 694948ccf31e7b565449cc056668e9dcc8cc0a3e
 cmake -H. -Bbuild && cmake --build build -- -j 48
-mv bin/odgi bin/odgi-358537678174adc975415a488b458725d8a213be
+mv bin/odgi bin/odgi-694948ccf31e7b565449cc056668e9dcc8cc0a3e
 cd ..
 
 (echo pggb wfmash seqwish smoothxg odgi gfaffix | tr ' ' '\n') | while read tool; do ls -l $(which $tool); done | cut -f 13 -d ' '
@@ -40,22 +40,44 @@ cd /lizardfs/guarracino/
 git clone --recursive https://github.com/pangenome/chromosome_communities.git
 ```
 
+Prepare verkko's HG002 contigs:
+
+```shell
+cd /lizardfs/guarracino/chromosome_communities/assemblies
+
+### Get the "hg002-prox.fna" file from Globus (t2t-share/hg002/acros/beta folder)
+
+# Rename contigs
+# Ugly! ($f doesn't work)
+cat hg002-prox.fna | \
+  sed "s/chr13_prox_MAT/HG002#MAT#chr13.prox/g" |\
+  sed "s/chr13_prox_PAT/HG002#PAT#chr13.prox/g" |\
+  sed "s/chr14_prox_MAT/HG002#MAT#chr14.prox/g" |\
+  sed "s/chr14_prox_PAT/HG002#PAT#chr14.prox/g" |\
+  sed "s/chr15_prox_MAT/HG002#MAT#chr15.prox/g" |\
+  sed "s/chr15_prox_PAT/HG002#PAT#chr15.prox/g" |\
+  sed "s/chr21_prox_MAT/HG002#MAT#chr21.prox/g" |\
+  sed "s/chr21_prox_PAT/HG002#PAT#chr21.prox/g" |\
+  sed "s/chr22_prox_MAT/HG002#MAT#chr22.prox/g" |\
+  sed "s/chr22_prox_PAT/HG002#PAT#chr22.prox/g" > hg002-prox.renamed.fna
+samtools faidx hg002-prox.renamed.fna
+
+# Partition by chromosomes
+(seq 13 15; seq 21 22) | while read f; do
+  samtools faidx hg002-prox.renamed.fna $(grep chr$f hg002-prox.renamed.fna.fai | cut -f 1) |\
+    bgzip -@ 48 -c > hg002.chr$f.prox.fa.gz
+  samtools faidx hg002.chr$f.prox.fa.gz
+done
+```
+
 [comment]: <> (## Get coverage analysis BED files)
-
 [comment]: <> (```shell)
-
 [comment]: <> (mkdir -p /lizardfs/guarracino/chromosome_communities/coverage_analysis_y1_genbank)
-
 [comment]: <> (cd /lizardfs/guarracino/chromosome_communities/coverage_analysis_y1_genbank)
-
 [comment]: <> (prefix=https://s3-us-west-2.amazonaws.com/human-pangenomics/submissions/e9ad8022-1b30-11ec-ab04-0a13c5208311--COVERAGE_ANALYSIS_Y1_GENBANK/FLAGGER/JAN_09_2022/FINAL_HIFI_BASED/FLAGGER_HIFI_ASM_BEDS/)
-
 [comment]: <> (cut -f 1 /lizardfs/erikg/HPRC/year1v2genbank/parts/HPRCy1.pan.fa.gz.fai | cut -f 1 -d '#' | grep 'chm13\|grch38' -v | sort | uniq | while read sample; do)
-
 [comment]: <> (  wget -c $prefix$sample.hifi.flagger_final.bed)
-
 [comment]: <> (done)
-
 [comment]: <> (```)
 
 ## Acrocentric chromosomes
@@ -175,36 +197,6 @@ done
 #(seq 13 15; seq 21 22) | while read f; do echo -n "$f -> "; cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chr$f.vs.chm13.50kbps.pq_contigs.union.txt | wc -l; done
 ```
 
-Prepare verkko's HG002 contigs:
-
-```shell
-cd /lizardfs/guarracino/chromosome_communities/assemblies
-
-### Get the "hg002-prox.fna" file from Globus (t2t-share/hg002/acros/beta folder)
-
-# Rename contigs
-# Ugly! ($f doesn't work)
-cat hg002-prox.fna | \
-  sed "s/chr13_prox_MAT/HG002#MAT#chr13.prox/g" |\
-  sed "s/chr13_prox_PAT/HG002#PAT#chr13.prox/g" |\
-  sed "s/chr14_prox_MAT/HG002#MAT#chr14.prox/g" |\
-  sed "s/chr14_prox_PAT/HG002#PAT#chr14.prox/g" |\
-  sed "s/chr15_prox_MAT/HG002#MAT#chr15.prox/g" |\
-  sed "s/chr15_prox_PAT/HG002#PAT#chr15.prox/g" |\
-  sed "s/chr21_prox_MAT/HG002#MAT#chr21.prox/g" |\
-  sed "s/chr21_prox_PAT/HG002#PAT#chr21.prox/g" |\
-  sed "s/chr22_prox_MAT/HG002#MAT#chr22.prox/g" |\
-  sed "s/chr22_prox_PAT/HG002#PAT#chr22.prox/g" > hg002-prox.renamed.fna
-samtools faidx hg002-prox.renamed.fna
-
-# Partition by chromosomes
-(seq 13 15; seq 21 22) | while read f; do
-  samtools faidx hg002-prox.renamed.fna $(grep chr$f hg002-prox.renamed.fna.fai | cut -f 1) |\
-    bgzip -@ 48 -c > hg002.chr$f.prox.fa.gz
-  samtools faidx hg002.chr$f.prox.fa.gz
-done
-```
-
 Prepare the FASTA files with the pq-contigs:
 
 ```shell
@@ -244,6 +236,26 @@ zcat \
 samtools faidx /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz
 ```
 
+### Collect all acrocentric contigs
+
+```shell
+# Prepare sequence order, with all references on the top
+grep chr /lizardfs/erikg/HPRC/year1v2genbank/parts/chrA.pan.fa.fai | cut -f 1 > sequence_order.txt
+grep chr /lizardfs/erikg/HPRC/year1v2genbank/parts/chrA.pan.fa.fai -v | cut -f 1 >> sequence_order.txt
+
+cat \
+  <(zcat hg002.chr13.prox.fa.gz) \
+  <(zcat hg002.chr14.prox.fa.gz) \
+  <(zcat hg002.chr15.prox.fa.gz) \
+  <(zcat hg002.chr21.prox.fa.gz) \
+  <(zcat hg002.chr22.prox.fa.gz) \
+  <(samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/parts/chrA.pan.fa $(cat sequence_order.txt)) |\
+   bgzip -@ 48 > chrA.pan+HG002chrAprox.fa.gz
+samtools faidx chrA.pan+HG002chrAprox.fa.gz
+
+rm sequence_order.txt
+```
+
 ### Pangenome building
 
 Apply `pggb` on the pq-contigs:
@@ -253,220 +265,12 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/graphs
 
 num_of_haplotypes=$(cut -f 1,2 -d '#' /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.fai | sort | uniq | wc -l)
 sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz -o chrACRO+refs.50kbps.pq_contigs.union.hg002prox.s100k.l300k.p98.n'$num_of_haplotypes' -t 48 -s 100k -l 300k -p 98 -n '$num_of_haplotypes' -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.s100k.l300k.p98.n'$num_of_haplotypes' /lizardfs/guarracino/chromosome_communities/graphs';
+
+num_of_haplotypes=$(cut -f 1,2 -d '#' /lizardfs/guarracino/chromosome_communities/assemblies/chrA.pan+HG002chrAprox.fa.gz.fai | sort | uniq | wc -l)
+sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/guarracino/chromosome_communities/assemblies/chrA.pan+HG002chrAprox.fa.gz -o chrA.pan+HG002chrAprox.s100k.l300k.p98.n'$num_of_haplotypes' -t 48 -s 100k -l 300k -p 98 -n '$num_of_haplotypes' -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrA.pan+HG002chrAprox.s100k.l300k.p98.n'$num_of_haplotypes' /lizardfs/guarracino/chromosome_communities/graphs';
 ```
 
 ### Untangling
-
-```shell
-# WIP (TO IGNORE)
-e=5000
-m=1000
-j=0.8
-n=1
-
-path_chr6_smooth=chr6.pan.fa.a2fb268.4030258.6a1ecc2.smooth.og
-path_fasta=${path_chr6_smooth}.fasta
-path_untangle_all_paf_gz=chr6.pan.fa.a2fb268.4030258.6a1ecc2.smooth.mhc.both.e$e.m$m.paf.gz
-path_untangle_single_paf_gz=chr6.pan.fa.a2fb268.4030258.6a1ecc2.smooth.mhc.chm13.e$e.m$m.n$n.j$j.paf.gz
-path_untangle_grounded_tsv_gz=chr6.mhc.untangle.chm13.e$e.m$m.n$n.j$j.grounded.tsv.gz
-path_untangle_grounded_paf_gz=chr6.mhc.untangle.chm13.e$e.m$m.n$n.j$j.grounded.paf.gz
-path_untangle_grounded_wfmash_paf_gz=chr6.mhc.untangle.chm13.e$e.m$m.n$n.j$j.grounded.wfmash.paf.gz
-
-odgi paths -i ${path_chr6_smooth} -f > ${path_fasta}
-samtools faidx ${path_fasta}
-
-odgi untangle -i ${path_chr6_smooth} -t 16 -P -R <(echo chm13#chr6:28874656-33821293; echo grch38#chr6:28999849-34000009) -e $e -m $m -d cut_points.txt -p | pigz -c > ${path_untangle_all_paf_gz}
-odgi untangle -i ${path_chr6_smooth} -t 16 -P -r chm13#chr6:28874656-33821293 -n $n -j $j -e $e -m $m -c cut_points.txt -p | pigz -c > ${path_untangle_single_paf_gz}
-
-( echo query query.length query.begin query.end strand target target.length target.begin target.end num.res alignment.length map.q id jaccard self.coverage nb ref ref.length ref.begin ref.end | tr ' ' '\t' ; \
-  join \
-    <(zcat ${path_untangle_all_paf_gz} | awk '{ print $1"_"$3, $0 }' | tr ' ' '\t' | sort  -k 1,1) \
-    <(zcat ${path_untangle_single_paf_gz} | awk -v OFS="\t" -v j=$j -v n=$n '{gsub("jc:f:", "", $14); gsub("nb:i:", "", $16); if($14 >= j && $16 <= n) {print $1"_"$3, $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,"jc:f:"$14,$15,"nb:i:"$16}}' | tr ' ' '\t' | sort  -k 1,1) | \
-  tr ' ' '\t' | cut -f 2- | cut -f -16,23,24,25,26) | 
-  tr ' ' '\t' | pigz -c > ${path_untangle_grounded_tsv_gz}
-
-zgrep query -v ${path_untangle_grounded_tsv_gz} | awk -v OFS='\t' '{print $1,$2,$3,$4,$5,$17,$18,$19,$20,$10,$11,$12,$13,$14,$15,$16}' | pigz -c > ${path_untangle_grounded_paf_gz}
-#zcat chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.untangle.chm13#chr13.e50000.m1000.n1.j08.grounded.paf.gz | -v OFS='\t' '{print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,"id:f:99.99999",$14,$15,$16}' > chrACRO+refs.100kbps.pq_contigs.union.fa.gz.20c4357.4030258.41cabb1.smooth.fix.untangle.chm13#chr13.e50000.m1000.n1.j08.grounded.9999999.paf.gz
-wfmash ${path_fasta} ${path_fasta} -i ${path_untangle_grounded_paf_gz} -t 6 | pigz -c > ${path_untangle_grounded_wfmash_paf_gz}
-
-~/git/rustybam/target/release/rustybam stats -p <(zcat ${path_untangle_grounded_wfmash_paf_gz}) > chr6.mhc.untangle.chm13.e$e.m$m.n$n.j$j.grounded.wfmash.stats.bed
-```
-
-```
-# WIP (TO IGNORE)
-# Saturate the alignments (-n 200)
-sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz -o chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n200 -t 48 -s 100k -l 300k -p 98 -n 200 -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrACRO+refs.100kbps.pq_contigs.union.s100k.l300k.p98.n200 /lizardfs/guarracino/chromosome_communities/graphs';
-
-############################
-#!/bin/bash
-path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan.s100k.l300k.p97.n200/chrA.pan.fa.4825454.4030258.0517e7e.smooth.fix.og
-prefix=$(basename $path_input_og .og)
-
-for e in 50000; do
-  for m in 1000; do
-    echo "-e $e -m $m"
-    
-    path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.bed.gz
-    if [[ ! -s ${path_paf_gz} ]]; then
-        path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.cut_points.txt
-        
-        \time -v ~/tools/odgi/bin/odgi-358537678174adc975415a488b458725d8a213be untangle -t 48 -P \
-          -i $path_input_og \
-          -R <(grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.100kbps.pq_contigs.union.fa.gz.fai | cut -f 1) \
-          -e $e -m $m \
-          --cut-points-output ${path_cut_points_txt} | \
-          pigz -c \
-          > ${path_bed_gz}
-    fi;
-  done
-done
-############################
-
-for ref in chm13#chr13 chm13#chr14 chm13#chr15 chm13#chr21 chm13#chr22; do
-    echo $ref
-    
-    sbatch -p headnode -c 5 --job-name acrotangle untangle.sh $ref
-done
-
-untangle.sh############################
-#!/bin/bash
-
-ref=$1
-path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan.s100k.l300k.p97.n200/chrA.pan.fa.4825454.4030258.0517e7e.smooth.fix.og
-prefix=$(basename $path_input_og .og)
-
-for e in 50000; do
-  for m in 1000; do
-    echo "-e $e -m $m"
-    
-    path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.bedpaf.gz
-    if [[ ! -s ${path_paf_gz} ]]; then
-        path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.cut_points.txt
-
-        echo $ref
-        \time -v ~/tools/odgi/bin/odgi-358537678174adc975415a488b458725d8a213be untangle -t 5 -P \
-          -i $path_input_og \
-          -r $ref \
-          -e $e -m $m \
-          --cut-points-input ${path_cut_points_txt} \
-          -j 0 -n 100 | pigz -c > /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz
-    fi;
-  done
-done
-############################
-
-
-# Grounding (applying filters)
-for e in 50000; do
-  for m in 1000; do
-      for j in 0 0.8; do
-        j_str=$(echo $j | sed 's/\.//g')
-        (seq 10 10; seq 15 5 100) | while read n; do 
-            echo "-e $e -m $m -j $j -n $n"
-            
-            for ref in chm13#chr13 chm13#chr14 chm13#chr15 chm13#chr21 chm13#chr22; do
-              echo -e "\t"$ref
-              
-              path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.tsv.gz
-              
-              if [[ ! -s ${path_grounded_tsv_gz} ]]; then
-                  ( echo query query.begin query.end target target.begin target.end jaccard strand self.coverage ref ref.begin ref.end | tr ' ' '\t'
-                    join \
-                      <(zcat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.bed.gz | awk '{ print $1"_"$2, $0 }' | tr ' ' '\t' | sort -k 1,1) \
-                      <(zcat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz | awk -v j=$j -v n=$n '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) | \
-                    tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -9,14-16 ) | tr ' ' '\t' | pigz -c > ${path_grounded_tsv_gz}
-              fi;
-            done
-        done
-      done
-    done
-done
-
-
-# Take pq-untangling contigs
-for e in 50000; do
-  for m in 1000; do
-      for j in 0.8; do
-        j_str=$(echo $j | sed 's/\.//g')
-        (seq 10 10) | while read n; do 
-            echo "-e $e -m $m -j $j -n $n"
-    
-            for ref in chm13#chr13 chm13#chr14 chm13#chr15 chm13#chr21 chm13#chr22; do
-              echo $ref
-              
-              path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.n$n.j${j_str}.grounded.tsv.gz
-              path_grounded_pq_touching_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv
-              
-              if [[ ! -s ${path_grounded_pq_touching_tsv}.gz ]]; then
-                  # "p-touching contigs" intersected "q-touching contigs"
-                  comm -12 \
-                    <(bedtools intersect \
-                      -a <(zcat ${path_grounded_tsv_gz} | awk -v OFS="\t" '{print $10,$11,$12,$1, "", "+"}' | grep query -v | bedtools sort) \
-                      -b <(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/p_arms.bed | bedtools sort) | \
-                      #awk '$3-$2+1>=100000' | \
-                      cut -f 4 | sort | uniq) \
-                    <(bedtools intersect \
-                      -a <(zcat ${path_grounded_tsv_gz} | awk -v OFS="\t" '{print $10,$11,$12,$1, "", "+"}' | grep query -v | bedtools sort) \
-                      -b <(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/q_arms.bed | bedtools sort) | \
-                      #awk '$3-$2+1>=100000' | \
-                      cut -f 4 | sort | uniq) | \
-                      grep 'chm13#\|grch38#' -v > $ref.tmp.txt
-                
-                  # Put header (with a new 'target' column), take intersection, and re-add other acrocentric references
-                  cat \
-                    <(zcat ${path_grounded_tsv_gz} | head -n 1 | awk -v OFS='\t' '{print $0, "grounded.target"}') \
-                    <(zgrep ${path_grounded_tsv_gz} -f $ref.tmp.txt | awk -v OFS='\t' -v ref=$ref '{print $0, ref}') \
-                    <(zgrep '^grch38\|^chm13' ${path_grounded_tsv_gz}  | awk -v OFS='\t' -v ref=$ref '{print $0, ref}') \
-                     > ${path_grounded_pq_touching_tsv}
-                
-                  # Add annotation
-                  zgrep rDNA /lizardfs/guarracino/chromosome_communities/data/chm13.CentromeresAndTelomeres.CenSatAnnotation.txt.gz | \
-                    sed 's/chr/chm13#chr/g' | \
-                    grep $ref | \
-                    awk -v OFS='\t' -v ref=$ref '{print $1"#"$4,".",".",$1,".",".",".",".",".",".",$2,$3, ref}' >> ${path_grounded_pq_touching_tsv}
-                  grep acen /lizardfs/guarracino/chromosome_communities/data/chm13.CytoBandIdeo.v2.txt | \
-                    bedtools merge | \
-                    grep 'chr13\|chr14\|chr15\|chr21\|chr22' | \
-                    sed 's/chr/chm13#chr/g'  | \
-                    grep $ref | \
-                    awk -v OFS='\t' -v ref=$ref '{print $1"#centromere",".",".",$1,".",".",".",".",".",".",$2,$3, ref}' >> ${path_grounded_pq_touching_tsv}
-                  
-                  pigz ${path_grounded_pq_touching_tsv}
-              fi;
-            done
-        done
-      done
-    done
-done
-
-
-# Merged plots
-for e in 50000; do
-  for m in 1000; do
-      for j in 0 0.8; do
-        j_str=$(echo $j | sed 's/\.//g')
-        (seq 10 10) | while read n; do 
-            echo "-e $e -m $m -j $j -n $n"
-    
-            path_grounded_pq_touching_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
-            if [[ ! -s ${path_grounded_pq_touching_all_chromosomes_tsv_gz} ]]; then
-                # Merge all acros together
-                cat \
-                  <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.*.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz | head -n 1) \
-                  <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.*.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz | grep query -v) |\
-                  pigz -c > x.tsv.gz
-                mv x.tsv.gz ${path_grounded_pq_touching_all_chromosomes_tsv_gz}
-            fi;
-
-            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R ${path_grounded_pq_touching_all_chromosomes_tsv_gz} "-e $e -m $m -j $j -n $n"
-        done
-      done
-    done
-done
-
-mv /lizardfs/guarracino/chromosome_communities/untangle/grounded/*.pdf /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
-
-`````
 
 ```shell
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle
@@ -480,20 +284,21 @@ for e in 5000 50000 100000; do
     echo "-e $e -m $m"
     
     path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.bed.gz
-    if [[ ! -s ${path_paf_gz} ]]; then
+    if [[ ! -s ${path_bed_gz} ]]; then
         path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.cut_points.txt
-        
-        \time -v ~/tools/odgi/bin/odgi-358537678174adc975415a488b458725d8a213be untangle -t 48 -P \
+               
+        \time -v ~/tools/odgi/bin/odgi-694948ccf31e7b565449cc056668e9dcc8cc0a3e untangle -t 48 -P \
           -i $path_input_og \
           -R <(grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.fai | cut -f 1) \
           -e $e -m $m \
+          -j 0 \
           --cut-points-output ${path_cut_points_txt} | \
           pigz -c \
           > ${path_bed_gz}
         
         grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.fai | cut -f 1 | while read ref; do
           echo $ref
-          \time -v ~/tools/odgi/bin/odgi-358537678174adc975415a488b458725d8a213be untangle -t 12 -P \
+          \time -v ~/tools/odgi/bin/odgi-694948ccf31e7b565449cc056668e9dcc8cc0a3e untangle -t 12 -P \
               -i $path_input_og \
               -r $ref \
               -e $e -m $m \
@@ -541,7 +346,7 @@ for e in 5000 50000 100000; do
     done
 done
 
-# Take only reliable blocks (flagged with "Hh" or "Hc", https://github.com/human-pangenomics/hpp_production_workflows/blob/asset/coverage/README.md#components)???
+### Take only reliable blocks (flagged with "Hh" or "Hc", https://github.com/human-pangenomics/hpp_production_workflows/blob/asset/coverage/README.md#components)???
 
 # Take pq-untangling contigs
 for e in 5000 50000 100000; do
@@ -607,46 +412,17 @@ for e in 5000 50000 100000; do
 done
 ```
 
-Plotting:
-
-```shell
-# Dependencies
-guix install r
-guix install r-ggplot2
-guix install r-ggforce
-guix install poppler # For pdfunite
-```
-
-```shell
-mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
-```
-
-Single plots:
-
-```shell
-for e in 5000 50000 100000; do
-  for m in 500 1000 10000; do
-      for j in 0 0.8; do
-        j_str=$(echo $j | sed 's/\.//g')
-        (seq 1 5; seq 10 10 50) | while read n; do 
-            echo "-e $e -m $m -j $j -n $n"
-    
-            grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.fai | cut -f 1 | while read ref; do
-              echo $ref
-              
-              path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
-            
-              Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle.R ${path_grounded_pq_touching_tsv_gz} "$ref -e $e -m $m -j $j -n $n"
-            done
-        done
-      done
-    done
-done
-```
-
 Merged plots:
 
 ```shell
+# Dependencies
+#guix install r
+#guix install r-ggplot2
+#guix install r-ggforce
+#guix install poppler # For pdfunite
+
+mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
+
 for e in 5000 50000 100000; do
   for m in 500 1000 10000; do
       for j in 0 0.8; do
@@ -656,11 +432,12 @@ for e in 5000 50000 100000; do
     
             path_grounded_pq_touching_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
             if [[ ! -s ${path_grounded_pq_touching_all_chromosomes_tsv_gz} ]]; then
-                # Merge all acros together
+                # Merge single reference results
                 cat \
                   <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.*.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz | head -n 1) \
                   <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.*.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz | grep query -v) |\
                   pigz -c > x.tsv.gz
+                # Rename after to avoid getting itself with the previous '*' expansion
                 mv x.tsv.gz ${path_grounded_pq_touching_all_chromosomes_tsv_gz}
             fi;
 
@@ -672,6 +449,7 @@ done
 
 mv /lizardfs/guarracino/chromosome_communities/untangle/grounded/*.pdf /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
 
+# Merge
 for e in 5000 50000 100000; do
   for m in 500 1000 10000; do
       for j in 0 0.8; do
@@ -694,6 +472,30 @@ for e in 5000 50000 100000; do
     done
 done
 ```
+
+Single plots (not used):
+
+```shell
+#for e in 5000 50000 100000; do
+#  for m in 500 1000 10000; do
+#      for j in 0 0.8; do
+#        j_str=$(echo $j | sed 's/\.//g')
+#        (seq 1 5; seq 10 10 50) | while read n; do 
+#            echo "-e $e -m $m -j $j -n $n"
+#    
+#            grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.fai | cut -f 1 | while read ref; do
+#              echo $ref
+#              
+#              path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
+#            
+#              Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle.R ${path_grounded_pq_touching_tsv_gz} "$ref -e $e -m $m -j $j -n $n"
+#            done
+#        done
+#      done
+#    done
+#done
+```
+
 
 ## Sex chromosome
 
@@ -741,18 +543,187 @@ num_of_haplotypes=$(cut -f 1,2 -d '#' /lizardfs/guarracino/chromosome_communitie
 sbatch -p highmem -c 48 --job-name sexpggb --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/guarracino/chromosome_communities/assemblies/chrS.pan+HG002chrXY.fa.gz -o chrS.pan+HG002chrXY.s100k.l300k.p98.n'$num_of_haplotypes' -t 48 -s 100k -l 300k -p 98 -n '$num_of_haplotypes' -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrS.pan+HG002chrXY.s100k.l300k.p98.n'$num_of_haplotypes' /lizardfs/guarracino/chromosome_communities/graphs';
 ```
 
+### Untangling
 
+```shell
+path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.og
+prefix=$(basename $path_input_og .og)
 
+run_odgi=/home/guarracino/tools/odgi/bin/odgi-694948ccf31e7b565449cc056668e9dcc8cc0a3e
+path_fasta_fai=/lizardfs/guarracino/chromosome_communities/assemblies/chrS.pan+HG002chrXY.fa.gz.fai
 
+# All references and emit cut points
+for refpattern in HG002 grch38; do
+  path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
+  grep $refpattern $path_fasta_fai | cut -f 1 > $path_targets_txt
+    
+  for e in 5000 50000 100000; do
+    for m in 500 1000 10000; do
+      echo "-e $e -m $m"
+    
+      path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$refpattern#SEX.e$e.m$m.bed.gz
+      path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$refpattern#SEX.e$e.m$m.cut_points.txt
+    
+      if [[ ! -s ${path_cut_points_txt} ]]; then
+        sbatch -p workers -c 48 --job-name sexuntangle --wrap '\time -v '$run_odgi' untangle -t 48 -P -i '$path_input_og' -R '$path_targets_txt' -e '$e' -m '$m' --cut-points-output '$path_cut_points_txt' -j 0 -n 1 | pigz -c > '$path_bed_gz';'
+      fi;
+    done
+  done
+done
 
+# Single reference by using the same cut points
+for refpattern in HG002 grch38; do
+  path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
+  
+  for e in 5000 50000 100000; do
+    for m in 500 1000 10000; do
+      echo "-e $e -m $m"
+        
+      cat $path_targets_txt | while read ref; do
+        echo $ref
+            
+        path_ref_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz
+        if [[ ! -s ${path_ref_bed_gz} ]]; then
+          path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$refpattern#SEX.e$e.m$m.cut_points.txt
+                    
+          sbatch -p workers -c 48 --job-name sexuntangle --wrap '\time -v '$run_odgi' untangle -t 48 -P -i '$path_input_og' -r '$ref' -e '$e' -m '$m' --cut-points-input '$path_cut_points_txt' -j 0 -n 100 | pigz -c > '$path_ref_bed_gz';'
+        fi;
+      done
+    done
+  done
+done
 
+# Grounding
+mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded
 
+for refpattern in HG002 grch38; do
+  path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
 
+  for e in 5000 50000 100000; do
+    for m in 500 1000 10000; do
+      for j in 0 0.8; do
+        j_str=$(echo $j | sed 's/\.//g')
+        (seq 1 5; seq 10 10 50) | while read n; do 
+          echo "-e $e -m $m -j $j -n $n"
+                
+          cat $path_targets_txt | while read ref; do
+            echo -e "\t"$ref
 
+            path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz
+            if [[ ! -s ${path_grounded_tsv_gz} ]]; then
+              path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$refpattern#SEX.e$e.m$m.bed.gz
+              path_ref_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz
+              
+              ( echo query query.begin query.end target target.begin target.end jaccard strand self.coverage ref ref.begin ref.end | tr ' ' '\t'
+                join \
+                  <(zcat $path_bed_gz | awk '{ print $1"_"$2, $0 }' | tr ' ' '\t' | sort -k 1,1) \
+                  <(zcat $path_ref_bed_gz | awk -v j=$j -v n=$n '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) | \
+                tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -9,14-16 ) | tr ' ' '\t' | pigz -c > x.tsv.gz
+              
+              #TODO filter stuff that do not span PAR, to have less stuff to visualize!!!
+              #TODO there is an attor somewhere (purple in the pltos!)
+              # Add grounded.target column and annotation (note that chrX PARs are from chm13#chrX, and not HG002#chrX)
+              cat \
+                <(zcat x.tsv.gz | head -n 1 | awk -v OFS='\t' '{print $0, "grounded.target"}') \
+                <(zcat x.tsv.gz | sed '1d' | awk -v OFS='\t' -v ref=$ref '{print $0, ref}') \
+                <(cat /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.approximate.bed | \
+                  sed "s/chr/$refpattern#chr/g" | \
+                  xxxxgrep $ref | \ xxxx I can grep with HG002#MAT#chrX, I need the chrX or chrY
+                  awk -v OFS='\t' -v ref=$ref '{print $1"#"$4,".",".",$1,".",".",".",".",".",".",$2,$3, ref}') |\
+                pigz -c > $path_grounded_tsv_gz
+              rm x.tsv.gz
+            fi;
 
+            ### Take only reliable blocks (flagged with "Hh" or "Hc", https://github.com/human-pangenomics/hpp_production_workflows/blob/asset/coverage/README.md#components)???
+          done
+        done
+      done
+    done
+  done
+done
+```
 
+Plot:
 
+```shell
+for refpattern in HG002 grch38; do
+  path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
 
+  for e in 5000 50000 100000; do
+    for m in 500 1000 10000; do
+      for j in 0 0.8; do
+        j_str=$(echo $j | sed 's/\.//g')
+        (seq 1 5; seq 10 10 50) | while read n; do 
+          echo "-e $e -m $m -j $j -n $n"
+    
+          path_grounded_all_references_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$refpattern#chrSEX.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz
+          if [[ ! -s ${path_grounded_all_references_tsv_gz} ]]; then
+            # Merge single reference results
+            cat \
+              <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$refpattern*.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz | head -n 1) \
+              <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$refpattern*.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz | grep query -v) |\
+              pigz -c > x.tsv.gz
+            # Rename after to avoid getting itself with the previous '*' expansion
+            mv x.tsv.gz $path_grounded_all_references_tsv_gz
+          fi;
 
+          Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R $path_grounded_all_references_tsv_gz "-e $e -m $m -j $j -n $n"
+        done
+      done
+    done
+  done
+done
 
+mv /lizardfs/guarracino/chromosome_communities/untangle/grounded/*.pdf /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
 
+# Merge
+for refpattern in HG002; do
+  path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
+  
+  for e in 5000 50000 100000; do
+    for m in 500 1000 10000; do
+      for j in 0 0.8; do
+        echo "-e $e -m $m -j $j"
+            
+        j_str=$(echo $j | sed 's/\.//g')
+        PDFs=$((seq 1 5; seq 10 10 50) | while read n; do \
+          echo /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.$refpattern#chrSEX.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz.pdf
+        done | tr '\n' ' ')
+        #echo $PDFs
+              
+        /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite $PDFs /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.merged.grounded.pq_touching.tsv.gz.pdf
+      done
+    done
+  done
+done
+```
+
+## Variant calling
+
+Call variants in a haploid setting:
+
+```shell
+# pq-contigs
+path_input_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.s100k.l300k.p98.n84/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.gfa
+path_chm13_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.s100k.l300k.p98.n84/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.chm13.vcf.gz
+path_grch38_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.s100k.l300k.p98.n84/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.grch38.vcf.gz
+sbatch -p workers -c 48 --job-name vgchm13 --wrap 'vg deconstruct -P chm13 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_chm13_vcf_gz' && tabix '$path_chm13_vcf_gz
+sbatch -p workers -c 48 --job-name vggrch38 --wrap 'vg deconstruct -P grch38 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_grch38_vcf_gz' && tabix '$path_grch38_vcf_gz
+
+# acro-contigs
+# todo to execute ################################
+path_input_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.gfa
+path_chm13_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.chm13.vcf.gz
+path_grch38_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.grch38.vcf.gz
+sbatch -p workers -c 48 --job-name vgchm13 --wrap 'vg deconstruct -P chm13 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_chm13_vcf_gz' && tabix '$path_chm13_vcf_gz
+sbatch -p workers -c 48 --job-name vggrch38 --wrap 'vg deconstruct -P grch38 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_grch38_vcf_gz' && tabix '$path_grch38_vcf_gz
+
+# sex-contigs
+path_input_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.gfa
+path_chm13_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.chm13.vcf.gz
+path_grch38_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.grch38.vcf.gz
+path_hg002_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.hg002.vcf.gz
+sbatch -p workers -c 48 --job-name vgchm13 --wrap 'vg deconstruct -P chm13 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_chm13_vcf_gz' && tabix '$path_chm13_vcf_gz
+sbatch -p workers -c 48 --job-name vggrch38 --wrap 'vg deconstruct -P grch38 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_grch38_vcf_gz' && tabix '$path_grch38_vcf_gz
+sbatch -p workers -c 48 --job-name vghg002 --wrap 'vg deconstruct -P HG002 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_hg002_vcf_gz' && tabix '$path_hg002_vcf_gz
+```
