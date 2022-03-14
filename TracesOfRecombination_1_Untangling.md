@@ -441,7 +441,7 @@ for e in 5000 50000 100000; do
                 mv x.tsv.gz ${path_grounded_pq_touching_all_chromosomes_tsv_gz}
             fi;
 
-            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R ${path_grounded_pq_touching_all_chromosomes_tsv_gz} "-e $e -m $m -j $j -n $n"
+            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R ${path_grounded_pq_touching_all_chromosomes_tsv_gz} "-e $e -m $m -j $j -n $n" 25000000 200
         done
       done
     done
@@ -599,9 +599,9 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded
 for refpattern in HG002 grch38; do
   path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
 
-  for e in 5000 50000 100000; do
-    for m in 500 1000 10000; do
-      for j in 0 0.8; do
+  for e in 100000; do
+    for m in 10000; do
+      for j in 0.8; do
         j_str=$(echo $j | sed 's/\.//g')
         (seq 1 5; seq 10 10 50) | while read n; do 
           echo "-e $e -m $m -j $j -n $n"
@@ -614,23 +614,36 @@ for refpattern in HG002 grch38; do
               path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$refpattern#SEX.e$e.m$m.bed.gz
               path_ref_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz
               
+              # Grounding
               ( echo query query.begin query.end target target.begin target.end jaccard strand self.coverage ref ref.begin ref.end | tr ' ' '\t'
                 join \
                   <(zcat $path_bed_gz | awk '{ print $1"_"$2, $0 }' | tr ' ' '\t' | sort -k 1,1) \
                   <(zcat $path_ref_bed_gz | awk -v j=$j -v n=$n '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) | \
                 tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -9,14-16 ) | tr ' ' '\t' | pigz -c > x.tsv.gz
               
-              #TODO filter stuff that do not span PAR, to have less stuff to visualize!!!
-              #TODO there is an attor somewhere (purple in the pltos!)
-              # Add grounded.target column and annotation (note that chrX PARs are from chm13#chrX, and not HG002#chrX)
+              # Contigs overlapping (or close at least 50kbps to) a PAR
+              ref_chr=$(echo $ref | cut -f 3 -d '#')
+              bedtools intersect \
+                -a <(zcat x.tsv.gz | awk -v OFS="\t" '{print $10,$11,$12,$1, "", "+"}' | grep query -v | bedtools sort) \
+                -b <(grep $ref_chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.approximate.bed |\
+                  bedtools sort |\
+                  bedtools slop -b 50000 -g /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.approximate.sizes |\
+                  awk -v OFS='\t' -v ref=$ref '{print(ref,$2,$3)}') | \
+                #awk '$3-$2+1>=100000' | \
+                cut -f 4 | \
+                #Remove references to avoid grepping everything later (with zgrep -f)
+                grep -v chr |\
+                sort | uniq > $ref.tmp.txt
+     
+              # Add grounded.target column, re-add the references, and add annotation (note that chrX PARs are from chm13#chrX, and not HG002#chrX)
               cat \
                 <(zcat x.tsv.gz | head -n 1 | awk -v OFS='\t' '{print $0, "grounded.target"}') \
-                <(zcat x.tsv.gz | sed '1d' | awk -v OFS='\t' -v ref=$ref '{print $0, ref}') \
-                <(cat /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.approximate.bed | \
-                  sed "s/chr/$refpattern#chr/g" | \
-                  xxxxgrep $ref | \ xxxx I can grep with HG002#MAT#chrX, I need the chrX or chrY
-                  awk -v OFS='\t' -v ref=$ref '{print $1"#"$4,".",".",$1,".",".",".",".",".",".",$2,$3, ref}') |\
+                <(zgrep x.tsv.gz -f $ref.tmp.txt | awk -v OFS='\t' -v ref=$ref '{print $0, ref}') \
+                <(zcat x.tsv.gz | awk -v OFS='\t' -v ref=$ref '$1 ~ /chr/ { print $0, ref}' ) \
+                <(grep $ref_chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.approximate.bed | \
+                  awk -v OFS='\t' -v ref=$ref '{print $1"#"$4,".",".",ref,".",".",".",".",".",".",$2,$3, ref}') |\
                 pigz -c > $path_grounded_tsv_gz
+
               rm x.tsv.gz
             fi;
 
@@ -641,6 +654,7 @@ for refpattern in HG002 grch38; do
     done
   done
 done
+
 ```
 
 Plot:
@@ -649,9 +663,9 @@ Plot:
 for refpattern in HG002 grch38; do
   path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
 
-  for e in 5000 50000 100000; do
-    for m in 500 1000 10000; do
-      for j in 0 0.8; do
+  for e in 100000; do
+    for m in 10000; do
+      for j in 0.8; do
         j_str=$(echo $j | sed 's/\.//g')
         (seq 1 5; seq 10 10 50) | while read n; do 
           echo "-e $e -m $m -j $j -n $n"
@@ -667,7 +681,7 @@ for refpattern in HG002 grch38; do
             mv x.tsv.gz $path_grounded_all_references_tsv_gz
           fi;
 
-          Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R $path_grounded_all_references_tsv_gz "-e $e -m $m -j $j -n $n"
+          Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R $path_grounded_all_references_tsv_gz "-e $e -m $m -j $j -n $n" 155000000 700
         done
       done
     done
@@ -680,9 +694,9 @@ mv /lizardfs/guarracino/chromosome_communities/untangle/grounded/*.pdf /lizardfs
 for refpattern in HG002; do
   path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
   
-  for e in 5000 50000 100000; do
-    for m in 500 1000 10000; do
-      for j in 0 0.8; do
+  for e in 100000; do
+    for m in 10000; do
+      for j in 0.8; do
         echo "-e $e -m $m -j $j"
             
         j_str=$(echo $j | sed 's/\.//g')
@@ -690,8 +704,8 @@ for refpattern in HG002; do
           echo /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.$refpattern#chrSEX.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz.pdf
         done | tr '\n' ' ')
         #echo $PDFs
-              
-        /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite $PDFs /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.merged.grounded.pq_touching.tsv.gz.pdf
+
+        /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite $PDFs /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.$refpattern#chrSEX.e$e.m$m.j${j_str}.merged.grounded.tsv.gz.pdf
       done
     done
   done

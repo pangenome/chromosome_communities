@@ -2,6 +2,7 @@ args <- commandArgs()
 path_untangle_grounded_all_tsv <- args[6]
 title <- args[7]
 x_max <- args[8]
+height <- args[9]
 
 library(ggplot2)
 library(ggforce)
@@ -27,4 +28,4 @@ p <- ggplot(x, aes(x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - 
   ) +
   xlim(0, x_max)
 
-ggsave(plot = p, paste0(path_untangle_grounded_all_tsv, '.pdf'), width = 120, height = 200, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
+ggsave(plot = p, paste0(path_untangle_grounded_all_tsv, '.pdf'), width = 120, height = height, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
