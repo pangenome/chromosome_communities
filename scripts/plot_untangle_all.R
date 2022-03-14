@@ -2,7 +2,7 @@ args <- commandArgs()
 path_untangle_grounded_all_tsv <- args[6]
 title <- args[7]
 x_max <- args[8]
-height <- args[9]
+height <- as.numeric(args[9])
 
 library(ggplot2)
 library(ggforce)
