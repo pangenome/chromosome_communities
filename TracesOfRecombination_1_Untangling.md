@@ -599,9 +599,9 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded
 for refpattern in HG002 grch38; do
   path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
 
-  for e in 100000; do
-    for m in 10000; do
-      for j in 0.8; do
+  for e in 5000 50000 100000; do
+    for m in 500 1000 10000; do
+      for j in 0 0.8; do
         j_str=$(echo $j | sed 's/\.//g')
         (seq 1 5; seq 10 10 50) | while read n; do 
           echo "-e $e -m $m -j $j -n $n"
@@ -654,7 +654,6 @@ for refpattern in HG002 grch38; do
     done
   done
 done
-
 ```
 
 Plot:
@@ -663,9 +662,9 @@ Plot:
 for refpattern in HG002 grch38; do
   path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
 
-  for e in 100000; do
-    for m in 10000; do
-      for j in 0.8; do
+  for e in 5000 50000 100000; do
+    for m in 500 1000 10000; do
+      for j in 0 0.8; do
         j_str=$(echo $j | sed 's/\.//g')
         (seq 1 5; seq 10 10 50) | while read n; do 
           echo "-e $e -m $m -j $j -n $n"
@@ -681,7 +680,7 @@ for refpattern in HG002 grch38; do
             mv x.tsv.gz $path_grounded_all_references_tsv_gz
           fi;
 
-          Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R $path_grounded_all_references_tsv_gz "-e $e -m $m -j $j -n $n" 155000000 700
+          Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R $path_grounded_all_references_tsv_gz "-e $e -m $m -j $j -n $n" 155000000 800
         done
       done
     done
@@ -694,9 +693,9 @@ mv /lizardfs/guarracino/chromosome_communities/untangle/grounded/*.pdf /lizardfs
 for refpattern in HG002; do
   path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
   
-  for e in 100000; do
-    for m in 10000; do
-      for j in 0.8; do
+  for e in 5000 50000 100000; do
+    for m in 500 1000 10000; do
+      for j in 0 0.8; do
         echo "-e $e -m $m -j $j"
             
         j_str=$(echo $j | sed 's/\.//g')
@@ -710,6 +709,9 @@ for refpattern in HG002; do
     done
   done
 done
+
+#PAR1/2/3
+# https://link.springer.com/article/10.1007/s10142-013-0323-6/figures/1
 ```
 
 ## Variant calling
