@@ -553,7 +553,7 @@ run_odgi=/home/guarracino/tools/odgi/bin/odgi-694948ccf31e7b565449cc056668e9dcc8
 path_fasta_fai=/lizardfs/guarracino/chromosome_communities/assemblies/chrS.pan+HG002chrXY.fa.gz.fai
 
 # All references and emit cut points
-for refpattern in HG002 grch38; do
+for refpattern in HG002; do
   path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
   grep $refpattern $path_fasta_fai | cut -f 1 > $path_targets_txt
     
@@ -572,7 +572,7 @@ for refpattern in HG002 grch38; do
 done
 
 # Single reference by using the same cut points
-for refpattern in HG002 grch38; do
+for refpattern in HG002; do
   path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
   
   for e in 5000 50000 100000; do
@@ -596,7 +596,7 @@ done
 # Grounding
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded
 
-for refpattern in HG002 grch38; do
+for refpattern in HG002; do
   path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
 
   for e in 5000 50000 100000; do
@@ -621,13 +621,14 @@ for refpattern in HG002 grch38; do
                   <(zcat $path_ref_bed_gz | awk -v j=$j -v n=$n '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) | \
                 tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -9,14-16 ) | tr ' ' '\t' | pigz -c > x.tsv.gz
               
-              # Contigs overlapping (or close at least 50kbps to) a PAR
-              ref_chr=$(echo $ref | cut -f 3 -d '#')
+              # Contigs overlapping (or close at least 100kbps to) a PAR
+              # Note that chrX PAR is from chm13, not HG002
+              ref_chr=$(echo $ref | rev | cut -f 1 -d '#' | rev)
               bedtools intersect \
                 -a <(zcat x.tsv.gz | awk -v OFS="\t" '{print $10,$11,$12,$1, "", "+"}' | grep query -v | bedtools sort) \
                 -b <(grep $ref_chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.approximate.bed |\
                   bedtools sort |\
-                  bedtools slop -b 50000 -g /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.approximate.sizes |\
+                  bedtools slop -b 100000 -g /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.approximate.sizes |\
                   awk -v OFS='\t' -v ref=$ref '{print(ref,$2,$3)}') | \
                 #awk '$3-$2+1>=100000' | \
                 cut -f 4 | \
@@ -635,7 +636,7 @@ for refpattern in HG002 grch38; do
                 grep -v chr |\
                 sort | uniq > $ref.tmp.txt
      
-              # Add grounded.target column, re-add the references, and add annotation (note that chrX PARs are from chm13#chrX, and not HG002#chrX)
+              # Add grounded.target column, re-add the references, and add annotation
               cat \
                 <(zcat x.tsv.gz | head -n 1 | awk -v OFS='\t' '{print $0, "grounded.target"}') \
                 <(zgrep x.tsv.gz -f $ref.tmp.txt | awk -v OFS='\t' -v ref=$ref '{print $0, ref}') \
@@ -659,7 +660,7 @@ done
 Plot:
 
 ```shell
-for refpattern in HG002 grch38; do
+for refpattern in HG002; do
   path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
 
   for e in 5000 50000 100000; do
