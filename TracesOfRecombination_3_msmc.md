@@ -54,7 +54,6 @@ vcftools \
 rm *log
 
 # Split by sample and fill missing genotypes (with 0, i.e. reference allele, else msmc breaks)
-
 for SAMPLE in `bcftools query -l $PATH_SNV_VCF_GZ`; do
     for ARMS in p_arms q_arms; do
       echo $SAMPLE $ARMS
@@ -64,22 +63,71 @@ for SAMPLE in `bcftools query -l $PATH_SNV_VCF_GZ`; do
     done
 done
 
-# Take 5 samples from each ACRO (todo increase such value and/or go random)
-# todo to automize
+# Take samples from each ACRO
+rm samples.p_arms.txt samples.q_arms.txt
+nsamples=15   # Take 15 samples (todo increase such value and/or go random)
+nsamples_minus_1=$(echo "$nsamples - 1" | bc)
+nsamples_mul_2_minus_1=$(echo "$nsamples * 2 - 1" | bc)
 (seq 13 15; seq 21 22) | while read i; do
-  REF=chm13#chr$i
   PATH_REF_FASTA_FAI=/lizardfs/guarracino/chromosome_communities/pq_contigs/chr$i.vs.chm13.50kbps.pq_contigs.union.hg002prox.fa.gz.fai
-  
-  head $PATH_REF_FASTA_FAI | cut -f 1
+
+  head $PATH_REF_FASTA_FAI -n $nsamples | cut -f 1 | while read SAMPLE; do
+    echo "chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.chm13.snv.p_arms.${SAMPLE}.vcf.gz" >> samples.p_arms.txt
+    echo "chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.chm13.snv.q_arms.${SAMPLE}.vcf.gz" >> samples.q_arms.txt
+  done
 done
+samples=$(cat samples.p_arms.txt samples.p_arms.txt | tr '\n' ' ')
+samples=${samples::-1} # Remove last space
 
 # Generate files for MSMC
 # Using a hacked version, changing a few rows in generate_multihetsep.py to get phased fake-diploid data
 #print ("HACKED: Non-diploid SNP found and considered as phased data: %s" % geno, file=sys.stderr)
 #phased = True
 #geno = "%s|%s" % (geno[0], geno[0])
+python3 ~/tools/msmc-tools/generate_multihetsep.py $samples > $nsamples.pq_arms.phased.hetsep
 
+# msmc wants a single chromosome
 # sed to avoid '#' in the reference name that breaks msmc
+grep '^chm13#chr13' $nsamples.pq_arms.phased.hetsep | sed 's/^chm13#//g' > $nsamples.pq_arms.phased.chr13.hetsep
+
+#!/bin/sh
+
+# Estimating the effective population size
+haplos1=`seq 0 $nsamples_minus_1 | tr '\n' ','`
+haplos1=${haplos1::-1} # Remove last comma
+#sbatch -p allnodes -c 48 --job-name msmc2_p1 --wrap 'hostname; \time -v /home/guarracino/tools/msmc2_linux64bit -p 1*2+15*1+1*2 -o '$nsamples'.pq_arms.phased.chr13.hetsep.p_arms -I '$haplos1' /lizardfs/guarracino/chromosome_communities/msmc/'$nsamples'.pq_arms.phased.chr13.hetsep'
+\time -v /home/guarracino/tools/msmc2_linux64bit -p 1*2+15*1+1*2 -o $nsamples.pq_arms.phased.chr13.hetsep.p_arms -I $haplos1 /lizardfs/guarracino/chromosome_communities/msmc/$nsamples.pq_arms.phased.chr13.hetsep
+
+haplos2=`seq $nsamples $nsamples_mul_2_minus_1 | tr '\n' ','`
+haplos2=${haplos2::-1} # Remove last comma
+#sbatch -p allnodes -c 48 --job-name msmc2_p2 --wrap 'hostname; \time -v /home/guarracino/tools/msmc2_linux64bit -p 1*2+15*1+1*2 -o '$nsamples'.pq_arms.phased.chr13.hetsep.q_arms -I '$haplos2' /lizardfs/guarracino/chromosome_communities/msmc/'$nsamples'.pq_arms.phased.chr13.hetsep'
+\time -v /home/guarracino/tools/msmc2_linux64bit -p 1*2+15*1+1*2 -o $nsamples.pq_arms.phased.chr13.hetsep.q_arms -I $haplos2 /lizardfs/guarracino/chromosome_communities/msmc/$nsamples.pq_arms.phased.chr13.hetsep
+
+
+# Estimating population separation history
+combinations=$((for x in `seq 0 $nsamples_minus_1`; do
+  for y in `seq $nsamples $nsamples_mul_2_minus_1`; do
+    echo "$x-$y"
+  done
+done) | tr '\n' ',')
+combinations=${combinations::-1} # Remove last comma
+
+# --skipAmbiguous: skip sites with ambiguous phasing. Recommended for cross population analysis
+#sbatch -p allnodes -c 48 --job-name msmc2_sep12 --wrap 'hostname; \time -v ~/tools/msmc2_linux64bit -p 1*2+15*1+1*2 --skipAmbiguous -o '$nsamples'.pq_arms.phased.chr13.hetsep.pq_arms -I '$combinations' /lizardfs/guarracino/chromosome_communities/msmc/'$nsamples'.pq_arms.phased.chr13.hetsep'
+\time -v ~/tools/msmc2_linux64bit -p 1*2+15*1+1*2 --skipAmbiguous -o $nsamples.pq_arms.phased.chr13.hetsep.pq_arms -I $combinations /lizardfs/guarracino/chromosome_communities/msmc/$nsamples.pq_arms.phased.chr13.hetsep
+
+
+python3 ~/tools/msmc-tools/combineCrossCoal.py \
+  $nsamples.pq_arms.phased.chr13.hetsep.pq_arms.final.txt \
+  $nsamples.pq_arms.phased.chr13.hetsep.p_arms.final.txt \
+  $nsamples.pq_arms.phased.chr13.hetsep.q_arms.final.txt \
+  > $nsamples.pq_arms.phased.chr13.hetsep.combined.final.txt
+
+
+
+
+
+
 python3 ~/tools/msmc-tools/generate_multihetsep.py \
   chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.chm13.snv.p_arms.HG002#MAT#chr13.prox.vcf.gz \
   chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.chm13.snv.p_arms.HG002#MAT#chr14.prox.vcf.gz \
@@ -94,7 +142,8 @@ python3 ~/tools/msmc-tools/generate_multihetsep.py \
   > HG002.pq_arms.phased.hetsep
 
 # msmc wants a single chromosome
-grep 'chr13' HG002.pq_arms.phased.hetsep > HG002.pq_arms.phased.chr13.hetsep
+# sed to avoid '#' in the reference name that breaks msmc
+grep '^chm13#chr13' HG002.pq_arms.phased.hetsep | sed 's/^chm13#//g' > HG002.pq_arms.phased.chr13.hetsep
 
 # Estimating the effective population size
 ~/tools/msmc2_linux64bit -p 1*2+15*1+1*2 \
@@ -108,17 +157,20 @@ grep 'chr13' HG002.pq_arms.phased.hetsep > HG002.pq_arms.phased.chr13.hetsep
   HG002.pq_arms.phased.chr13.hetsep 
 
 # Estimating population separation history
+# --skipAmbiguous: skip sites with ambiguous phasing. Recommended for cross population analysis
 ~/tools/msmc2_linux64bit \
   -p 1*2+15*1+1*2 \
-  -o HG002.pq_arms.phased.chr13.hetsep.p_arms_q_arms \
+  --skipAmbiguous \
+  -o HG002.pq_arms.phased.chr13.hetsep.pq_arms \
   -I 0-5,0-6,0-7,0-8,0-9,1-5,1-6,1-7,1-8,1-9,2-5,2-6,2-7,2-9,2-9,3-5,3-6,3-7,3-8,3-9,4-5,4-6,4-7,4-8,4-9 \
+     0-5,0-6,0-7,0-8,0-9,1-5,1-6,1-7,1-8,1-9,2-5,2-6,2-7,2-8,2-9,3-5,3-6,3-7,3-8,3-9,4-5,4-6,4-7,4-8,4-9
   HG002.pq_arms.phased.chr13.hetsep 
 
-python3 ~/tools/msmc-tools/combineCrossCoal.py subset.13vs14.chr13.separation.final.txt \
-  subset.13vs14.chr13.pop13.final.txt \
-  subset.13vs14.chr13.pop14.final.txt > subset.13vs14.chr13.separation.combined.final.txt
-
-
+python3 ~/tools/msmc-tools/combineCrossCoal.py \
+  HG002.pq_arms.phased.chr13.hetsep.pq_arms.final.txt \
+  HG002.pq_arms.phased.chr13.hetsep.p_arms.final.txt \
+  HG002.pq_arms.phased.chr13.hetsep.q_arms.final.txt \
+  > HG002.pq_arms.phased.chr13.hetsep.combined.final.txt
 
 
 
