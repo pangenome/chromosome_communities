@@ -45,7 +45,6 @@ zgrep '^#' $PATH_VCF_GZ -v | cut -f 1 | uniq | sort | uniq > ref_names.txt
 Take SNPs:
 
 ```shell
-
 # Take SNPs and normalize
 vcftools --gzvcf $PATH_VCF_GZ --remove-indels --recode --recode-INFO-all --stdout |\
   #bcftools norm -f $PATH_REF_FASTA -c e -m - |\
@@ -81,5 +80,14 @@ for FST_TYPE in wc hudson; do
       --window_size $WIN_SIZE
   done
 done
+
+    python3 ~/git/pixy/pixy/__main__.py --n_cores 1 \
+      --chromosomes "chm13#chr13" \
+      --vcf $PATH_SNV_VCF_GZ \
+      --stats 'fst' --fst_type $FST_TYPE \
+      --pop pop.txt \
+      --output_prefix $FST_TYPE.$WIN_SIZE \
+      --bypass_invariant_check 'yes' \
+      --window_size $WIN_SIZE
 ```
 
