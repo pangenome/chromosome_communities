@@ -38,8 +38,8 @@ haplos2=`seq $nsamples $nsamples_mul_2_minus_1 | tr '\n' ',' | sed 's/.$//'`
 
 
 # Estimating population separation history
-combinations=$((for x in `seq 0 $nsamples_minus_1`; do
-  for y in `seq $nsamples $nsamples_mul_2_minus_1`; do
+combinations=$((for x in $(seq 0 $nsamples_minus_1); do
+  for y in $(seq $nsamples $nsamples_mul_2_minus_1); do
     echo "$x-$y"
   done
 done) | tr '\n' ',' | sed 's/.$//')
