@@ -12,7 +12,7 @@ nsamples=$(cat $PATH_POPULATION_1_TXT | wc -l)
 nsamples_minus_1=$(echo "$nsamples - 1" | bc)
 nsamples_mul_2_minus_1=$(echo "$nsamples * 2 - 1" | bc)
 
-samples=$(cat $PATH_POPULATION_1_TXT $PATH_POPULATION_2_TXT | tr '\n' ' ' | sed 's/.$//'`)
+samples=$(cat $PATH_POPULATION_1_TXT $PATH_POPULATION_2_TXT | tr '\n' ' ' | sed 's/.$//')
 
 # Generate files for MSMC
 # Using a hacked version, changing a few rows in generate_multihetsep.py to get phased fake-diploid data
@@ -38,11 +38,11 @@ haplos2=`seq $nsamples $nsamples_mul_2_minus_1 | tr '\n' ',' | sed 's/.$//'`
 
 
 # Estimating population separation history
-combinations=$((for x in $(seq 0 $nsamples_minus_1); do
-  for y in $(seq $nsamples $nsamples_mul_2_minus_1); do
+combinations=$( (for x in `seq 0 $nsamples_minus_1`; do
+  for y in `seq $nsamples $nsamples_mul_2_minus_1`; do
     echo "$x-$y"
   done
-done) | tr '\n' ',' | sed 's/.$//')
+done ) | tr '\n' ',' | sed 's/.$//')
 
 # --skipAmbiguous: skip sites with ambiguous phasing. Recommended for cross population analysis
 \time -v $PATH_MSMC2 \
