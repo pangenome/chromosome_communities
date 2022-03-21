@@ -33,7 +33,9 @@ x %>%
     panel.grid.minor = element_line(size = 0.125),
     panel.grid.major = element_line(size = 0.25)
   ) +
-  scale_x_continuous(trans='log2') +
+  #xlim(c(0, 300)) +
+  #ylim(c(0, 500)) +
+  scale_x_continuous(trans='log10') +
   xlab("Years ago") + 
   ylab("effective population size") +
   ggtitle('75 contigs (15 for each acro)')
@@ -67,7 +69,7 @@ crossPopDat %>%
     panel.grid.minor = element_line(size = 0.125),
     panel.grid.major = element_line(size = 0.25)
   ) +
-  scale_x_continuous(trans='log2') +
+  scale_x_continuous(trans='log10') +
   xlab("Years ago") + 
   ylab("relative cross-coalescence rate") +
   ggtitle('75 contigs (15 for each acro)')
