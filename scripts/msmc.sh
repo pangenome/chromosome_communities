@@ -19,7 +19,9 @@ samples=$(cat $PATH_POPULATION_1_TXT $PATH_POPULATION_2_TXT | tr '\n' ' ' | sed 
 #print ("HACKED: Non-diploid SNP found and considered as phased data: %s" % geno, file=sys.stderr)
 #phased = True
 #geno = "%s|%s" % (geno[0], geno[0])
-python3 $PATH_HACKED_GENERATE_MULTIHETSEP_PY $samples > $PREFIX.multihetsep
+
+# '#' breaks MSMC
+python3 $PATH_HACKED_GENERATE_MULTIHETSEP_PY $samples | sed 's/#/-/g' > $PREFIX.multihetsep
 
 # Estimating the effective population size
 haplos1=`seq 0 $nsamples_minus_1 | tr '\n' ',' | sed 's/.$//'`
