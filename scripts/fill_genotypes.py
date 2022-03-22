@@ -12,9 +12,9 @@ for line in sys.stdin:
             new_gt = ''
             if diploid and len(gt) != 3:
                 if gt in ['01']:
-                    new_gt == f'{gt}|{gt}'
+                    gt == f'{gt}|{gt}'
                 else:
-                    new_gt == '0|0'
+                    gt == '0|0'
             for j, c in enumerate(gt):
                 if j % 2 == 0 and c == '.':
                     c = '0'
