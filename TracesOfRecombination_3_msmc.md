@@ -1,6 +1,6 @@
 # msmc
 
-## Tools
+## Tools and directory
 
 ```shell
 cd ~/tools
@@ -10,35 +10,147 @@ wget -c https://github.com/stschiff/msmc/releases/download/v1.1.0/msmc_1.1.0_lin
 chmod +x msmc_1.1.0_linux64bit
 ```
 
-## Steps
+```shell
+mkdir -p /lizardfs/guarracino/chromosome_communities/msmc
+cd /lizardfs/guarracino/chromosome_communities/msmc
+```
+
+
+## Notes
+In vcftools, the BED file is expected to have a header line.
 
 Tutorial: https://github.com/stschiff/msmc-tools/blob/master/msmc-tutorial/guide.md#estimating-population-separation-history
 
-Prepare VCF files for each sample, with respect to each reference:
+
+## Steps
+
+Set variables:
 
 ```shell
-#grep -e $'chr1\t\|chr2\t\|chr3\|chr4\|chr5\|cht6\|cht7\|chr8\|chr9\|chr13\|chr14\|chr15\|chr21\|chr22'
 THREADS=48
+```
 
-PATH_SNV_VCF_GZ=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.chm13.snv.vcf.gz
-VCF_NAME=$(basename $PATH_SNV_VCF_GZ .vcf.gz)
+Prepare p/q-arms BED files:
 
-mkdir -p /lizardfs/guarracino/chromosome_communities/msmc
-cd /lizardfs/guarracino/chromosome_communities/msmc
-
-# Split p/q-arm variants 
+```shell
 sed 's/chr/chm13#chr/g' /lizardfs/guarracino/chromosome_communities/data/chm13.centromeres.approximate.bed | \
   bedtools sort | \
   bedtools complement \
     -i - \
-    -g <(cut -f 1,2 /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa.fai | sort) | \
-  grep 'chr13\|chr14\|chr15\|chr21\|chr22' > tmp.bed
+    -g <(cut -f 1,2 /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa.fai | sort) \
+  > tmp.bed
   
 # Take odd rows
 (echo -e "#chrom\tstart\tend"; sed -n 1~2p tmp.bed) > p_arms.bed
 # Take even rows
 (echo -e "#chrom\tstart\tend"; sed -n 2~2p tmp.bed) > q_arms.bed
 rm tmp.bed
+```
+
+### Coalescence p-arms and q-arms separately and for each chromosome
+
+Split variants by arm and sample:
+
+```shell
+(seq 1 22) | while read i; do
+  REF=chr$i
+  echo $REF 
+
+  PATH_CHR_VCF_GZ=/lizardfs/erikg/.../wgg88/.../..$REF...vcf.gz
+  VCF_NAME=$(basename $PATH_CHR_VCF_GZ .vcf.gz)
+
+  for ARM in p_arm q_arm; do
+    ARM_DIR=$REF/$ARM
+    mkdir -p $ARM_DIR
+
+    PATH_CHR_ARM_SNV_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.snv.vcf.gz
+
+    # Split by arm
+    vcftools \
+      --gzvcf $PATH_CHR_VCF_GZ \
+      --bed <(echo -e "#chrom\tstart\tend"; grep $REF ${ARM}s.bed) \
+      --remove-indels --recode --keep-INFO-all --stdout |\
+      #bcftools norm -f $PATH_REF_FASTA -c e -m - |\
+      bgzip -@ $THREADS > $PATH_CHR_ARM_SNV_VCF_GZ
+
+    # Split by sample
+    for SAMPLE in `bcftools query -l $PATH_CHR_ARM_SNV_VCF_GZ | tr '\n' ' '`; do
+      echo $REF $ARM $SAMPLE
+      
+      # Fill missing genotypes (with 0, i.e. reference allele, else msmc breaks)
+      PATH_CHR_ARM_SNV_SAMPLE_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.$SAMPLE.snv.vcf.gz
+      bcftools view --samples $SAMPLE $PATH_CHR_ARM_SNV_VCF_GZ |\
+        bcftools +setGT - -- -t . --new-gt 0p |\
+        bgzip -@ $THREADS -c > $PATH_CHR_ARM_SNV_SAMPLE_VCF_GZ
+    done
+  done
+done
+```
+
+Collect samples to build the populations to compare:
+
+```shell
+(seq 1 22) | while read i; do
+  REF=chr$i
+  echo $REF 
+
+  PATH_CHR_VCF_GZ=/lizardfs/erikg/.../wgg88/.../..$REF...vcf.gz
+  VCF_NAME=$(basename $PATH_CHR_VCF_GZ .vcf.gz)
+
+  for ARM in p_arm q_arm; do
+    ARM_DIR=$REF/$ARM
+    PATH_CHR_ARM_SNV_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.snv.vcf.gz
+    PATH_CHR_ARM_POP_TXT=$ARM_DIR/$REF.$ARM.population.txt
+    
+    for SAMPLE in `bcftools query -l $PATH_CHR_ARM_SNV_VCF_GZ | tr '\n' ' '`; do
+      echo $REF $ARM $SAMPLE
+      
+      PATH_CHR_ARM_SNV_SAMPLE_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.$SAMPLE.snv.vcf.gz
+      
+      echo $PATH_CHR_ARM_SNV_SAMPLE_VCF_GZ >> $PATH_CHR_ARM_POP_TXT
+    done
+  done
+done
+```
+
+Run `msmc`:
+
+```shell
+(seq 1 22) | while read i; do
+  REF=chr$i
+  echo $REF 
+
+  PATH_CHR_VCF_GZ=/lizardfs/erikg/.../wgg88/.../..$REF...vcf.gz
+  VCF_NAME=$(basename $PATH_CHR_VCF_GZ .vcf.gz)
+
+  for ARM in p_arm q_arm; do
+    ARM_DIR=$REF/$ARM
+    PATH_CHR_ARM_SNV_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.snv.vcf.gz
+    PATH_CHR_ARM_POP_TXT=$ARM_DIR/$REF.$ARM.population.txt
+
+    sbatch -c 48 -p high-mem --job-name msmc-$REF msmc2.sh
+  done
+done
+
+
+
+```
+
+### Coalescence p-arms together/all pairs/all combinations ???
+...
+
+
+
+
+
+Prepare acro-VCF files for each sample, with respect to each acro-reference:
+
+```shell
+PATH_SNV_VCF_GZ=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.chm13.snv.vcf.gz
+VCF_NAME=$(basename $PATH_SNV_VCF_GZ .vcf.gz)
+
+
+# Split p/q-arm variants 
 
 (seq 13 15; seq 21 22) | while read i; do
   REF=chr$i
@@ -46,17 +158,16 @@ rm tmp.bed
     
   mkdir -p $REF
     
-  # NOTE: in vctools, the BED file is expected to have a header line.
   vcftools \
     --gzvcf $PATH_SNV_VCF_GZ \
     --bed <(echo -e "#chrom\tstart\tend"; grep $REF p_arms.bed) \
-    --recode --out $REF.p --keep-INFO-all --stdout |\
+    --recode --keep-INFO-all --out $REF.p --stdout |\
     #bcftools norm -f $PATH_REF_FASTA -c e -m - |\
     bgzip -@ $THREADS > $REF/$VCF_NAME.$REF.p_arm.vcf.gz
   vcftools \
     --gzvcf $PATH_SNV_VCF_GZ \
     --bed <(echo -e "#chrom\tstart\tend"; grep $REF q_arms.bed) \
-    --recode --out $REF.q --keep-INFO-all --stdout |\
+    --recode --keep-INFO-all --out $REF.q --stdout |\
     #bcftools norm -f $PATH_REF_FASTA -c e -m - |\
     bgzip -@ $THREADS > $REF/$VCF_NAME.$REF.q_arm.vcf.gz
 done
@@ -136,7 +247,7 @@ done
   REF=chr$i
   OUTPUT_DIR=p${i}_vs_q${rm}_wrt_${REF}
   
-  bash /lizardfs/guarracino/chromosome_communities/scripts/msmc.sh \
+  bash /lizardfs/guarracino/chromosome_communities/scripts/msmc2pops.sh \
     $OUTPUT_DIR/$REF.samples.p_arms.txt \
     $OUTPUT_DIR/$REF.samples.q_arms.txt \
     /home/guarracino/tools/msmc-tools/generate_multihetsep.py \
