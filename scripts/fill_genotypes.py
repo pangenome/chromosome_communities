@@ -11,13 +11,14 @@ for line in sys.stdin:
         for i, gt in enumerate(line_list[9:]):
             new_gt = ''
             if diploid and len(gt) != 3:
-                if gt in ['01']:
-                    gt == f'{gt}|{gt}'
+                if gt[0] in '01':
+                    gt = f'{gt[0]}|{gt[0]}'
                 else:
-                    gt == '0|0'
+                    gt = '0|0'
+  
             for j, c in enumerate(gt):
                 if j % 2 == 0 and c == '.':
-                    c = '0'
+                        c = '0'
                 new_gt += c
             
             line_list[9 + i] = new_gt

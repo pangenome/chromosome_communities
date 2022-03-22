@@ -5,9 +5,19 @@
 ```shell
 cd ~/tools
 git clone --recursive https://github.com/stschiff/msmc-tools.git
+# Hack the tool by changing a few rows in generate_multihetsep.py to get phased fake-diploid data
+#print ("HACKED: Non-diploid SNP found and considered as phased data: %s" % geno, file=sys.stderr)
+#phased = True
+#geno = "%s|%s" % (geno[0], geno[0])
+cd ..
 
 wget -c https://github.com/stschiff/msmc/releases/download/v1.1.0/msmc_1.1.0_linux64bit
 chmod +x msmc_1.1.0_linux64bit
+
+
+wget -c https://github.com/popgenmethods/smcpp/releases/download/v1.15.2/smcpp-1.15.2-Linux-x86_64.sh
+bash smcpp-1.15.2-Linux-x86_64.sh
+/home/guarracino/smcpp/bin/smc++
 ```
 
 ```shell
@@ -37,7 +47,7 @@ sed 's/chr/chm13#chr/g' /lizardfs/guarracino/chromosome_communities/data/chm13.c
   bedtools sort | \
   bedtools complement \
     -i - \
-    -g <(cut -f 1,2 /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa.fai | sort) \
+    -g <(cut -f 1,2 /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa.fai | grep 'chrM\|chrX' -v | sort) \
   > tmp.bed
   
 # Take odd rows
@@ -47,16 +57,14 @@ sed 's/chr/chm13#chr/g' /lizardfs/guarracino/chromosome_communities/data/chm13.c
 rm tmp.bed
 ```
 
-### Coalescence p-arms and q-arms separately and for each chromosome
-
-Split variants by arm and sample:
+Split variants by arm:
 
 ```shell
-(seq 1 22) | while read i; do
+(seq 21 21) | while read i; do
   REF=chr$i
   echo $REF 
 
-  PATH_CHR_VCF_GZ=/lizardfs/erikg/.../wgg88/.../..$REF...vcf.gz
+  PATH_CHR_VCF_GZ=/lizardfs/erikg/HPRC/year1v2genbank/wgg.88/$REF.pan/$REF.pan.fa.a2fb268.4030258.6a1ecc2.smooth.chm13.vcf.gz
   VCF_NAME=$(basename $PATH_CHR_VCF_GZ .vcf.gz)
 
   for ARM in p_arm q_arm; do
@@ -66,12 +74,37 @@ Split variants by arm and sample:
     PATH_CHR_ARM_SNV_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.snv.vcf.gz
 
     # Split by arm
+    # Fill missing genotypes (with 0, i.e. reference allele, else msmc breaks)
     vcftools \
       --gzvcf $PATH_CHR_VCF_GZ \
-      --bed <(echo -e "#chrom\tstart\tend"; grep $REF ${ARM}s.bed) \
+      --bed <(echo -e "#chrom\tstart\tend"; grep -P "${REF}\t" ${ARM}s.bed) \
       --remove-indels --recode --keep-INFO-all --stdout |\
+      python3 /lizardfs/guarracino/chromosome_communities/scripts/fill_genotypes.py diploid |
       #bcftools norm -f $PATH_REF_FASTA -c e -m - |\
       bgzip -@ $THREADS > $PATH_CHR_ARM_SNV_VCF_GZ
+    tabix $PATH_CHR_ARM_SNV_VCF_GZ
+    #cat out.log
+  done
+done
+```
+
+### Coalescence p-arms and q-arms separately and for each chromosome
+
+Split variants by sample:
+
+```shell
+(seq 1 21) | while read i; do
+  REF=chr$i
+  echo $REF 
+
+  PATH_CHR_VCF_GZ=/lizardfs/erikg/HPRC/year1v2genbank/wgg.88/$REF.pan/$REF.pan.fa.a2fb268.4030258.6a1ecc2.smooth.chm13.vcf.gz
+  VCF_NAME=$(basename $PATH_CHR_VCF_GZ .vcf.gz)
+
+  for ARM in p_arm q_arm; do
+    ARM_DIR=$REF/$ARM
+    mkdir -p $ARM_DIR
+
+    PATH_CHR_ARM_SNV_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.snv.vcf.gz
 
     # Split by sample
     for SAMPLE in `bcftools query -l $PATH_CHR_ARM_SNV_VCF_GZ | tr '\n' ' '`; do
@@ -80,21 +113,22 @@ Split variants by arm and sample:
       # Fill missing genotypes (with 0, i.e. reference allele, else msmc breaks)
       PATH_CHR_ARM_SNV_SAMPLE_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.$SAMPLE.snv.vcf.gz
       bcftools view --samples $SAMPLE $PATH_CHR_ARM_SNV_VCF_GZ |\
-        bcftools +setGT - -- -t . --new-gt 0p |\
+        python3 /lizardfs/guarracino/chromosome_communities/scripts/fill_genotypes.py |
         bgzip -@ $THREADS -c > $PATH_CHR_ARM_SNV_SAMPLE_VCF_GZ
     done
   done
 done
 ```
 
+
 Collect samples to build the populations to compare:
 
 ```shell
-(seq 1 22) | while read i; do
+(seq 22 22) | while read i; do
   REF=chr$i
   echo $REF 
 
-  PATH_CHR_VCF_GZ=/lizardfs/erikg/.../wgg88/.../..$REF...vcf.gz
+  PATH_CHR_VCF_GZ=/lizardfs/erikg/HPRC/year1v2genbank/wgg.88/$REF.pan/$REF.pan.fa.a2fb268.4030258.6a1ecc2.smooth.chm13.vcf.gz
   VCF_NAME=$(basename $PATH_CHR_VCF_GZ .vcf.gz)
 
   for ARM in p_arm q_arm; do
@@ -102,7 +136,7 @@ Collect samples to build the populations to compare:
     PATH_CHR_ARM_SNV_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.snv.vcf.gz
     PATH_CHR_ARM_POP_TXT=$ARM_DIR/$REF.$ARM.population.txt
     
-    for SAMPLE in `bcftools query -l $PATH_CHR_ARM_SNV_VCF_GZ | tr '\n' ' '`; do
+    for SAMPLE in `bcftools query -l $PATH_CHR_ARM_SNV_VCF_GZ | grep grch38 -v | tr '\n' ' '`; do
       echo $REF $ARM $SAMPLE
       
       PATH_CHR_ARM_SNV_SAMPLE_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.$SAMPLE.snv.vcf.gz
@@ -116,7 +150,7 @@ done
 Run `msmc`:
 
 ```shell
-(seq 1 22) | while read i; do
+(seq 22 22) | while read i; do
   REF=chr$i
   echo $REF 
 
@@ -128,10 +162,9 @@ Run `msmc`:
     PATH_CHR_ARM_SNV_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.snv.vcf.gz
     PATH_CHR_ARM_POP_TXT=$ARM_DIR/$REF.$ARM.population.txt
 
-    sbatch -c 48 -p high-mem --job-name msmc-$REF msmc2.sh
+    sbatch -c 48 -p highmem --job-name msmc-$REF /lizardfs/guarracino/chromosome_communities/scripts/msmc2.sh $PATH_CHR_ARM_POP_TXT /home/guarracino/tools/msmc-tools/generate_multihetsep.py /home/guarracino/tools/msmc2_linux64bit $ARM_DIR/$REF.$ARM.msmc2
   done
 done
-
 
 
 ```
