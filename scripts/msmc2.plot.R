@@ -16,8 +16,8 @@ x$pop <- population_name
 x$x <- x$left_time_boundary/mu*gen
 x$y <- (1/x$lambda)/(2*mu)
 
-x %>%
-  ggplot(aes(x = x, y = y, color = pop)) + 
+
+ggplot(x, aes(x = x, y = y, color = pop)) + 
   geom_step() + 
   theme_bw() + 
   theme(
