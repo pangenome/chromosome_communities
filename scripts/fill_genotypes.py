@@ -1,6 +1,6 @@
 import sys
 
-diploid = sys.argv[1] == 'diploid'
+diploid = True if len(sys.argv) > 1 and sys.argv[1] == 'diploid' else False
 
 for line in sys.stdin:
     if line.startswith('#'):
@@ -10,17 +10,20 @@ for line in sys.stdin:
 
         for i, gt in enumerate(line_list[9:]):
             new_gt = ''
-            if diploid and len(gt) != 3:
-                if gt[0] in '01':
-                    gt = f'{gt[0]}|{gt[0]}'
-                else:
-                    gt = '0|0'
-  
-            for j, c in enumerate(gt):
-                if j % 2 == 0 and c == '.':
+            for x in gt.split(','):
+                if diploid and len(x) != 3:
+                    if x[0] in '01':
+                        x = f'{x[0]}|{x[0]}'
+                    else:
+                        x = '0|0'
+    
+                for j, c in enumerate(x):
+                    if j % 2 == 0 and c == '.':
                         c = '0'
-                new_gt += c
+                    new_gt += c
+                
+                new_gt += ','
             
-            line_list[9 + i] = new_gt
+            line_list[9 + i] = new_gt.strip(',')
         
         print('\t'.join(line_list))
