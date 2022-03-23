@@ -3,7 +3,8 @@ args <- commandArgs()
 path_msmc2_final_txt <- args[6]
 population_name <- args[7]
 
-library(tidyverse)
+library(ggplot2)
+library(ggforce)
 
 mu <- 1.25e-8
 gen <- 30
