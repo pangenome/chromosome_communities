@@ -1,4 +1,4 @@
-# msmc
+# History
 
 ## Tools and directory
 
@@ -17,12 +17,7 @@ chmod +x msmc_1.1.0_linux64bit
 
 wget -c https://github.com/popgenmethods/smcpp/releases/download/v1.15.2/smcpp-1.15.2-Linux-x86_64.sh
 bash smcpp-1.15.2-Linux-x86_64.sh
-/home/guarracino/smcpp/bin/smc++
-```
-
-```shell
-mkdir -p /lizardfs/guarracino/chromosome_communities/msmc
-cd /lizardfs/guarracino/chromosome_communities/msmc
+/home/guarracino/smcpp/bin/smc++ 
 ```
 
 
@@ -32,7 +27,7 @@ In vcftools, the BED file is expected to have a header line.
 Tutorial: https://github.com/stschiff/msmc-tools/blob/master/msmc-tutorial/guide.md#estimating-population-separation-history
 
 
-## Steps
+## Preparation
 
 Set variables:
 
@@ -60,7 +55,7 @@ rm tmp.bed
 Split variants by arm:
 
 ```shell
-(seq 21 21) | while read i; do
+(seq 1 22) | while read i; do
   REF=chr$i
   echo $REF 
 
@@ -88,12 +83,17 @@ Split variants by arm:
 done
 ```
 
+## MSMC
+
 ### Coalescence p-arms and q-arms separately and for each chromosome
 
 Split variants by sample:
 
 ```shell
-(seq 1 21) | while read i; do
+mkdir -p /lizardfs/guarracino/chromosome_communities/msmc
+cd /lizardfs/guarracino/chromosome_communities/msmc
+
+(seq 1 22) | while read i; do
   REF=chr$i
   echo $REF 
 
@@ -113,7 +113,6 @@ Split variants by sample:
       # Fill missing genotypes (with 0, i.e. reference allele, else msmc breaks)
       PATH_CHR_ARM_SNV_SAMPLE_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.$SAMPLE.snv.vcf.gz
       bcftools view --samples $SAMPLE $PATH_CHR_ARM_SNV_VCF_GZ |\
-        python3 /lizardfs/guarracino/chromosome_communities/scripts/fill_genotypes.py |
         bgzip -@ $THREADS -c > $PATH_CHR_ARM_SNV_SAMPLE_VCF_GZ
     done
   done
@@ -121,10 +120,12 @@ done
 ```
 
 
-Collect samples to build the populations to compare:
+Collect a few samples (MSMC doesn't scale) to build the populations to compare:
 
 ```shell
-(seq 22 22) | while read i; do
+NUM_SAMPLES=15
+
+(seq 1 22) | while read i; do
   REF=chr$i
   echo $REF 
 
@@ -136,7 +137,7 @@ Collect samples to build the populations to compare:
     PATH_CHR_ARM_SNV_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.snv.vcf.gz
     PATH_CHR_ARM_POP_TXT=$ARM_DIR/$REF.$ARM.population.txt
     
-    for SAMPLE in `bcftools query -l $PATH_CHR_ARM_SNV_VCF_GZ | grep grch38 -v | tr '\n' ' '`; do
+    for SAMPLE in `bcftools query -l $PATH_CHR_ARM_SNV_VCF_GZ | grep grch38 -v | head -n ${NUM_SAMPLES} | tr '\n' ' '`; do
       echo $REF $ARM $SAMPLE
       
       PATH_CHR_ARM_SNV_SAMPLE_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.$SAMPLE.snv.vcf.gz
@@ -150,27 +151,101 @@ done
 Run `msmc`:
 
 ```shell
-(seq 22 22) | while read i; do
+(seq 1 22) | while read i; do
   REF=chr$i
-  echo $REF 
+  echo $REF
 
   PATH_CHR_VCF_GZ=/lizardfs/erikg/.../wgg88/.../..$REF...vcf.gz
   VCF_NAME=$(basename $PATH_CHR_VCF_GZ .vcf.gz)
 
   for ARM in p_arm q_arm; do
     ARM_DIR=$REF/$ARM
-    PATH_CHR_ARM_SNV_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.snv.vcf.gz
     PATH_CHR_ARM_POP_TXT=$ARM_DIR/$REF.$ARM.population.txt
 
-    sbatch -c 48 -p highmem --job-name msmc-$REF /lizardfs/guarracino/chromosome_communities/scripts/msmc2.sh $PATH_CHR_ARM_POP_TXT /home/guarracino/tools/msmc-tools/generate_multihetsep.py /home/guarracino/tools/msmc2_linux64bit $ARM_DIR/$REF.$ARM.msmc2
+    sbatch -c 48 -p workers --job-name msmc-$i /lizardfs/guarracino/chromosome_communities/scripts/msmc2.sh $PATH_CHR_ARM_POP_TXT /home/guarracino/tools/msmc-tools/generate_multihetsep.py /home/guarracino/tools/msmc2_linux64bit $ARM_DIR/$REF.$ARM.msmc2
   done
 done
-
-
 ```
 
 ### Coalescence p-arms together/all pairs/all combinations ???
 ...
+
+
+
+## SMC++
+
+### Coalescence p-arms and q-arms separately and for each chromosome
+
+```shell
+mkdir -p /lizardfs/guarracino/chromosome_communities/smcpp
+cd /lizardfs/guarracino/chromosome_communities/smcpp
+
+(seq 1 22) | while read i; do
+  REF=chr$i
+  echo $REF 
+
+  for ARM in p_arm q_arm; do
+    PATH_CHR_ARM_SNV_VCF_GZ=/lizardfs/guarracino/chromosome_communities/msmc/$REF/$ARM/$REF.pan.fa.a2fb268.4030258.6a1ecc2.smooth.chm13.$REF.$ARM.snv.vcf.gz
+    SAMPLES=`bcftools query -l $PATH_CHR_ARM_SNV_VCF_GZ | grep grch38 -v | tr '\n' ',' | sed 's/.$//'`
+    
+    /home/guarracino/smcpp/bin/smc++ vcf2smc \
+      $PATH_CHR_ARM_SNV_VCF_GZ \
+      $REF.$ARM.smc.gz \
+      chm13#$REF \
+      $REF_$ARM:$SAMPLES
+  done
+done
+
+(seq 1 22) | while read i; do
+  REF=chr$i
+  echo $REF 
+
+  for ARM in p_arm q_arm; do
+    PATH_CHR_ARM_SNV_VCF_GZ=/lizardfs/guarracino/chromosome_communities/msmc/$REF/$ARM/$REF.pan.fa.a2fb268.4030258.6a1ecc2.smooth.chm13.$REF.$ARM.snv.vcf.gz
+
+    sbatch -c 48 -p workers --jon-name smcpp-$i --wrap'/home/guarracino/smcpp/bin/smc++ estimate 1e-8 '$REF'.'$ARM'.smc.gz -o '$REF'.'$ARM
+  done
+done
+
+(seq 1 22) | while read i; do
+  REF=chr$i
+  echo $REF 
+
+  for ARM in p_arm q_arm; do
+    PATH_CHR_ARM_SNV_VCF_GZ=/lizardfs/guarracino/chromosome_communities/msmc/$REF/$ARM/$REF.pan.fa.a2fb268.4030258.6a1ecc2.smooth.chm13.$REF.$ARM.snv.vcf.gz
+
+    /home/guarracino/smcpp/bin/smc++ plot $REF.$ARM/$REF.$ARM.png $REF.$ARM/model.final.json
+  done
+done
+
+
+
+
+
+/home/guarracino/smcpp/bin/smc++ vcf2smc \
+  /lizardfs/guarracino/chromosome_communities/msmc/chr21/p_arm/chr21.pan.fa.a2fb268.4030258.6a1ecc2.smooth.chm13.chr21.p_arm.snv.vcf.gz \
+  chr21.smc.gz \
+  chm13#chr21 \
+  POP:HG00735,HG00741,HG01071,HG01106,HG01109,HG01123,HG01175,HG01243,HG01258,HG01358,HG01361,HG01891,HG01928,HG01952,HG01978,HG02055,HG02080,HG02109,HG02145,HG02148,HG02257,HG02486,HG02559,HG02572,HG02622
+
+
+
+/home/guarracino/smcpp/bin/smc++ estimate 1e-8 chr21.smc.gz \
+/home/guarracino/smcpp/bin/smc++ plot plot.png model.final.json  -g 1000
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
