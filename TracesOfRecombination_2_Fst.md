@@ -19,11 +19,10 @@ run_pixy="python3 /home/guarracino/git/pixy/pixy/__main__.py"
 Choose the VCF file:
 
 ```shell
-PATH_VCF_GZ=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.s100k.l300k.p98.n84/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.chm13.vcf.gz
+#PATH_VCF_GZ=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.s100k.l300k.p98.n84/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.chm13.vcf.gz
 #PATH_VCF_GZ=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.s100k.l300k.p98.n84/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.grch38.vcf.gz
-#PATH_REF_FASTA=xxxxxx
 
-#PATH_VCF_GZ=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.chm13.vcf.gz
+PATH_VCF_GZ=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.chm13.vcf.gz
 #PATH_VCF_GZ=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.grch38.vcf.gz
 
 #PATH_VCF_GZ=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.chm13.vcf.gz
@@ -42,16 +41,6 @@ PATH_SNV_VCF_GZ=$OUTPUT_DIR/$VCF_NAME.snps.vcf.gz
 zgrep '^#' $PATH_VCF_GZ -v | cut -f 1 | uniq | sort | uniq > ref_names.txt
 ```
 
-Take SNPs:
-
-```shell
-# Take SNPs and normalize
-vcftools --gzvcf $PATH_VCF_GZ --remove-indels --recode --recode-INFO-all --stdout |\
-  #bcftools norm -f $PATH_REF_FASTA -c e -m - |\
-  bgzip -@ $THREADS > $PATH_SNV_VCF_GZ
-tabix $PATH_SNV_VCF_GZ
-rm out.log
-```
 
 ```shell
 # Prepare populations

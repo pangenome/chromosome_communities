@@ -211,11 +211,13 @@ done
   REF=chr$i
   echo $REF 
 
-  for ARM in p_arm q_arm; do
-    PATH_CHR_ARM_SNV_VCF_GZ=/lizardfs/guarracino/chromosome_communities/msmc/$REF/$ARM/$REF.pan.fa.a2fb268.4030258.6a1ecc2.smooth.chm13.$REF.$ARM.snv.vcf.gz
+  #for ARM in p_arm q_arm; do
+  #  PATH_CHR_ARM_SNV_VCF_GZ=/lizardfs/guarracino/chromosome_communities/msmc/$REF/$ARM/$REF.pan.fa.a2fb268.4030258.6a1ecc2.smooth.chm13.$REF.$ARM.snv.vcf.gz
 
-    /home/guarracino/smcpp/bin/smc++ plot $REF.$ARM/$REF.$ARM.png $REF.$ARM/model.final.json
-  done
+  #  /home/guarracino/smcpp/bin/smc++ plot $REF.$ARM/$REF.$ARM.png $REF.$ARM/model.final.json
+  #done
+  /home/guarracino/smcpp/bin/smc++ plot $REF.pq_arms.png $REF.p_arm/model.final.json $REF.q_arm/model.final.json -g 1000
+
 done
 
 
