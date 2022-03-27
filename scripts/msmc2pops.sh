@@ -15,7 +15,8 @@ nsamples_mul_2_minus_1=$(echo "$nsamples * 2 - 1" | bc)
 samples=$(cat $PATH_POPULATION_1_TXT $PATH_POPULATION_2_TXT | tr '\n' ' ' | sed 's/.$//')
 
 # Generate files for MSMC
-python3 $PATH_HACKED_GENERATE_MULTIHETSEP_PY $samples > $PREFIX.multihetsep
+# Using the masks, I get nothing, so I need to hack the first line to avoid having a fake homozygous region from the telomere to the rDNA
+$PATH_HACKED_GENERATE_MULTIHETSEP_PY $samples | awk -v OFS='\t' '{if (NR == 1) {print($1, $2, "1", $4)} else {print $0}}' > $PREFIX.multihetsep
 
 # Estimating the effective population size
 haplos1=`seq 0 $nsamples_minus_1 | tr '\n' ',' | sed 's/.$//'`
@@ -52,7 +53,7 @@ done ) | tr '\n' ',' | sed 's/.$//')
 # Since we have obtained the coalescence rates independently, we have allowed MSMC2 to choose different
 # time interval boundaries in each case, depending on the observed heterozygosity within and across populations.
 # We therefore combine the three rates to obtain cross-population results.
-python3 $PATH_COMBINE_CROSS_COAL_PY \
+$PATH_COMBINE_CROSS_COAL_PY \
   $PREFIX.pop1and2.final.txt \
   $PREFIX.pop1.final.txt \
   $PREFIX.pop2.final.txt \
