@@ -1,19 +1,19 @@
-# History
+# History - PGGB + MSMC2/SMC++
 
 ## Tools and directory
 
 ```shell
 cd ~/tools
 git clone --recursive https://github.com/stschiff/msmc-tools.git
-# Hack the tool by changing a few rows in generate_multihetsep.py to get phased fake-diploid data
-#print ("HACKED: Non-diploid SNP found and considered as phased data: %s" % geno, file=sys.stderr)
-#phased = True
-#geno = "%s|%s" % (geno[0], geno[0])
+# Hack the tool, changing a few rows in generate_multihetsep.py to get phased fake-diploid data
+#if len(geno) != 3 or geno[1] not in ['|/']:
+#  print ("HACKED: Non-diploid SNP found and considered as phased data: %s" % geno, file=sys.stderr)
+#  phased = True
+#  geno = "%s|%s" % (geno[0], geno[0])
 cd ..
 
 wget -c https://github.com/stschiff/msmc/releases/download/v1.1.0/msmc_1.1.0_linux64bit
 chmod +x msmc_1.1.0_linux64bit
-
 
 wget -c https://github.com/popgenmethods/smcpp/releases/download/v1.15.2/smcpp-1.15.2-Linux-x86_64.sh
 bash smcpp-1.15.2-Linux-x86_64.sh
@@ -24,15 +24,14 @@ bash smcpp-1.15.2-Linux-x86_64.sh
 ## Notes
 In vcftools, the BED file is expected to have a header line.
 
-Tutorial: https://github.com/stschiff/msmc-tools/blob/master/msmc-tutorial/guide.md#estimating-population-separation-history
+MSMC2 tutorial: https://github.com/stschiff/msmc-tools/blob/master/msmc-tutorial/guide.md#estimating-population-separation-history
 
 
 ## Preparation
 
-Set variables:
-
 ```shell
-THREADS=48
+mkdir -p /lizardfs/guarracino/chromosome_communities/msmc
+cd /lizardfs/guarracino/chromosome_communities/msmc
 ```
 
 Prepare p/q-arms BED files:
@@ -44,13 +43,157 @@ sed 's/chr/chm13#chr/g' /lizardfs/guarracino/chromosome_communities/data/chm13.c
     -i - \
     -g <(cut -f 1,2 /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa.fai | grep 'chrM\|chrX' -v | sort) \
   > tmp.bed
-  
+
 # Take odd rows
-(echo -e "#chrom\tstart\tend"; sed -n 1~2p tmp.bed) > p_arms.bed
+(echo -e "#chrom\tstart\tend"; sed -n 1~2p tmp.bed | grep 'chr13\|chr14\|chr15\|chr21\|chr22') > p_arms.bed
+
 # Take even rows
-(echo -e "#chrom\tstart\tend"; sed -n 2~2p tmp.bed) > q_arms.bed
+(echo -e "#chrom\tstart\tend"; sed -n 2~2p tmp.bed | grep 'chr13\|chr14\|chr15\|chr21\|chr22') > q_arms.bed
 rm tmp.bed
+
+
+# Regions on the right of the rDNA
+zgrep rDNA /lizardfs/guarracino/chromosome_communities/data/chm13.CentromeresAndTelomeres.CenSatAnnotation.txt.gz | \
+  sed 's/chr/chm13#chr/g' | \
+  awk -v OFS='\t' '{print $1,"0",$3}' |\
+  bedtools complement \
+    -i - \
+    -g <(grep 'chr13\|chr14\|chr15\|chr21\|chr22' /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa.fai | cut -f 1,2 | sort) \
+  > rDNA.right.bed
+
+bedtools intersect -a p_arms.bed -b rDNA.right.bed > p_arms.right.bed
 ```
+
+
+## All possible pairs of acrocentric chromosomes
+
+Prepare acro-VCF files for each sample, with respect to each acro-reference:
+
+```shell
+PATH_VCF_GZ=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.952ce3b.4030258.0e65f78.smooth.fix.sed.c1000.chm13.vcf.gz
+VCF_NAME=$(basename $PATH_VCF_GZ .vcf.gz)
+
+# Consider p-arm-right SNVs with at most 70% of missing genotypes
+(seq 13 15; seq 21 22) | while read i; do
+  REF=chr$i
+  echo $REF
+
+  mkdir -p $REF
+
+  # Do not consider the GRCh38 reference (very bad in on the p-arm of the acrocentric chromosomes)
+  vcftools \
+    --gzvcf $PATH_VCF_GZ \
+    --bed <(echo -e "#chrom\tstart\tend"; grep $REF q_arms.bed | sed 's/#/-/') \
+    --remove-indv 'grch38-chr13' \
+    --remove-indv 'grch38-chr14' \
+    --remove-indv 'grch38-chr15' \
+    --remove-indv 'grch38-chr21' \
+    --remove-indv 'grch38-chr22' \
+    --max-missing 1 \
+    --remove-indels \
+    --recode --keep-INFO-all \
+    --out $REF.p_arm.right.maxMiss1 \
+    --stdout |\
+    #bcftools norm -f $PATH_REF_FASTA -c e -m - |\
+    bgzip -@ 48 > $REF/$VCF_NAME.$REF.p_arm.right.vcf.gz 
+done
+
+#(seq 13 15; seq 21 22) | while read i; do
+#  REF=chr$i
+#  echo $REF
+#
+#  # Do not consider the GRCh38 reference (very bad in on the p-arm of the acrocentric chromosomes)
+#  vcftools \
+#    --gzvcf $PATH_VCF_GZ \
+#    --bed <(echo -e "#chrom\tstart\tend"; grep $REF q_arms.bed | sed 's/#/-/') \
+#    --remove-indv 'grch38-chr13' \
+#    --remove-indv 'grch38-chr14' \
+#    --remove-indv 'grch38-chr15' \
+#    --remove-indv 'grch38-chr21' \
+#    --remove-indv 'grch38-chr22' \
+#    --remove-indels \
+#    --recode --keep-INFO-all \
+#    --stdout | bcftools stats -s '-' - > $REF.stats.tsv
+#done
+
+#--max-missing 1.0
+#chr13.p_arm.right.maxMiss1.log:After filtering, kept 620046 out of a possible 3708776 Sites
+#chr14.p_arm.right.maxMiss1.log:After filtering, kept 544422 out of a possible 3708776 Sites
+#chr15.p_arm.right.maxMiss1.log:After filtering, kept 504982 out of a possible 3708776 Sites
+#chr21.p_arm.right.maxMiss1.log:After filtering, kept 234702 out of a possible 3708776 Sites
+#chr22.p_arm.right.maxMiss1.log:After filtering, kept 228922 out of a possible 3708776 Sites
+
+#--max-missing 0.9
+#chr13.p_arm.right.maxMiss09.log:After filtering, kept 645105 out of a possible 3708776 Sites
+#chr14.p_arm.right.maxMiss09.log:After filtering, kept 584216 out of a possible 3708776 Sites
+#chr15.p_arm.right.maxMiss09.log:After filtering, kept 538064 out of a possible 3708776 Sites
+#chr21.p_arm.right.maxMiss09.log:After filtering, kept 246852 out of a possible 3708776 Sites
+#chr22.p_arm.right.maxMiss09.log:After filtering, kept 256023 out of a possible 3708776 Sites
+
+#--max-missing 0.0
+#chr13.p_arm.right.maxMiss0.log:After filtering, kept 656414 out of a possible 3708776 Sites
+#chr14.p_arm.right.maxMiss0.log:After filtering, kept 608339 out of a possible 3708776 Sites
+#chr15.p_arm.right.maxMiss0.log:After filtering, kept 575662 out of a possible 3708776 Sites
+#chr21.p_arm.right.maxMiss0.log:After filtering, kept 251152 out of a possible 3708776 Sites
+#chr22.p_arm.right.maxMiss0.log:After filtering, kept 270264 out of a possible 3708776 Sites
+
+```
+
+
+```shell
+
+
+
+# Split p/q-arm variants 
+
+(seq 13 15; seq 21 22) | while read i; do
+  REF=chr$i
+  echo $REF
+
+  mkdir -p $REF
+    
+  vcftools \
+    --gzvcf $PATH_SNV_VCF_GZ \
+    --bed <(echo -e "#chrom\tstart\tend"; grep $REF p_arms.bed) \
+    --recode --keep-INFO-all --out $REF.p --stdout |\
+    #bcftools norm -f $PATH_REF_FASTA -c e -m - |\
+    bgzip -@ 48 > $REF/$VCF_NAME.$REF.p_arm.vcf.gz
+  vcftools \
+    --gzvcf $PATH_SNV_VCF_GZ \
+    --bed <(echo -e "#chrom\tstart\tend"; grep $REF q_arms.bed) \
+    --recode --keep-INFO-all --out $REF.q --stdout |\
+    #bcftools norm -f $PATH_REF_FASTA -c e -m - |\
+    bgzip -@ 48 > $REF/$VCF_NAME.$REF.q_arm.vcf.gz
+done
+#rm *log
+
+
+
+
+# Split by sample and fill missing genotypes (with 0, i.e. reference allele, else msmc breaks)
+(seq 13 15; seq 21 22) | while read i; do
+  REF=chr$i
+    
+  for ARM in p_arm q_arm; do
+    #Better to keep the same samples in p/q VCFs
+    #SAMPLES_WITH_GENOTYPES=$(bcftools stats -s '-' $REF/$VCF_NAME.$REF.$ARM.vcf.gz | awk '$1=="PSC" && $12+$13>0 {print $3}')
+    for SAMPLE in `bcftools query -l $PATH_SNV_VCF_GZ | tr '\n' ' '`; do
+      echo $REF $SAMPLE $ARM
+      bcftools view --samples $SAMPLE $REF/$VCF_NAME.$REF.$ARM.vcf.gz |\
+        bcftools +setGT - -- -t . --new-gt 0p |\
+        bgzip -@ 48 -c > $REF/$VCF_NAME.$REF.$ARM.$SAMPLE.vcf.gz
+    done
+  done
+done
+```
+
+
+
+
+
+
+
+
 
 Split variants by arm:
 
@@ -76,7 +219,7 @@ Split variants by arm:
       --remove-indels --recode --keep-INFO-all --stdout |\
       python3 /lizardfs/guarracino/chromosome_communities/scripts/fill_genotypes.py diploid |
       #bcftools norm -f $PATH_REF_FASTA -c e -m - |\
-      bgzip -@ $THREADS > $PATH_CHR_ARM_SNV_VCF_GZ
+      bgzip -@ 48 > $PATH_CHR_ARM_SNV_VCF_GZ
     tabix $PATH_CHR_ARM_SNV_VCF_GZ
     #cat out.log
   done
@@ -113,7 +256,7 @@ cd /lizardfs/guarracino/chromosome_communities/msmc
       # Fill missing genotypes (with 0, i.e. reference allele, else msmc breaks)
       PATH_CHR_ARM_SNV_SAMPLE_VCF_GZ=$ARM_DIR/$VCF_NAME.$REF.$ARM.$SAMPLE.snv.vcf.gz
       bcftools view --samples $SAMPLE $PATH_CHR_ARM_SNV_VCF_GZ |\
-        bgzip -@ $THREADS -c > $PATH_CHR_ARM_SNV_SAMPLE_VCF_GZ
+        bgzip -@ 48 -c > $PATH_CHR_ARM_SNV_SAMPLE_VCF_GZ
     done
   done
 done
@@ -253,53 +396,6 @@ done
 
 
 
-Prepare acro-VCF files for each sample, with respect to each acro-reference:
-
-```shell
-PATH_SNV_VCF_GZ=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.e998a33.4030258.fb5ffef.smooth.fix.chm13.snv.vcf.gz
-VCF_NAME=$(basename $PATH_SNV_VCF_GZ .vcf.gz)
-
-
-# Split p/q-arm variants 
-
-(seq 13 15; seq 21 22) | while read i; do
-  REF=chr$i
-  echo $REF
-    
-  mkdir -p $REF
-    
-  vcftools \
-    --gzvcf $PATH_SNV_VCF_GZ \
-    --bed <(echo -e "#chrom\tstart\tend"; grep $REF p_arms.bed) \
-    --recode --keep-INFO-all --out $REF.p --stdout |\
-    #bcftools norm -f $PATH_REF_FASTA -c e -m - |\
-    bgzip -@ $THREADS > $REF/$VCF_NAME.$REF.p_arm.vcf.gz
-  vcftools \
-    --gzvcf $PATH_SNV_VCF_GZ \
-    --bed <(echo -e "#chrom\tstart\tend"; grep $REF q_arms.bed) \
-    --recode --keep-INFO-all --out $REF.q --stdout |\
-    #bcftools norm -f $PATH_REF_FASTA -c e -m - |\
-    bgzip -@ $THREADS > $REF/$VCF_NAME.$REF.q_arm.vcf.gz
-done
-#rm *log
-
-# Split by sample and fill missing genotypes (with 0, i.e. reference allele, else msmc breaks)
-(seq 13 15; seq 21 22) | while read i; do
-  REF=chr$i
-    
-  for ARM in p_arm q_arm; do
-    #Better to keep the same samples in p/q VCFs
-    #SAMPLES_WITH_GENOTYPES=$(bcftools stats -s '-' $REF/$VCF_NAME.$REF.$ARM.vcf.gz | awk '$1=="PSC" && $12+$13>0 {print $3}')
-    for SAMPLE in `bcftools query -l $PATH_SNV_VCF_GZ | tr '\n' ' '`; do
-      echo $REF $SAMPLE $ARM
-      bcftools view --samples $SAMPLE $REF/$VCF_NAME.$REF.$ARM.vcf.gz |\
-        bcftools +setGT - -- -t . --new-gt 0p |\
-        bgzip -@ $THREADS -c > $REF/$VCF_NAME.$REF.$ARM.$SAMPLE.vcf.gz
-    done
-  done
-done
-```
-
 Collect samples to build the populations to compare:
 
 ```shell
@@ -418,7 +514,4 @@ python3 ~/tools/msmc-tools/combineCrossCoal.py \
   $nsamples.pq_arms.phased.chr13.hetsep.p_arms.final.txt \
   $nsamples.pq_arms.phased.chr13.hetsep.q_arms.final.txt \
   > $nsamples.pq_arms.phased.chr13.hetsep.combined.final.txt
-
-
-
 ```

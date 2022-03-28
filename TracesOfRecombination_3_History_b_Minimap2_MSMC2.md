@@ -184,6 +184,9 @@ zgrep rDNA /lizardfs/guarracino/chromosome_communities/data/chm13.CentromeresAnd
     done
   done
 done
+
+mkdir -p logs
+mv *.log logs/
 ```
 
 Combining into one file multiple individuals from all possible pairs of populations:
@@ -191,10 +194,10 @@ Combining into one file multiple individuals from all possible pairs of populati
 ```shell
 mkdir -p  /lizardfs/guarracino/chromosome_communities/haplotypes/msmc
 
-#( seq 13 15; seq 21 22 ) | while read r; do
-( echo 13 ) | while read r; do
+( seq 13 15; seq 21 22 ) | while read r; do
+#( echo 13 ) | while read r; do
   # Skip haplotypes with less than 5000 called variants on the p-arm
-  grep 'Sites' *on.chr$r.p_arm.right.log | cut -f 1,4 -d ' ' | awk '{if ($2 < 5000) print($0)}' | sort -k 2nr | cut -f 2 -d '.' | sort | uniq > haplotypes_to_skip.on.chr$r.p_arm.right.txt
+  grep 'Sites' logs/*on.chr$r.p_arm.right.log | cut -f 1,4 -d ' ' | awk '{if ($2 < 5000) print($0)}' | sort -k 2nr | cut -f 2 -d '.' | sort | uniq > haplotypes_to_skip.on.chr$r.p_arm.right.txt
 
   # All possible acro-pairs
   ( seq 13 15; seq 21 22 ) | while read a; do 
@@ -209,11 +212,11 @@ mkdir -p  /lizardfs/guarracino/chromosome_communities/haplotypes/msmc
         #sbatch -p workers -c 2 --job-name "$a-$b-$r" --wrap 'hostname; \time -v '$RUN_HACKED_GENERATE_MULTIHETSEP' --mask '$MASKsA' --mask '$MASKsB' '$VCFsA' '$VCFsB' > /lizardfs/guarracino/chromosome_communities/haplotypes/multihetsep/chr'$a'.vs.chr'$b'.on.chr'$r'.phased.hetsep'
         
         PATH_POPULATION_1_TXT=/lizardfs/guarracino/chromosome_communities/haplotypes/msmc/chr$a.on.chr$r.txt
-        ls /lizardfs/guarracino/chromosome_communities/haplotypes/chr$a/chr$a.*.on.chr$r.p_arm.right.vcf.gz | grep -f haplotypes_to_skip.on.chr$r.p_arm.right.txt -v > $PATH_POPULATION_1_TXT
+        ls /lizardfs/guarracino/chromosome_communities/haplotypes/chr$a/chr$a.*.on.chr$r.p_arm.right.vcf.gz | grep -f haplotypes_to_skip.on.chr$r.p_arm.right.txt -v | head -n 8 > $PATH_POPULATION_1_TXT
         PATH_POPULATION_2_TXT=/lizardfs/guarracino/chromosome_communities/haplotypes/msmc/chr$b.on.chr$r.txt
-        ls /lizardfs/guarracino/chromosome_communities/haplotypes/chr$b/chr$b.*.on.chr$r.p_arm.right.vcf.gz | grep -f haplotypes_to_skip.on.chr$r.p_arm.right.txt -v > $PATH_POPULATION_2_TXT
+        ls /lizardfs/guarracino/chromosome_communities/haplotypes/chr$b/chr$b.*.on.chr$r.p_arm.right.vcf.gz | grep -f haplotypes_to_skip.on.chr$r.p_arm.right.txt -v | head -n 8 > $PATH_POPULATION_2_TXT
         
-        sbatch -c 48 -p allhighmem --job-name $a-$b-$r /lizardfs/guarracino/chromosome_communities/scripts/msmc2pops.sh $PATH_POPULATION_1_TXT $PATH_POPULATION_2_TXT $RUN_HACKED_GENERATE_MULTIHETSEP $RUN_COMBINE_CROSS_COAL $RUN_MSMC2 chr$a.vs.chr$b.on.chr$r
+        sbatch -c 48 -p workers --job-name $a-$b-$r /lizardfs/guarracino/chromosome_communities/scripts/msmc2pops.sh $PATH_POPULATION_1_TXT $PATH_POPULATION_2_TXT $RUN_HACKED_GENERATE_MULTIHETSEP $RUN_COMBINE_CROSS_COAL $RUN_MSMC2 /lizardfs/guarracino/chromosome_communities/haplotypes/msmc/chr$a.vs.chr$b.on.chr$r
       fi
     done
   done

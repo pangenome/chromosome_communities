@@ -2,11 +2,13 @@ library(tidyverse)
 
 mu <- 1.25e-8
 gen <- 30
-x1 <- read.table('~/git/chromosome_communities/msmc/15.pq_arms.phased.chr13.hetsep.p_arms.final.txt', sep = '\t', header = T)
-x2 <- read.table('~/git/chromosome_communities/msmc/15.pq_arms.phased.chr13.hetsep.q_arms.final.txt', sep = '\t', header = T)
+x1 <- read.table('/home/guarracino/chr13.vs.chr21.on.chr13.pop1.final.txt', sep = '\t', header = T)
+x2 <- read.table('/home/guarracino/chr13.vs.chr21.on.chr13.pop2.final.txt', sep = '\t', header = T)
 
-x1$pop <- 'p-arms'
-x2$pop <- 'q-arms'
+title <- '67 haplotypes for each pop\nSNVs called wrt chm13#chr13'
+
+x1$pop <- 'chr13 p-arms'
+x2$pop <- 'chr21 p-arms'
 
 x <- rbind(x1, x2)
 
@@ -34,17 +36,17 @@ x %>%
     panel.grid.major = element_line(size = 0.25)
   ) +
   #xlim(c(0, 300)) +
-  #ylim(c(0, 500)) +
+  ylim(c(0, 1000)) +
   scale_x_continuous(trans='log10') +
   xlab("Years ago") + 
   ylab("effective population size") +
-  ggtitle('75 contigs (15 for each acro)')
+  ggtitle(title)
 
 
 
 mu <- 1.25e-8
 gen <- 30
-crossPopDat<-read.table("~/git/chromosome_communities/msmc/15.pq_arms.phased.chr13.hetsep.combined.final.txt", header=TRUE)
+crossPopDat<-read.table("/home/guarracino/chr13.vs.chr21.on.chr13.pop1and2.combined.final.txt", header=TRUE)
 
 crossPopDat$x <- crossPopDat$left_time_boundary/mu*gen
 crossPopDat$y <- 2 * crossPopDat$lambda_01 / (crossPopDat$lambda_00 + crossPopDat$lambda_11)
@@ -72,4 +74,6 @@ crossPopDat %>%
   scale_x_continuous(trans='log10') +
   xlab("Years ago") + 
   ylab("relative cross-coalescence rate") +
-  ggtitle('75 contigs (15 for each acro)')
+  ggtitle(title)
+
+          
