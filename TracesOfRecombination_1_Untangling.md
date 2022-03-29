@@ -40,7 +40,7 @@ cd /lizardfs/guarracino/
 git clone --recursive https://github.com/pangenome/chromosome_communities.git
 ```
 
-Prepare verkko's HG002 contigs:
+Prepare verkko's HG002 contigs (HiFi+ONT-based):
 
 ```shell
 cd /lizardfs/guarracino/chromosome_communities/assemblies
@@ -67,6 +67,21 @@ samtools faidx hg002-prox.renamed.fna
   samtools faidx hg002-prox.renamed.fna $(grep chr$f hg002-prox.renamed.fna.fai | cut -f 1) |\
     bgzip -@ 48 -c > hg002.chr$f.prox.fa.gz
   samtools faidx hg002.chr$f.prox.fa.gz
+done
+```
+
+Prepare HiFi-based HG002 contigs:
+
+```shell
+# Download
+wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/working/HPRC_PLUS/HG002/assemblies/year1_freeze_assembly_v2.1/HG002.maternal.f1_assembly_v2.1.fa.gz
+wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/working/HPRC_PLUS/HG002/assemblies/year1_freeze_assembly_v2.1/HG002.paternal.f1_assembly_v2.1.fa.gz
+
+# Partitioning
+mkdir -p partitioning
+
+for hap in maternal paternal; do
+    sbatch -c 48 -p workers --job-name HG002 --wrap 'hostname; cd scratch; \time -v /gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13+grch38.fa /lizardfs/guarracino/chromosome_communities/assemblies/HG002.'$hap'.f1_assembly_v2.1.fa.gz -t 48 -m -N -s 50000 -p 90 > /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.'$hap'.f1_assembly_v2.1.vs.refs.paf'
 done
 ```
 
@@ -443,7 +458,7 @@ for e in 5000 50000 100000; do
                 mv x.tsv.gz ${path_grounded_pq_touching_all_chromosomes_tsv_gz}
             fi;
 
-            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R ${path_grounded_pq_touching_all_chromosomes_tsv_gz} "-e $e -m $m -j $j -n $n" 20000000 200
+            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R ${path_grounded_pq_touching_all_chromosomes_tsv_gz} "-e $e -m $m -j $j -n $n" 150000000 200
         done
       done
     done

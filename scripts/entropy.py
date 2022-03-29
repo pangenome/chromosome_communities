@@ -50,7 +50,7 @@ with gzip.open(path_grounded_tsv_gz,"rt") as f:
 
     for line in f:
         query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, ref, ref_begin, ref_end, grounded_target = line.strip().split('\t')
-        
+
         if not query.startswith('chm') and not query.startswith('grch'):
             ref_begin = int(ref_begin)
             ref_end = int(ref_end)
@@ -62,17 +62,12 @@ with gzip.open(path_grounded_tsv_gz,"rt") as f:
             ground_2_query_2_pieces_dict[grounded_target][query].append((ref_begin, ref_end, int(target.split('chm13#chr')[-1])))
 
 
-#ground_2_query_2_entropy_dict = {}
-
 
 window_size = 50000
 
 print('\t'.join(['query', 'ground.target', 'start', 'end', 'shannon_div_index']))
 for ground_target, query_2_pieces_dict in ground_2_query_2_pieces_dict.items():
-    #ground_2_query_2_entropy_dict[ground_target] = {}
-
     for query, pieces_list in query_2_pieces_dict.items():
-        #ground_2_query_2_entropy_dict[ground_target][query] = []
         #print(ground_target, query, sorted(pieces_list))
         
         # Fill (slowly!) targets over the ground target
@@ -86,10 +81,10 @@ for ground_target, query_2_pieces_dict in ground_2_query_2_pieces_dict.items():
             end = start + window_size
             #if end > ground_2_len_dict[ground_target]:
             #    end = ground_2_len_dict[ground_target]
-            shannon_div_index = sdi(collections.Counter(query_on_ref_list[start:end]))
-
-            #ground_2_query_2_entropy_dict[ground_target][query].append(
-            #    shannon_div_index
-            #)
+            targets_list = [x for x in query_on_ref_list[start:end] if x != 0]
+            if len(targets_list) > 0:
+                shannon_div_index = sdi(collections.Counter(targets_list))
+            else:
+                shannon_div_index = -1
 
             print('\t'.join([query, ground_target, str(start), str(end), str(shannon_div_index)]))

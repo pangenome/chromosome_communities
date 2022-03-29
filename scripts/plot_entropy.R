@@ -18,6 +18,7 @@ for(ground in unique(x$ground.target)) {
     ) +
     facet_col(~query, scales = "free_y", space = "free", labeller = labeller(variable = labels)) +
     geom_point() +
+    ylim(0,max(x_sub$shannon_div_index) + 0.1) +
     ggtitle(title)
 
     num_queries <- length(unique(x_sub$query))
