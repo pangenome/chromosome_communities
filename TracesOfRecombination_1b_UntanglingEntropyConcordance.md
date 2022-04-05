@@ -28,9 +28,9 @@ for e in 50000 ; do
       n=1
       
       path_grounded_pq_touching_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
-      python3 scripts/entropy.py $path_grounded_pq_touching_all_chromosomes_tsv_gz chm13#ACRO.len.tsv > x.tsv
+      python3 scripts/entropy.py $path_grounded_pq_touching_all_chromosomes_tsv_gz chm13#ACRO.len.tsv > entropy.tsv
         
-      Rscript scripts/plot_entropy.R x.tsv 'e50000.m1000.j08.n1 - Window 50kbp'
+      Rscript scripts/plot_entropy_tile.R entropy.tsv 'e50000.m1000.j08.n1 - Window 50kbp' 25000000 200
     done
   done
 done
@@ -47,7 +47,9 @@ for e in 50000 ; do
       
       path_grounded_pq_touching_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
       
-      python3 scripts/concordance.py $path_grounded_pq_touching_all_chromosomes_tsv_gz chm13#ACRO.len.tsv 
+      python3 scripts/concordance.py $path_grounded_pq_touching_all_chromosomes_tsv_gz chm13#ACRO.len.tsv > concordance.tsv
+      
+      Rscript scripts/plot_concordance_tile.R concordance.tsv 'e50000.m1000.j08.n1' 25000000 200
     done
   done
 done
