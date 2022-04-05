@@ -437,8 +437,8 @@ done
 ### Take only reliable blocks (flagged with "Hh" or "Hc", https://github.com/human-pangenomics/hpp_production_workflows/blob/asset/coverage/README.md#components)???
 
 # Take pq-untangling contigs
-for e in 5000 50000 100000; do
-  for m in 500 1000 10000; do
+for e in 50000 ; do
+  for m in 1000 ; do
     for j in 0 0.8 0.95; do
       j_str=$(echo $j | sed 's/\.//g')
       (seq 1 5; seq 10 10 50) | while read n; do 
@@ -471,9 +471,20 @@ for e in 5000 50000 100000; do
               > $ref.tmp2.txt
             rm $ref.tmp.txt
             
+            ##########################################################################################
             # To plot the short (bad) HiFi-based HG002 contigs
-            #cut -f 1 /lizardfs/guarracino/chromosome_communities/assemblies/hg002.`echo $ref | sed 's/chm13#//g'`.hifi.fa.gz.fai >> $ref.tmp2.txt         
-               
+            cat /lizardfs/guarracino/chromosome_communities/assemblies/hg002.`echo $ref | sed 's/chm13#//g'`.hifi.fa.gz.fai | awk '$2 > 300000' | cut -f 1 >> $ref.tmp2.txt       
+            if [ $ref == "chm13#chr13" ]; then
+              echo "Remove wrongly partitioned contig: HG002#1#h1tg000013l"
+              grep 'HG002#1#h1tg000013l' -v $ref.tmp2.txt > $ref.tmp3.txt
+              rm $ref.tmp2.txt && mv $ref.tmp3.txt $ref.tmp2.txt
+            fi
+            if [ $ref == "chm13#chr21" ]; then
+              echo "Add wrongly partitioned contig: HG002#1#h1tg000013l"
+              echo 'HG002#1#h1tg000013l' >> $ref.tmp2.txt
+            fi              
+            ##########################################################################################
+          
             # Put header (with a new 'target' column), take intersection, and re-add other acrocentric references
             cat \
               <(zcat ${path_grounded_tsv_gz} | head -n 1 | awk -v OFS='\t' '{print $0, "grounded.target"}') \
@@ -514,8 +525,8 @@ Merged plots:
 
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
 
-for e in 5000 50000 100000; do
-  for m in 500 1000 10000; do
+for e in 50000 ; do
+  for m in 1000 ; do
     for j in 0 0.8 0.95; do
         j_str=$(echo $j | sed 's/\.//g')
         (seq 1 5; seq 10 10 50) | while read n; do 
@@ -541,8 +552,8 @@ done
 mv /lizardfs/guarracino/chromosome_communities/untangle/grounded/*.pdf /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
 
 # Merge
-for e in 5000 50000 100000; do
-  for m in 500 1000 10000; do
+for e in 50000 ; do
+  for m in 1000 ; do
     for j in 0 0.8 0.95; do
         echo "-e $e -m $m -j $j"
         
@@ -846,4 +857,127 @@ sbatch -p workers -c 48 --job-name vghg002 --wrap '\time -v vg deconstruct -P HG
 #num_samples=`bcftools query -l $PATH_VCF_GZ | wc -l`
 #num_miss_gen=$(echo $num_samples - 1 | bc)
 #--max-missing-count $num_miss_gen \
+
+
+RUNWFMASH=/home/guarracino/tools/wfmash/build/bin/wfmash-master-adaptive
+RUNBENCHMARK=/home/guarracino/tools/BiWFA/bin/align_benchmark
+
+FASTA=/lizardfs/guarracino/biwfa/zmays41.fa
+DIR_OUTPUT=/lizardfs/guarracino/biwfa/zmays41
+PREFIX=zmays41
+
+
+FASTA=/lizardfs/guarracino/biwfa/athaliana16.fa
+DIR_OUTPUT=/lizardfs/guarracino/biwfa/athaliana16
+PREFIX=athaliana16
+N=100
+
+mkdir -p $DIR_OUTPUT
+
+# Compute mappings
+for s in 100000 200000; do
+  for p in 95 90 85; do
+    echo "${s} - ${p}"
+    
+    PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.paf
+	sbatch -p workers -c 48 --job-name $s-$p --wrap '\time -v '$RUNWFMASH' '$FASTA' -s '$s' -c 0 -l 0 -p '$p' --no-filter -t 48 -m > '$PAF
+  done
+done
+
+# Collect max N mappings for each set
+for s in 100000 200000; do
+  for p in 95 90 85; do
+    echo "${s} - ${p}"
+    
+    PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.paf
+    FILTERED_PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf
+
+    minid=$( echo "$p - 0.5" | bc );
+    maxid=$( echo "$p + 0.5" | bc );
+
+	sed 's/id:f://g' $PAF | \
+	  awk -v len=$s -v minid=$minid -v maxid=$maxid '$11 == len && $13 >= minid && $13 < maxid' | \
+	  shuf -n $N > $FILTERED_PAF
+  done
+done
+
+wc $DIR_OUTPUT/*sample$N.paf -l
+
+# Get the sequences
+for s in 100000 200000; do
+  for p in 95 90 85; do
+    echo "${s} - ${p}"
+
+    FILTERED_PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf
+    bash paf+fasta2seq.sh $FILTERED_PAF $FASTA
+  done
+done
+
+# Split the sequences
+for s in 100000 200000; do
+  for p in 95 90 85; do
+    echo "${s} - ${p}"
+
+    FILTERED_SEQ=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf.seq
+    c=1
+    while mapfile -t -n 2 ary && ((${#ary[@]})); do
+        printf '%s\n' "${ary[@]}" > $FILTERED_SEQ.pair_$c.seq
+        c=$(( c + 1 ))
+    done < $FILTERED_SEQ
+  done
+done
+
+
+
+# Compute alignments
+for s in 100000 200000; do
+  for p in 95 90 85; do
+    #echo "${s} - ${p}"
+    
+    FILTERED_PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf
+    NUM_PAIRS=$(cat $FILTERED_PAF | wc -l)
+    echo "${s} - ${p} $NUM_PAIRS"
+    FILTERED_SEQ=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf.seq
+
+    seq $NUM_PAIRS | while read c; do
+      FILTERED_PAIR_SEQ=$FILTERED_SEQ.pair_$c.seq
+    
+      # -c 48 because the memory consumption can be high
+      sbatch -w octopus02 -p workers -c 48 --job-name $s-$p --wrap '\time -v '$RUNBENCHMARK' -a gap-affine-wfa -i '$FILTERED_PAIR_SEQ' --affine-penalties 0,5,11,1 --wfa-memory-mode high --output '$FILTERED_PAF'.pair_'$c'.high.out 2> '$FILTERED_PAF'.pair_'$c'.high.log'
+      #sbatch -w octopus02 -p workers -c 1 --job-name $s-$p --wrap '\time -v '$RUNBENCHMARK' -a gap-affine-wfa -i '$FILTERED_PAIR_SEQ' --affine-penalties 0,5,11,1 --wfa-memory-mode med --output '$FILTERED_PAF'.pair_'$c'.med.out 2> '$FILTERED_PAF'.pair_'$c'.med.log'
+      #sbatch -w octopus02 -p workers -c 1 --job-name $s-$p --wrap '\time -v '$RUNBENCHMARK' -a gap-affine-wfa -i '$FILTERED_PAIR_SEQ' --affine-penalties 0,5,11,1 --wfa-memory-mode low --output '$FILTERED_PAF'.pair_'$c'.low.out 2> '$FILTERED_PAF'.pair_'$c'.low.log'
+      #sbatch -w octopus02 -p workers -c 1 --job-name $s-$p --wrap '\time -v '$RUNBENCHMARK' -a gap-affine-wfa -i '$FILTERED_PAIR_SEQ' --affine-penalties 0,5,11,1 --wfa-bidirectional   --output '$FILTERED_PAF'.pair_'$c'.bid.out 2> '$FILTERED_PAF'.pair_'$c'.bid.log'
+    done
+  done
+done
+
+# Statistics
+echo -e "s\tp\tnum.pair\tmode\tvalue\tstatistic" > x.tsv
+echo -e "s\tp\tnum.pair\tmode\tscore" > score.tsv
+for s in 100000 200000; do
+  for p in 95 90 85; do
+    FILTERED_PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf
+    NUM_PAIRS=$(cat $FILTERED_PAF | wc -l)
+    echo "${s} - ${p} $NUM_PAIRS"
+    
+    grep 'User time' $FILTERED_PAF.pair_*.*.log | cut -f 6,7,8 -d '.' | sed 's/pair_//g' | sed 's/.log://' | sed 's/User time (seconds): //g' | tr '.' '\t' | sort -k 1n | awk -v OFS='\t' -v s=$s -v p=$p '{print(s,p,$0,"time_s")}' >> x.tsv
+    grep 'Maximum' $FILTERED_PAF.pair_*.*.log | cut -f 6,7,8 -d '.' | sed 's/pair_//g' | sed 's/.log://' | sed 's/Maximum resident set size (kbytes): //g' | tr '.' '\t' | sort -k 1n | awk -v OFS='\t' -v s=$s -v p=$p '{print(s,p,$0,"memory_kb")}' >> x.tsv
+    grep '^-' $FILTERED_PAF.pair_*.*.out | cut -f 1 | cut -f 6,7,8 -d '.' | sed 's/pair_//g' | sed 's/out://g' | tr '.' '\t' | sort -k 1n | awk -v OFS='\t' -v s=$s -v p=$p '{print(s,p,$0)}' >> score.tsv
+  done
+done
+
+for s in 20000 50000 100000; do
+  for p in 95 90 85; do
+    echo "${s} - ${p}"
+    
+    FILTERED_PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf
+    NUM_PAIRS=$(cat $FILTERED_PAF | wc -l)
+    FILTERED_SEQ=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf.seq
+
+    seq $NUM_PAIRS | while read c; do
+      #echo "$FILTERED_SEQ.pair_$c.seq $FILTERED_PAF.pair_$c.med.out"
+      python3 validateCIGAR.py $FILTERED_SEQ.pair_$c.seq $FILTERED_PAF.pair_$c.bid.out
+    done
+  done
+done
 ```

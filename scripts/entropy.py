@@ -4,7 +4,9 @@
 # http://en.wikipedia.org/wiki/Shannon_index
 
 import collections
+import gzip
 import sys
+
 
 def sdi(data):
     """ Given a hash { 'species': count } , returns the SDI
@@ -25,9 +27,6 @@ def sdi(data):
     
     return -sum(p(n, N) for n in data.values() if n != 0)
 
-
-import gzip
-import sys
 
 
 path_grounded_tsv_gz=sys.argv[1]
@@ -54,12 +53,13 @@ with gzip.open(path_grounded_tsv_gz,"rt") as f:
         if not query.startswith('chm') and not query.startswith('grch'):
             ref_begin = int(ref_begin)
             ref_end = int(ref_end)
+            target_int = int(target.split('chm13#chr')[-1])
 
             if grounded_target not in ground_2_query_2_pieces_dict:
                 ground_2_query_2_pieces_dict[grounded_target] = {}
             if query not in ground_2_query_2_pieces_dict[grounded_target]:
                 ground_2_query_2_pieces_dict[grounded_target][query] = []
-            ground_2_query_2_pieces_dict[grounded_target][query].append((ref_begin, ref_end, int(target.split('chm13#chr')[-1])))
+            ground_2_query_2_pieces_dict[grounded_target][query].append((ref_begin, ref_end, target_int))
 
 
 
@@ -72,9 +72,9 @@ for ground_target, query_2_pieces_dict in ground_2_query_2_pieces_dict.items():
         
         # Fill (slowly!) targets over the ground target
         query_on_ref_list = [0] * ground_2_len_dict[ground_target]
-        for start, stop, target in pieces_list:
+        for start, stop, target_int in pieces_list:
             for pos in range(start, stop):
-                query_on_ref_list[pos] = target
+                query_on_ref_list[pos] = target_int
         
         # Compute entropy for each window
         for start in range(0, len(query_on_ref_list), window_size):
