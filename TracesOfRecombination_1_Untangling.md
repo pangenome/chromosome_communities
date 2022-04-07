@@ -1,151 +1,5 @@
 # Traces of recombination
 
-## Tools
-
-```shell
-mkdir -p ~/tools $$ cd ~/tools
-
-git clone --recursive https://github.com/ekg/fastix.git
-cd fastix
-git checkout 331c1159ea16625ee79d1a82522e800c99206834
-cargo build --release
-mv target/release/fastix target/release/fastix-331c1159ea16625ee79d1a82522e800c99206834
-cd ..
-
-git clone --recursive https://github.com/pangenome/odgi.git
-cd odgi
-git checkout 694948ccf31e7b565449cc056668e9dcc8cc0a3e
-cmake -H. -Bbuild && cmake --build build -- -j 48
-mv bin/odgi bin/odgi-694948ccf31e7b565449cc056668e9dcc8cc0a3e
-cd ..
-
-(echo pggb wfmash seqwish smoothxg odgi gfaffix | tr ' ' '\n') | while read tool; do ls -l $(which $tool); done | cut -f 13 -d ' '
-/gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb
-/gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash
-/gnu/store/v1q6ja2fy3c7fcz7bnr6k3x54amynhyp-seqwish-0.7.3+51ee550-1/bin/seqwish
-/gnu/store/p8wflvwwxiih4z9ds5hfkin8mjld6qw2-smoothxg-0.6.0+0f383e5-10/bin/smoothxg
-/gnu/store/2ln6zv8mk6aqqzcib39rgi11x2hn7mv9-odgi-0.6.2+9e9c481-13/bin/odgi
-/gnu/store/ccw48k7h8v1brz3ap0sj3bcwvvmk6xra-gfaffix-0.1.2.2/bin/gfaffix
-
-vg
-vg: variation graph tool, version v1.38.0 "Canossa"
-```
-
-## Preparation
-
-Clone the repository:
-
-```shell
-cd /lizardfs/guarracino/
-git clone --recursive https://github.com/pangenome/chromosome_communities.git
-```
-
-Prepare verkko's HG002 contigs (HiFi+ONT-based):
-
-```shell
-cd /lizardfs/guarracino/chromosome_communities/assemblies
-
-### Get the "hg002-prox.fna" file from Globus (t2t-share/hg002/acros/beta folder)
-
-# Rename contigs
-# Ugly! ($f doesn't work)
-cat hg002-prox.fna | \
-  sed "s/chr13_prox_MAT/HG002#MAT#chr13.prox/g" |\
-  sed "s/chr13_prox_PAT/HG002#PAT#chr13.prox/g" |\
-  sed "s/chr14_prox_MAT/HG002#MAT#chr14.prox/g" |\
-  sed "s/chr14_prox_PAT/HG002#PAT#chr14.prox/g" |\
-  sed "s/chr15_prox_MAT/HG002#MAT#chr15.prox/g" |\
-  sed "s/chr15_prox_PAT/HG002#PAT#chr15.prox/g" |\
-  sed "s/chr21_prox_MAT/HG002#MAT#chr21.prox/g" |\
-  sed "s/chr21_prox_PAT/HG002#PAT#chr21.prox/g" |\
-  sed "s/chr22_prox_MAT/HG002#MAT#chr22.prox/g" |\
-  sed "s/chr22_prox_PAT/HG002#PAT#chr22.prox/g" > hg002-prox.renamed.fna
-samtools faidx hg002-prox.renamed.fna
-
-# Partition by chromosomes
-(seq 13 15; seq 21 22) | while read f; do
-  samtools faidx hg002-prox.renamed.fna $(grep chr$f hg002-prox.renamed.fna.fai | cut -f 1) |\
-    bgzip -@ 48 -c > hg002.chr$f.prox.fa.gz
-  samtools faidx hg002.chr$f.prox.fa.gz
-done
-```
-
-Prepare HiFi-based HG002 contigs:
-
-```shell
-# Download
-wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/working/HPRC_PLUS/HG002/assemblies/year1_freeze_assembly_v2.1/HG002.maternal.f1_assembly_v2.1.fa.gz
-wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/working/HPRC_PLUS/HG002/assemblies/year1_freeze_assembly_v2.1/HG002.paternal.f1_assembly_v2.1.fa.gz
-
-for hap in maternal paternal; do
-  echo $hap
-  gunzip HG002.$hap.f1_assembly_v2.1.fa.gz -c | bgzip -@ 48 -c > HG002.$hap.fa.gz
-  samtools faidx HG002.$hap.fa.gz
-done
-rm HG002.*.f1_assembly_v2.1.fa.gz
-
-# HG002 has low quality, so no pq-contigs. We use verkko's assemblies to collect all its acro-centric contigs
-mkdir -p partitioning
-
-for hap in mat pat; do
-  samtools faidx hg002-prox.renamed.fna $(grep $hap hg002-prox.renamed.fna.fai -i | cut -f 1) | bgzip -@ 48 -c > hg002-prox.renamed.$hap.fna.gz
-  samtools faidx hg002-prox.renamed.$hap.fna.gz
-done
-
-## Map against the verkko's assemblies (more strict identity threshold)
-for hap in mat pat; do
-  reffa=/lizardfs/guarracino/chromosome_communities/assemblies/hg002-prox.renamed.$hap.fna.gz
-  hapfa=/lizardfs/guarracino/chromosome_communities/assemblies/HG002.${hap}ernal.fa.gz 
-  
-  sbatch -c 24 -p workers --job-name HG002 --wrap 'hostname; cd /scratch; \time -v /gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash -t 24 -m -N -s 50k -p 95 '$reffa' '$hapfa' > /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.'$hap'.vs.hg002-prox.'$hap'.paf'
-done
-
-## Collect unmapped contigs and remap them in split mode
-for hap in mat pat; do
-  echo $hap
-  hapfa=/lizardfs/guarracino/chromosome_communities/assemblies/HG002.${hap}ernal.fa.gz
-  nonsplitpaf=/lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.$hap.vs.hg002-prox.$hap.paf
-
-  comm -23 <(cut -f 1 $hapfa.fai | sort) <(cut -f 1 $nonsplitpaf | sort) > partitioning/HG002.$hap.vs.hg002-prox.$hap.missing.txt
-  if [[ $(wc -l partitioning/HG002.$hap.vs.hg002-prox.$hap.missing.txt | cut -f 1 -d\ ) != 0 ]];
-  then
-    missingfa=/lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.$hap.vs.hg002-prox.$hap.missing.fa.gz
-    
-    samtools faidx $hapfa $(tr '\n' ' ' < partitioning/HG002.$hap.vs.hg002-prox.$hap.missing.txt) | bgzip -@ 48 -c > $missingfa
-    samtools faidx $missingfa
-    
-    sbatch -c 24 -p workers --job-name HG002 --wrap 'hostname; cd /scratch; \time -v /gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash -t 24 -m -s 50k -p 95 '$reffa' '$missingfa' > /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.'$hap'.split.vs.hg002-prox.'$hap'.paf'
-  fi
-done
-
-# Nothing recoverable
-cat partitioning/HG002.*.split.vs.hg002-prox.*.paf
-
-## Subset by acrocentric chromosome
-( seq 13 15; seq 21 22 ) | while read f; do
-  echo $f
-  
-  for hap in mat pat; do
-    hapfa=/lizardfs/guarracino/chromosome_communities/assemblies/HG002.${hap}ernal.fa.gz
-  
-    samtools faidx $hapfa $(awk '$6 ~ "chr'$f'.prox$"' partitioning/HG002.$hap.vs.hg002-prox.$hap.paf | cut -f 1) >> hg002.chr$f.hifi.fa
-  done
-  
-  bgzip -@ 48 hg002.chr$f.hifi.fa
-  samtools faidx hg002.chr$f.hifi.fa.gz
-done
-```
-
-[comment]: <> (## Get coverage analysis BED files)
-[comment]: <> (```shell)
-[comment]: <> (mkdir -p /lizardfs/guarracino/chromosome_communities/coverage_analysis_y1_genbank)
-[comment]: <> (cd /lizardfs/guarracino/chromosome_communities/coverage_analysis_y1_genbank)
-[comment]: <> (prefix=https://s3-us-west-2.amazonaws.com/human-pangenomics/submissions/e9ad8022-1b30-11ec-ab04-0a13c5208311--COVERAGE_ANALYSIS_Y1_GENBANK/FLAGGER/JAN_09_2022/FINAL_HIFI_BASED/FLAGGER_HIFI_ASM_BEDS/)
-[comment]: <> (cut -f 1 /lizardfs/erikg/HPRC/year1v2genbank/parts/HPRCy1.pan.fa.gz.fai | cut -f 1 -d '#' | grep 'chm13\|grch38' -v | sort | uniq | while read sample; do)
-[comment]: <> (  wget -c $prefix$sample.hifi.flagger_final.bed)
-[comment]: <> (done)
-[comment]: <> (```)
-
 ## Acrocentric chromosomes
 
 ### Collect contigs running from the p-arm to the q-arm of the acrocentric chromosomes
@@ -313,6 +167,16 @@ zcat \
   /lizardfs/guarracino/chromosome_communities/assemblies/hg002.chr*.hifi.fa.gz | \
   bgzip -@ 48 -c > /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.hg002hifi.fa.gz
 samtools faidx /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.hg002hifi.fa.gz
+
+# With `HG002#2#h2tg000134l         4689773  0  4689773  -  chm13#chr21           45090682   6659180   11348953  42408  4689773  10  id:f:90.4268`
+zcat \
+  /lizardfs/guarracino/chromosome_communities/assemblies/chm13.chr*.fa.gz \
+  $path_grch38_acro_fa_gz \
+  /lizardfs/guarracino/chromosome_communities/pq_contigs/chr*.vs.chm13.1kbps.pq_contigs.union.hg002prox.fa.gz \
+  /lizardfs/guarracino/chromosome_communities/assemblies/hg002.chr*.hifi.fa.gz \
+  <( samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/HG002.maternal.fa.gz HG002#2#h2tg000134l | bgzip -c ) | \
+  bgzip -@ 48 -c > /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.hg002hifi.h2tg000134.fa.gz
+samtools faidx /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.hg002hifi.h2tg000134.fa.gz
 ```
 
 ### Collect all acrocentric contigs
@@ -348,6 +212,10 @@ sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && /gn
 num_of_haplotypes=$(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.fa.gz.fai | wc -l)
 num_of_haplotypes_plus_a_bit=$(echo "$num_of_haplotypes + 10" | bc) # 5 mat acros + 5 pat acros
 sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.hg002hifi.fa.gz -o chrACRO+refs.1kbps.pq_contigs.union.hg002prox.hg002hifi.s100k.l300k.p98.n'$num_of_haplotypes_plus_a_bit' -t 48 -s 100k -l 300k -p 98 -n '$num_of_haplotypes_plus_a_bit' -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.hg002hifi.s100k.l300k.p98.n'$num_of_haplotypes_plus_a_bit' /lizardfs/guarracino/chromosome_communities/graphs';
+
+num_of_haplotypes=$(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.fa.gz.fai | wc -l)
+num_of_haplotypes_plus_a_bit=$(echo "$num_of_haplotypes + 10" | bc) # 5 mat acros + 5 pat acros
+sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.hg002hifi.h2tg000134.fa.gz -o chrACRO+refs.1kbps.pq_contigs.union.hg002prox.hg002hifi.h2tg000134.s100k.l300k.p98.n'$num_of_haplotypes_plus_a_bit' -t 48 -s 100k -l 300k -p 98 -n '$num_of_haplotypes_plus_a_bit' -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.hg002hifi.h2tg000134.s100k.l300k.p98.n'$num_of_haplotypes_plus_a_bit' /lizardfs/guarracino/chromosome_communities/graphs';
 
 
 #num_of_haplotypes=$(cut -f 1,2 -d '#' /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.50kbps.pq_contigs.union.hg002prox.fa.gz.fai | sort | uniq | wc -l)
@@ -434,8 +302,6 @@ for e in 5000 50000 100000; do
   done
 done
 
-### Take only reliable blocks (flagged with "Hh" or "Hc", https://github.com/human-pangenomics/hpp_production_workflows/blob/asset/coverage/README.md#components)???
-
 # Take pq-untangling contigs
 for e in 50000 ; do
   for m in 1000 ; do
@@ -465,6 +331,7 @@ for e in 50000 ; do
                 cut -f 4 | sort | uniq) | \
                 grep 'chm13#\|grch38#' -v > $ref.tmp.txt
 
+            # Consider only chromosome-partitioned contigs
             comm -12 \
               <(sort $ref.tmp.txt) \
               <(cut -f 1 /lizardfs/guarracino/chromosome_communities/pq_contigs/`echo $ref | sed 's/chm13#//g'`.vs.chm13.1kbps.pq_contigs.union.hg002prox.fa.gz.fai | sort)  \
@@ -477,15 +344,20 @@ for e in 50000 ; do
             if [ $ref == "chm13#chr13" ]; then
               echo "Remove wrongly partitioned contig: HG002#1#h1tg000013l"
               grep 'HG002#1#h1tg000013l' -v $ref.tmp2.txt > $ref.tmp3.txt
+              echo "Add wrongly partitioned contig: HG002#1#h1tg000260l"
+              echo 'HG002#1#h1tg000260l' >> $ref.tmp3.txt
               rm $ref.tmp2.txt && mv $ref.tmp3.txt $ref.tmp2.txt
             fi
             if [ $ref == "chm13#chr21" ]; then
+              echo "Remove wrongly partitioned contig: HG002#1#h1tg000260l"
+              grep 'HG002#1#h1tg000260l' -v $ref.tmp2.txt > $ref.tmp3.txt
               echo "Add wrongly partitioned contig: HG002#1#h1tg000013l"
-              echo 'HG002#1#h1tg000013l' >> $ref.tmp2.txt
+              echo 'HG002#1#h1tg000013l' >> $ref.tmp3.txt
+              rm $ref.tmp2.txt && mv $ref.tmp3.txt $ref.tmp2.txt
             fi              
             ##########################################################################################
           
-            # Put header (with a new 'target' column), take intersection, and re-add other acrocentric references
+            #### Put header (with a new 'target' column), take intersection, and re-add other acrocentric references
             cat \
               <(zcat ${path_grounded_tsv_gz} | head -n 1 | awk -v OFS='\t' '{print $0, "grounded.target"}') \
               <(zgrep ${path_grounded_tsv_gz} -f $ref.tmp2.txt | awk -v OFS='\t' -v ref=$ref '{print $0, ref}') \
@@ -497,13 +369,13 @@ for e in 50000 ; do
             zgrep rDNA /lizardfs/guarracino/chromosome_communities/data/chm13.CentromeresAndTelomeres.CenSatAnnotation.txt.gz | \
               sed 's/chr/chm13#chr/g' | \
               grep $ref | \
-              awk -v OFS='\t' -v ref=$ref '{print $1"#"$4,".",".",$1,".",".",".",".",".",".",$2,$3, ref}' >> ${path_grounded_pq_touching_tsv}
+              awk -v OFS='\t' -v ref=$ref '{print $1"#"$4,".",".",$1,".",".",".",".","1","ref",$2,$3, ref}' >> ${path_grounded_pq_touching_tsv}
             cat /lizardfs/guarracino/chromosome_communities/data/chm13.centromeres.approximate.bed | \
               bedtools merge | \
               grep 'chr13\|chr14\|chr15\|chr21\|chr22' | \
               sed 's/chr/chm13#chr/g'  | \
               grep $ref | \
-              awk -v OFS='\t' -v ref=$ref '{print $1"#centromere",".",".",$1,".",".",".",".",".",".",$2,$3, ref}' >> ${path_grounded_pq_touching_tsv}
+              awk -v OFS='\t' -v ref=$ref '{print $1"#centromere",".",".",$1,".",".",".",".","1","ref",$2,$3, ref}' >> ${path_grounded_pq_touching_tsv}
                   
             pigz ${path_grounded_pq_touching_tsv}
           fi;
@@ -749,8 +621,6 @@ for refpattern in HG002; do
 
               rm x.tsv.gz
             fi;
-
-            ### Take only reliable blocks (flagged with "Hh" or "Hc", https://github.com/human-pangenomics/hpp_production_workflows/blob/asset/coverage/README.md#components)???
           done
         done
       done
@@ -867,9 +737,9 @@ DIR_OUTPUT=/lizardfs/guarracino/biwfa/zmays41
 PREFIX=zmays41
 
 
-FASTA=/lizardfs/guarracino/biwfa/athaliana16.fa
-DIR_OUTPUT=/lizardfs/guarracino/biwfa/athaliana16
-PREFIX=athaliana16
+#FASTA=/lizardfs/guarracino/biwfa/athaliana16.fa
+#DIR_OUTPUT=/lizardfs/guarracino/biwfa/athaliana16
+#PREFIX=athaliana16
 N=100
 
 mkdir -p $DIR_OUTPUT
@@ -882,6 +752,17 @@ for s in 100000 200000; do
     PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.paf
 	sbatch -p workers -c 48 --job-name $s-$p --wrap '\time -v '$RUNWFMASH' '$FASTA' -s '$s' -c 0 -l 0 -p '$p' --no-filter -t 48 -m > '$PAF
   done
+done
+##################
+
+PAF=$DIR_OUTPUT/$PREFIX.s5000.p90.n41.paf
+sbatch -p workers -c 48 --job-name s5k-p90 --wrap '\time -v '$RUNWFMASH' '$FASTA' -s 5k -c 0 -l 0 -p 90 -n 41 -t 48 -m > '$PAF
+
+for p in 99 95 90; do
+  echo "-s 1000 -p ${p}"
+    
+  PAF=$DIR_OUTPUT/$PREFIX.s1000.p$p.n41.paf
+  sbatch -p highmem -c 48 --job-name s1k-p$p --wrap '\time -v '$RUNWFMASH' '$FASTA' -s 1k -c 0 -l 0 -p '$p' -n 41 -t 48 -m > '$PAF
 done
 
 # Collect max N mappings for each set
