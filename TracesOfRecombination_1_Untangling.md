@@ -386,6 +386,45 @@ for e in 50000 ; do
 done
 ```
 
+Add Mobin's annotations:
+
+```shell
+touch xyz.tsv
+cat $path_targets_txt | while read ref; do
+    echo $ref
+    path_grounded_pq_touching_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv
+    
+    touch z.tsv
+    zcat $path_grounded_pq_touching_tsv.gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' -v | cut -f 1 | sort | uniq | while read CONTIG; do
+      SAMPLE=$( echo $CONTIG | cut -f 1 -d '#')
+    
+      path_unreliable_bed=/lizardfs/erikg/HPRC/year1v2genbank/annotations/unreliable/$SAMPLE.hifi.flagger_final.bed
+      if [[ -s $path_unreliable_bed ]]; then
+        echo $CONTIG "--->" $SAMPLE
+        
+        zgrep "^$CONTIG" $path_grounded_pq_touching_tsv.gz | sort -k 2n | awk -v OFS='\t' '{print($1,$2,$3,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$11"_"$12"_"$13)}' > x.bed
+        grep $CONTIG $path_unreliable_bed > y.bed
+        bedtools intersect -a x.bed -b y.bed -wo >> z.tsv
+      fi
+    done
+    
+    cat \
+      <( zcat $path_grounded_pq_touching_tsv.gz | sed '1d' ) \
+      <( python3 scripts/get_annotation_track.py z.tsv ) | tr ' ' '\t' >> xyz.tsv
+
+    rm z.tsv
+done
+    
+cat \
+  <( zcat $path_grounded_pq_touching_tsv.gz | head -n 1 ) \
+   xyz.tsv | pigz -c > xyz.tsv.gz
+rm xyz.tsv
+
+
+Rscript scripts/plot_untangle_all.R xyz.tsv.gz "-e 50000 -m 1000 -j 0.8 -n 1" 0 25000000 360 200
+
+```
+
 Merged plots:
 
 ```shell
@@ -415,7 +454,7 @@ for e in 50000 ; do
                 mv x.tsv.gz ${path_grounded_pq_touching_all_chromosomes_tsv_gz}
             fi;
 
-            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R ${path_grounded_pq_touching_all_chromosomes_tsv_gz} "-e $e -m $m -j $j -n $n" 25000000 200
+            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R ${path_grounded_pq_touching_all_chromosomes_tsv_gz} "-e $e -m $m -j $j -n $n" 0 25000000 120 200
         done
       done
     done
@@ -653,7 +692,7 @@ for refpattern in HG002; do
             mv x.tsv.gz $path_grounded_all_references_tsv_gz
           fi;
 
-          Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R $path_grounded_all_references_tsv_gz "-e $e -m $m -j $j -n $n" 155000000 800
+          Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R $path_grounded_all_references_tsv_gz "-e $e -m $m -j $j -n $n" 0 155000000 120 800
         done
       done
     done

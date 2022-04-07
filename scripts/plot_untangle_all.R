@@ -1,15 +1,34 @@
 args <- commandArgs()
 path_untangle_grounded_all_tsv <- args[6]
 title <- args[7]
-x_max <- as.numeric(args[8])
-height <- as.numeric(args[9])
+x_min <- as.numeric(args[8])
+x_max <- as.numeric(args[9])
+width <- as.numeric(args[10])
+height <- as.numeric(args[11])
 
 library(ggplot2)
 library(ggforce)
 
 x <- read.delim(path_untangle_grounded_all_tsv)
 
-p <- ggplot(x, aes(x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin - 200, y = query, fill = target)) +
+# To have it as numeric column
+#x$self.coverage[x$self.coverage == '.'] <- 1
+#x$self.coverage <- as.numeric(x$self.coverage)
+
+#x <- x[x$self.coverage <= 1,]
+
+colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
+if (length(unique(x$target)) > 5) {
+  # Mobin's annotations
+  colors <- c(colors, "#000000", "#000000", "#000000")
+}
+
+p <- ggplot(
+    x,
+    aes(
+      x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin - 200, y = query, fill = target#, alpha=self.coverage
+    )
+  ) +
   geom_tile() +
   ggtitle(title) +
   facet_col(~grounded.target, scales = "free_y", space = "free", labeller = labeller(variable = labels)) +
@@ -26,6 +45,7 @@ p <- ggplot(x, aes(x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - 
 
     #axis.title.y=element_blank()
   ) +
-  xlim(0, x_max)
+  xlim(x_min, x_max) +
+  scale_fill_manual(values=colors)
 
-ggsave(plot = p, paste0(path_untangle_grounded_all_tsv, '.pdf'), width = 120, height = height, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
+ggsave(plot = p, paste0(path_untangle_grounded_all_tsv, '.pdf'), width = width, height = height, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
