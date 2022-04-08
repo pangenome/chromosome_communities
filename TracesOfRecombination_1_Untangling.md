@@ -389,40 +389,81 @@ done
 Add Mobin's annotations:
 
 ```shell
+e=50000
+m=1000
+j=0.8
+j_str=$(echo $j | sed 's/\.//g')
+n=1
+ref=chm13#chr13
+
 touch xyz.tsv
 cat $path_targets_txt | while read ref; do
     echo $ref
-    path_grounded_pq_touching_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv
+    path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
     
     touch z.tsv
-    zcat $path_grounded_pq_touching_tsv.gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' -v | cut -f 1 | sort | uniq | while read CONTIG; do
+    zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' -v | cut -f 1 | sort | uniq | while read CONTIG; do
       SAMPLE=$( echo $CONTIG | cut -f 1 -d '#')
     
       path_unreliable_bed=/lizardfs/erikg/HPRC/year1v2genbank/annotations/unreliable/$SAMPLE.hifi.flagger_final.bed
       if [[ -s $path_unreliable_bed ]]; then
         echo $CONTIG "--->" $SAMPLE
         
-        zgrep "^$CONTIG" $path_grounded_pq_touching_tsv.gz | sort -k 2n | awk -v OFS='\t' '{print($1,$2,$3,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$11"_"$12"_"$13)}' > x.bed
+        zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n | awk -v OFS='\t' '{print($1,$2,$3,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$11"_"$12"_"$13)}' > x.bed
         grep $CONTIG $path_unreliable_bed > y.bed
         bedtools intersect -a x.bed -b y.bed -wo >> z.tsv
       fi
     done
     
     cat \
-      <( zcat $path_grounded_pq_touching_tsv.gz | sed '1d' ) \
+      <( zcat $path_grounded_pq_touching_tsv_gz | sed '1d' ) \
       <( python3 scripts/get_annotation_track.py z.tsv ) | tr ' ' '\t' >> xyz.tsv
 
     rm z.tsv
 done
-    
+
+# TO FIX: take header    
 cat \
   <( zcat $path_grounded_pq_touching_tsv.gz | head -n 1 ) \
    xyz.tsv | pigz -c > xyz.tsv.gz
 rm xyz.tsv
 
-
 Rscript scripts/plot_untangle_all.R xyz.tsv.gz "-e 50000 -m 1000 -j 0.8 -n 1" 0 25000000 360 200
 
+
+
+# Brutal
+touch xyz.tsv
+cat $path_targets_txt | while read ref; do
+    echo $ref
+    path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
+    
+    touch z.tsv
+    zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' -v | cut -f 1 | sort | uniq | while read CONTIG; do
+      SAMPLE=$( echo $CONTIG | cut -f 1 -d '#')
+    
+      path_unreliable_bed=/lizardfs/erikg/HPRC/year1v2genbank/annotations/unreliable/$SAMPLE.hifi.flagger_final.bed
+      if [[ -s $path_unreliable_bed ]]; then
+        echo $CONTIG "--->" $SAMPLE
+        
+        zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n | awk -v OFS='\t' '{print($1,$2,$3,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$11"_"$12"_"$13)}' > x.bed
+        grep $CONTIG $path_unreliable_bed > y.bed
+        bedtools subtract -a x.bed -b y.bed -A |\
+          awk -v OFS='\t' '{split($4, a, "_"); print($1,$2,$3,a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10])}' >> xyz.tsv
+      else
+        zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n >> xyz.tsv
+      fi
+    done
+    
+    zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' >> xyz.tsv
+done
+
+cat \
+  <( zcat $path_grounded_pq_touching_tsv.gz | head -n 1 ) \
+   xyz.tsv | pigz -c > xyz.tsv.gz
+rm xyz.tsv
+
+Rscript scripts/plot_untangle_all.R xyz.tsv.gz "-e 50000 -m 1000 -j 0.8 -n 1" 0 25000000 360 200
 ```
 
 Merged plots:
@@ -760,6 +801,9 @@ path_hg002_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG
 sbatch -p workers -c 48 --job-name vgchm13 --wrap '\time -v vg deconstruct -P chm13 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_chm13_vcf_gz' && tabix '$path_chm13_vcf_gz
 #sbatch -p workers -c 48 --job-name vggrch38 --wrap '\time -v vg deconstruct -P grch38 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_grch38_vcf_gz' && tabix '$path_grch38_vcf_gz
 sbatch -p workers -c 48 --job-name vghg002 --wrap '\time -v vg deconstruct -P HG002 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_hg002_vcf_gz' && tabix '$path_hg002_vcf_gz
+
+
+
 
 
 # In the VCF there are variants with all samples having missing genotype!
