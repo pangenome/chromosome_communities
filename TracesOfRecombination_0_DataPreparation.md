@@ -74,15 +74,15 @@ Prepare HiFi-based HG002 contigs:
 
 ```shell
 # Download
-wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/working/HPRC_PLUS/HG002/assemblies/year1_freeze_assembly_v2.1/HG002.maternal.f1_assembly_v2.1.fa.gz
-wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/working/HPRC_PLUS/HG002/assemblies/year1_freeze_assembly_v2.1/HG002.paternal.f1_assembly_v2.1.fa.gz
+wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/working/HPRC_PLUS/HG002/assemblies/year1_f1_assembly_v2_genbank/HG002.maternal.f1_assembly_v2_genbank.fa.gz
+wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/working/HPRC_PLUS/HG002/assemblies/year1_f1_assembly_v2_genbank/HG002.paternal.f1_assembly_v2_genbank.fa.gz
 
 for hap in maternal paternal; do
   echo $hap
-  gunzip HG002.$hap.f1_assembly_v2.1.fa.gz -c | bgzip -@ 48 -c > HG002.$hap.fa.gz
+  gunzip HG002.$hap.f1_assembly_v2_genbank.fa.gz -c | bgzip -@ 48 -c > HG002.$hap.fa.gz
   samtools faidx HG002.$hap.fa.gz
 done
-rm HG002.*.f1_assembly_v2.1.fa.gz
+rm HG002.*.f1_assembly_v2_genbank.fa.gz
 
 # HG002 has low quality, so no pq-contigs. We use verkko's assemblies to collect all its acro-centric contigs
 mkdir -p partitioning
@@ -103,6 +103,8 @@ done
 ## Collect unmapped contigs and remap them in split mode
 for hap in mat pat; do
   echo $hap
+  reffa=/lizardfs/guarracino/chromosome_communities/assemblies/hg002-prox.renamed.$hap.fna.gz
+  
   hapfa=/lizardfs/guarracino/chromosome_communities/assemblies/HG002.${hap}ernal.fa.gz
   nonsplitpaf=/lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.$hap.vs.hg002-prox.$hap.paf
 
@@ -119,31 +121,43 @@ for hap in mat pat; do
 done
 
 # Nothing recoverable
-cat partitioning/HG002.*.split.vs.hg002-prox.*.paf
+ls partitioning/HG002.*.split.vs.hg002-prox.*.paf
+
+for hap in mat pat; do
+  echo $hap
+
+  cat partitioning/HG002.$hap.split.vs.hg002-prox.$hap.paf | \
+   awk '{ print $1,$11,$0 }' | tr ' ' '\t' |  sort -n -r -k 1,2 | \
+   awk '$1 != last { print; last = $1; }' | awk -v OFS='\t' '{print($1,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)}' > partitioning/HG002.$hap.split.vs.hg002-prox.$hap.recovered.paf
+done
+
 
 ## Subset by acrocentric chromosome
-( seq 13 15; seq 21 22 ) | while read f; do
-  echo $f
-  
+( seq 13 15; seq 21 22 ) | while read f; do  
   for hap in mat pat; do
+    echo $f $hap
     hapfa=/lizardfs/guarracino/chromosome_communities/assemblies/HG002.${hap}ernal.fa.gz
   
-    samtools faidx $hapfa $(awk '$6 ~ "chr'$f'.prox$"' partitioning/HG002.$hap.vs.hg002-prox.$hap.paf | cut -f 1) >> hg002.chr$f.hifi.fa
+    awk '$6 ~ "chr'$f'.prox$"' $( echo partitioning/HG002.$hap.vs.hg002-prox.$hap.paf; echo partitioning/HG002.$hap.split.vs.hg002-prox.$hap.recovered.paf ) | cut -f 1 > partitioning/hg002.$f.$hap.contigs.txt
+    
+    samtools faidx $hapfa $(cat partitioning/hg002.$f.$hap.contigs.txt) >> hg002.chr$f.hifi.fa
   done
+  echo "bgzip..."
   
   bgzip -@ 48 hg002.chr$f.hifi.fa
   samtools faidx hg002.chr$f.hifi.fa.gz
 done
 ```
 
+Check the partitioning with CHM13:
 
 ```shell
-## Map against the CHM13 assembly
+## Map against the CHM13 assembly (and manually check the output)
 for hap in mat pat; do
   reffa=/lizardfs/guarracino/chromosome_communities/assemblies/chm13.fa.gz
   hapfa=/lizardfs/guarracino/chromosome_communities/assemblies/HG002.${hap}ernal.fa.gz 
   
-  sbatch -c 48 -p workers --job-name HG002 --wrap 'hostname; cd /scratch; \time -v /gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash -t 48 -m -N -s 50k -p 90 -n 10 '$reffa' '$hapfa' > /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.'$hap'.vs.CHM13.n10.paf'
+  sbatch -c 48 -p workers --job-name HG002 --wrap 'hostname; cd /scratch; \time -v /gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash -t 48 -m -N -s 50k -p 90 -n 1 '$reffa' '$hapfa' > /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.'$hap'.vs.CHM13.n1.paf'
 done
 
 for hap in mat pat; do

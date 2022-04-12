@@ -227,7 +227,7 @@ sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && /gn
 ```shell
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle
 
-path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.s100k.l300k.p98.n178/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.fa.gz.de31bcf.4030258.2385969.smooth.fix.og
+#path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.s100k.l300k.p98.n178/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.fa.gz.de31bcf.4030258.2385969.smooth.fix.og
 path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.hg002hifi.s100k.l300k.p98.n188/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.hg002hifi.fa.gz.4817bf7.4030258.57ed14c.smooth.fix.og
 
 prefix=$(basename $path_input_og .og)
@@ -237,8 +237,8 @@ path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/chm13.targ
 grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.fa.gz.fai | cut -f 1 > $path_targets_txt
 
 # All references and emit cut points
-for e in 5000 50000 100000; do
-  for m in 500 1000 10000; do
+for e in 50000 5000 100000; do
+  for m in 1000 500 10000; do
     echo "-e $e -m $m"
     
     path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.bed.gz
@@ -251,8 +251,8 @@ for e in 5000 50000 100000; do
 done
 
 # Single reference by using the same cut points
-for e in 5000 50000 100000; do
-  for m in 500 1000 10000; do
+for e in 50000 5000 100000; do
+  for m in 1000 500 10000; do
     echo "-e $e -m $m"
     
     path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.cut_points.txt
@@ -264,7 +264,7 @@ for e in 5000 50000 100000; do
       if [[ ! -s ${path_ref_bed_gz} ]]; then
         path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.cut_points.txt
         
-        sbatch -p workers -c 12 --job-name acrountangle --wrap '\time -v '$run_odgi' untangle -t 12 -P -i '$path_input_og' -r '$ref' -e '$e' -m '$m' --cut-points-input '$path_cut_points_txt' -j 0 -n 100 | pigz -c > '$path_ref_bed_gz';'
+        sbatch -p workers -c 24 --job-name acrountangle --wrap '\time -v '$run_odgi' untangle -t 24 -P -i '$path_input_og' -r '$ref' -e '$e' -m '$m' --cut-points-input '$path_cut_points_txt' -j 0 -n 100 | pigz -c > '$path_ref_bed_gz';'
       fi;
     done
   done
@@ -276,8 +276,8 @@ Grounding (applying filters) and plotting:
 ```shell
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded
 
-for e in 5000 50000 100000; do
-  for m in 500 1000 10000; do
+for e in 50000 ; do
+  for m in 1000 ; do
     for j in 0 0.8 0.95; do
       j_str=$(echo $j | sed 's/\.//g')
       (seq 1 5; seq 10 10 50) | while read n; do 
@@ -342,17 +342,29 @@ for e in 50000 ; do
             # To plot the short (bad) HiFi-based HG002 contigs
             cat /lizardfs/guarracino/chromosome_communities/assemblies/hg002.`echo $ref | sed 's/chm13#//g'`.hifi.fa.gz.fai | awk '$2 > 300000' | cut -f 1 >> $ref.tmp2.txt       
             if [ $ref == "chm13#chr13" ]; then
-              echo "Remove wrongly partitioned contig: HG002#1#h1tg000013l"
-              grep 'HG002#1#h1tg000013l' -v $ref.tmp2.txt > $ref.tmp3.txt
-              echo "Add wrongly partitioned contig: HG002#1#h1tg000260l"
-              echo 'HG002#1#h1tg000260l' >> $ref.tmp3.txt
+#              echo "Remove wrongly partitioned contig: HG002#1#h1tg000013l"
+#              grep 'HG002#1#h1tg000013l' -v $ref.tmp2.txt > $ref.tmp3.txt
+#              echo "Add wrongly partitioned contig: HG002#1#h1tg000260l"
+#              echo 'HG002#1#h1tg000260l' >> $ref.tmp3.txt
+
+              echo "Remove wrongly partitioned contig: HG002#1#JAHKSE010000013.1"
+              grep 'HG002#1#JAHKSE010000013.1' -v $ref.tmp2.txt > $ref.tmp3.txt
+              echo "Add wrongly partitioned contig: HG002#1#JAHKSE010000214.1"
+              echo 'HG002#1#JAHKSE010000214.1' >> $ref.tmp3.txt             
+              
               rm $ref.tmp2.txt && mv $ref.tmp3.txt $ref.tmp2.txt
             fi
             if [ $ref == "chm13#chr21" ]; then
-              echo "Remove wrongly partitioned contig: HG002#1#h1tg000260l"
-              grep 'HG002#1#h1tg000260l' -v $ref.tmp2.txt > $ref.tmp3.txt
-              echo "Add wrongly partitioned contig: HG002#1#h1tg000013l"
-              echo 'HG002#1#h1tg000013l' >> $ref.tmp3.txt
+#              echo "Remove wrongly partitioned contig: HG002#1#h1tg000260l"
+#              grep 'HG002#1#h1tg000260l' -v $ref.tmp2.txt > $ref.tmp3.txt
+#              echo "Add wrongly partitioned contig: HG002#1#h1tg000013l"
+#              echo 'HG002#1#h1tg000013l' >> $ref.tmp3.txt
+
+              echo "Remove wrongly partitioned contig: HG002#1#JAHKSE010000214.1"
+              grep 'HG002#1#JAHKSE010000214.1' -v $ref.tmp2.txt > $ref.tmp3.txt
+              echo "Add wrongly partitioned contig: HG002#1#JAHKSE010000013.1"
+              echo 'HG002#1#JAHKSE010000013.1' >> $ref.tmp3.txt 
+              
               rm $ref.tmp2.txt && mv $ref.tmp3.txt $ref.tmp2.txt
             fi              
             ##########################################################################################
@@ -384,86 +396,7 @@ for e in 50000 ; do
     done
   done
 done
-```
 
-Add Mobin's annotations:
-
-```shell
-e=50000
-m=1000
-j=0.8
-j_str=$(echo $j | sed 's/\.//g')
-n=1
-ref=chm13#chr13
-
-touch xyz.tsv
-cat $path_targets_txt | while read ref; do
-    echo $ref
-    path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
-    
-    touch z.tsv
-    zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' -v | cut -f 1 | sort | uniq | while read CONTIG; do
-      SAMPLE=$( echo $CONTIG | cut -f 1 -d '#')
-    
-      path_unreliable_bed=/lizardfs/erikg/HPRC/year1v2genbank/annotations/unreliable/$SAMPLE.hifi.flagger_final.bed
-      if [[ -s $path_unreliable_bed ]]; then
-        echo $CONTIG "--->" $SAMPLE
-        
-        zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n | awk -v OFS='\t' '{print($1,$2,$3,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$11"_"$12"_"$13)}' > x.bed
-        grep $CONTIG $path_unreliable_bed > y.bed
-        bedtools intersect -a x.bed -b y.bed -wo >> z.tsv
-      fi
-    done
-    
-    cat \
-      <( zcat $path_grounded_pq_touching_tsv_gz | sed '1d' ) \
-      <( python3 scripts/get_annotation_track.py z.tsv ) | tr ' ' '\t' >> xyz.tsv
-
-    rm z.tsv
-done
-
-# TO FIX: take header    
-cat \
-  <( zcat $path_grounded_pq_touching_tsv.gz | head -n 1 ) \
-   xyz.tsv | pigz -c > xyz.tsv.gz
-rm xyz.tsv
-
-Rscript scripts/plot_untangle_all.R xyz.tsv.gz "-e 50000 -m 1000 -j 0.8 -n 1" 0 25000000 360 200
-
-
-
-# Brutal
-touch xyz.tsv
-cat $path_targets_txt | while read ref; do
-    echo $ref
-    path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
-    
-    touch z.tsv
-    zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' -v | cut -f 1 | sort | uniq | while read CONTIG; do
-      SAMPLE=$( echo $CONTIG | cut -f 1 -d '#')
-    
-      path_unreliable_bed=/lizardfs/erikg/HPRC/year1v2genbank/annotations/unreliable/$SAMPLE.hifi.flagger_final.bed
-      if [[ -s $path_unreliable_bed ]]; then
-        echo $CONTIG "--->" $SAMPLE
-        
-        zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n | awk -v OFS='\t' '{print($1,$2,$3,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$11"_"$12"_"$13)}' > x.bed
-        grep $CONTIG $path_unreliable_bed > y.bed
-        bedtools subtract -a x.bed -b y.bed -A |\
-          awk -v OFS='\t' '{split($4, a, "_"); print($1,$2,$3,a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10])}' >> xyz.tsv
-      else
-        zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n >> xyz.tsv
-      fi
-    done
-    
-    zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' >> xyz.tsv
-done
-
-cat \
-  <( zcat $path_grounded_pq_touching_tsv.gz | head -n 1 ) \
-   xyz.tsv | pigz -c > xyz.tsv.gz
-rm xyz.tsv
-
-Rscript scripts/plot_untangle_all.R xyz.tsv.gz "-e 50000 -m 1000 -j 0.8 -n 1" 0 25000000 360 200
 ```
 
 Merged plots:
@@ -548,6 +481,91 @@ Single plots (not used):
 #      done
 #    done
 #done
+```
+
+
+Add Mobin's annotations:
+
+```shell
+e=50000
+m=1000
+j=0.8
+j_str=$(echo $j | sed 's/\.//g')
+n=1
+ref=chm13#chr13
+
+# Brutal: remove untantled regions if they overlap with unreliable regions
+touch xyz.tsv
+cat $path_targets_txt | while read ref; do
+    echo $ref
+    path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
+    
+    touch z.tsv
+    zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' -v | cut -f 1 | sort | uniq | while read CONTIG; do
+      SAMPLE=$( echo $CONTIG | cut -f 1 -d '#')
+    
+      path_unreliable_bed=/lizardfs/erikg/HPRC/year1v2genbank/annotations/unreliable/$SAMPLE.hifi.flagger_final.bed
+      if [[ -s $path_unreliable_bed ]]; then
+        echo $CONTIG "--->" $SAMPLE
+        
+        zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n | awk -v OFS='\t' '{print($1,$2,$3,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$11"_"$12"_"$13)}' > x.bed
+        grep $CONTIG $path_unreliable_bed > y.bed
+        # -A: remove entire feature if any overlap
+        bedtools subtract -a x.bed -b y.bed -A |\
+          awk -v OFS='\t' '{split($4, a, "_"); print($1,$2,$3,a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10])}' >> xyz.tsv
+      else
+        zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n >> xyz.tsv
+      fi
+    done
+    
+    zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' >> xyz.tsv
+done
+
+path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
+cat \
+  <( zcat $path_grounded_pq_touching_tsv_gz | head -n 1 ) \
+   xyz.tsv | pigz -c > xyz.tsv.gz
+rm xyz.tsv
+
+Rscript scripts/plot_untangle_all.R xyz.tsv.gz "-e 50000 -m 1000 -j 0.8 -n 1" 0 25000000 360 200
+
+
+# Plot additional tracks for the annotations
+touch xyz.tsv
+cat $path_targets_txt | while read ref; do
+    echo $ref
+    path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
+    
+    touch z.tsv
+    zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' -v | cut -f 1 | sort | uniq | while read CONTIG; do
+      SAMPLE=$( echo $CONTIG | cut -f 1 -d '#')
+    
+      path_unreliable_bed=/lizardfs/erikg/HPRC/year1v2genbank/annotations/unreliable/$SAMPLE.hifi.flagger_final.bed
+      if [[ -s $path_unreliable_bed ]]; then
+        echo $CONTIG "--->" $SAMPLE
+        
+        zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n | awk -v OFS='\t' '{print($1,$2,$3,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$11"_"$12"_"$13)}' > x.bed
+        grep $CONTIG $path_unreliable_bed > y.bed
+        
+        # wao: write the original A and B entries plus the number of base pairs of overlap between the two features.
+        bedtools intersect -a x.bed -b y.bed -wo >> z.tsv
+      fi
+    done
+    
+    cat \
+      <( zcat $path_grounded_pq_touching_tsv_gz | sed '1d' ) \
+      <( python3 scripts/get_annotation_track.py z.tsv ) | tr ' ' '\t' >> xyz.tsv
+
+    rm z.tsv
+done
+
+path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
+cat \
+  <( zcat $path_grounded_pq_touching_tsv_gz | head -n 1 ) \
+   xyz.tsv | pigz -c > xyz.annot.tsv.gz
+rm xyz.tsv
+
+Rscript scripts/plot_untangle_all.R xyz.annot.tsv.gz "-e 50000 -m 1000 -j 0.8 -n 1" 0 25000000 120 200
 ```
 
 
@@ -810,138 +828,4 @@ sbatch -p workers -c 48 --job-name vghg002 --wrap '\time -v vg deconstruct -P HG
 #num_samples=`bcftools query -l $PATH_VCF_GZ | wc -l`
 #num_miss_gen=$(echo $num_samples - 1 | bc)
 #--max-missing-count $num_miss_gen \
-
-
-RUNWFMASH=/home/guarracino/tools/wfmash/build/bin/wfmash-master-adaptive
-RUNBENCHMARK=/home/guarracino/tools/BiWFA/bin/align_benchmark
-
-FASTA=/lizardfs/guarracino/biwfa/zmays41.fa
-DIR_OUTPUT=/lizardfs/guarracino/biwfa/zmays41
-PREFIX=zmays41
-
-
-#FASTA=/lizardfs/guarracino/biwfa/athaliana16.fa
-#DIR_OUTPUT=/lizardfs/guarracino/biwfa/athaliana16
-#PREFIX=athaliana16
-N=100
-
-mkdir -p $DIR_OUTPUT
-
-# Compute mappings
-for s in 100000 200000; do
-  for p in 95 90 85; do
-    echo "${s} - ${p}"
-    
-    PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.paf
-	sbatch -p workers -c 48 --job-name $s-$p --wrap '\time -v '$RUNWFMASH' '$FASTA' -s '$s' -c 0 -l 0 -p '$p' --no-filter -t 48 -m > '$PAF
-  done
-done
-##################
-
-PAF=$DIR_OUTPUT/$PREFIX.s5000.p90.n41.paf
-sbatch -p workers -c 48 --job-name s5k-p90 --wrap '\time -v '$RUNWFMASH' '$FASTA' -s 5k -c 0 -l 0 -p 90 -n 41 -t 48 -m > '$PAF
-
-for p in 99 95 90; do
-  echo "-s 1000 -p ${p}"
-    
-  PAF=$DIR_OUTPUT/$PREFIX.s1000.p$p.n41.paf
-  sbatch -p highmem -c 48 --job-name s1k-p$p --wrap '\time -v '$RUNWFMASH' '$FASTA' -s 1k -c 0 -l 0 -p '$p' -n 41 -t 48 -m > '$PAF
-done
-
-# Collect max N mappings for each set
-for s in 100000 200000; do
-  for p in 95 90 85; do
-    echo "${s} - ${p}"
-    
-    PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.paf
-    FILTERED_PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf
-
-    minid=$( echo "$p - 0.5" | bc );
-    maxid=$( echo "$p + 0.5" | bc );
-
-	sed 's/id:f://g' $PAF | \
-	  awk -v len=$s -v minid=$minid -v maxid=$maxid '$11 == len && $13 >= minid && $13 < maxid' | \
-	  shuf -n $N > $FILTERED_PAF
-  done
-done
-
-wc $DIR_OUTPUT/*sample$N.paf -l
-
-# Get the sequences
-for s in 100000 200000; do
-  for p in 95 90 85; do
-    echo "${s} - ${p}"
-
-    FILTERED_PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf
-    bash paf+fasta2seq.sh $FILTERED_PAF $FASTA
-  done
-done
-
-# Split the sequences
-for s in 100000 200000; do
-  for p in 95 90 85; do
-    echo "${s} - ${p}"
-
-    FILTERED_SEQ=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf.seq
-    c=1
-    while mapfile -t -n 2 ary && ((${#ary[@]})); do
-        printf '%s\n' "${ary[@]}" > $FILTERED_SEQ.pair_$c.seq
-        c=$(( c + 1 ))
-    done < $FILTERED_SEQ
-  done
-done
-
-
-
-# Compute alignments
-for s in 100000 200000; do
-  for p in 95 90 85; do
-    #echo "${s} - ${p}"
-    
-    FILTERED_PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf
-    NUM_PAIRS=$(cat $FILTERED_PAF | wc -l)
-    echo "${s} - ${p} $NUM_PAIRS"
-    FILTERED_SEQ=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf.seq
-
-    seq $NUM_PAIRS | while read c; do
-      FILTERED_PAIR_SEQ=$FILTERED_SEQ.pair_$c.seq
-    
-      # -c 48 because the memory consumption can be high
-      sbatch -w octopus02 -p workers -c 48 --job-name $s-$p --wrap '\time -v '$RUNBENCHMARK' -a gap-affine-wfa -i '$FILTERED_PAIR_SEQ' --affine-penalties 0,5,11,1 --wfa-memory-mode high --output '$FILTERED_PAF'.pair_'$c'.high.out 2> '$FILTERED_PAF'.pair_'$c'.high.log'
-      #sbatch -w octopus02 -p workers -c 1 --job-name $s-$p --wrap '\time -v '$RUNBENCHMARK' -a gap-affine-wfa -i '$FILTERED_PAIR_SEQ' --affine-penalties 0,5,11,1 --wfa-memory-mode med --output '$FILTERED_PAF'.pair_'$c'.med.out 2> '$FILTERED_PAF'.pair_'$c'.med.log'
-      #sbatch -w octopus02 -p workers -c 1 --job-name $s-$p --wrap '\time -v '$RUNBENCHMARK' -a gap-affine-wfa -i '$FILTERED_PAIR_SEQ' --affine-penalties 0,5,11,1 --wfa-memory-mode low --output '$FILTERED_PAF'.pair_'$c'.low.out 2> '$FILTERED_PAF'.pair_'$c'.low.log'
-      #sbatch -w octopus02 -p workers -c 1 --job-name $s-$p --wrap '\time -v '$RUNBENCHMARK' -a gap-affine-wfa -i '$FILTERED_PAIR_SEQ' --affine-penalties 0,5,11,1 --wfa-bidirectional   --output '$FILTERED_PAF'.pair_'$c'.bid.out 2> '$FILTERED_PAF'.pair_'$c'.bid.log'
-    done
-  done
-done
-
-# Statistics
-echo -e "s\tp\tnum.pair\tmode\tvalue\tstatistic" > x.tsv
-echo -e "s\tp\tnum.pair\tmode\tscore" > score.tsv
-for s in 100000 200000; do
-  for p in 95 90 85; do
-    FILTERED_PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf
-    NUM_PAIRS=$(cat $FILTERED_PAF | wc -l)
-    echo "${s} - ${p} $NUM_PAIRS"
-    
-    grep 'User time' $FILTERED_PAF.pair_*.*.log | cut -f 6,7,8 -d '.' | sed 's/pair_//g' | sed 's/.log://' | sed 's/User time (seconds): //g' | tr '.' '\t' | sort -k 1n | awk -v OFS='\t' -v s=$s -v p=$p '{print(s,p,$0,"time_s")}' >> x.tsv
-    grep 'Maximum' $FILTERED_PAF.pair_*.*.log | cut -f 6,7,8 -d '.' | sed 's/pair_//g' | sed 's/.log://' | sed 's/Maximum resident set size (kbytes): //g' | tr '.' '\t' | sort -k 1n | awk -v OFS='\t' -v s=$s -v p=$p '{print(s,p,$0,"memory_kb")}' >> x.tsv
-    grep '^-' $FILTERED_PAF.pair_*.*.out | cut -f 1 | cut -f 6,7,8 -d '.' | sed 's/pair_//g' | sed 's/out://g' | tr '.' '\t' | sort -k 1n | awk -v OFS='\t' -v s=$s -v p=$p '{print(s,p,$0)}' >> score.tsv
-  done
-done
-
-for s in 20000 50000 100000; do
-  for p in 95 90 85; do
-    echo "${s} - ${p}"
-    
-    FILTERED_PAF=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf
-    NUM_PAIRS=$(cat $FILTERED_PAF | wc -l)
-    FILTERED_SEQ=$DIR_OUTPUT/$PREFIX.s$s.p$p.sample$N.paf.seq
-
-    seq $NUM_PAIRS | while read c; do
-      #echo "$FILTERED_SEQ.pair_$c.seq $FILTERED_PAF.pair_$c.med.out"
-      python3 validateCIGAR.py $FILTERED_SEQ.pair_$c.seq $FILTERED_PAF.pair_$c.bid.out
-    done
-  done
-done
 ```
