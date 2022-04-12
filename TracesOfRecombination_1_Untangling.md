@@ -396,6 +396,57 @@ for e in 50000 ; do
     done
   done
 done
+```
+
+Remove unreliable regions:
+
+```shell
+# Remove unreliable regions:
+for e in 50000 ; do
+  for m in 1000 ; do
+    for j in 0.8 0.95; do
+      j_str=$(echo $j | sed 's/\.//g')
+      (seq 1 5; seq 10 10 50) | while read n; do 
+        echo "-e $e -m $m -j $j -n $n"
+    
+        cat $path_targets_txt | while read ref; do
+          echo $ref
+
+          path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
+          path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.reliable.tsv.gz
+
+          if [[ ! -s ${path_grounded_pq_touching_reliable_tsv_gz} ]]; then
+            # Skip verkko's HG002 contigs because we don't have unreliable regions for it
+            zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' -v | cut -f 1 | sort | uniq | while read CONTIG; do
+              SAMPLE=$( echo $CONTIG | cut -f 1 -d '#')
+            
+              path_unreliable_bed=/lizardfs/erikg/HPRC/year1v2genbank/annotations/unreliable/$SAMPLE.hifi.flagger_final.bed
+              if [[ -s $path_unreliable_bed ]]; then
+                #echo $CONTIG "--->" $SAMPLE
+                
+                zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n | awk -v OFS='\t' '{print($1,$2,$3,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$11"_"$12"_"$13)}' > x.bed
+                grep $CONTIG $path_unreliable_bed > y.bed
+                # -A: remove entire feature if any overlap
+                bedtools subtract -a x.bed -b y.bed -A |\
+                  awk -v OFS='\t' '{split($4, a, "_"); print($1,$2,$3,a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10])}' >> x.tsv
+              else
+                zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n >> x.tsv
+              fi
+            done
+            
+            # Re-take verkko's HG002 untangled regions
+            zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' >> x.tsv
+            
+            cat \
+              <( zcat $path_grounded_pq_touching_tsv_gz | head -n 1 ) \
+               x.tsv | pigz -c > $path_grounded_pq_touching_reliable_tsv_gz
+            rm x.tsv
+          fi;
+        done
+      done
+    done
+  done
+done
 
 ```
 
@@ -412,23 +463,23 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
 
 for e in 50000 ; do
   for m in 1000 ; do
-    for j in 0 0.8 0.95; do
+    for j in 0.8 0.95; do
         j_str=$(echo $j | sed 's/\.//g')
         (seq 1 5; seq 10 10 50) | while read n; do 
             echo "-e $e -m $m -j $j -n $n"
     
-            path_grounded_pq_touching_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
-            if [[ ! -s ${path_grounded_pq_touching_all_chromosomes_tsv_gz} ]]; then
+            path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.reliable.tsv.gz
+            if [[ ! -s ${path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz} ]]; then
                 # Merge single reference results
                 cat \
-                  <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.*.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz | head -n 1) \
-                  <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.*.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz | grep query -v) |\
+                  <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.*.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.reliable.tsv.gz | head -n 1) \
+                  <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.*.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.reliable.tsv.gz | grep query -v) |\
                   pigz -c > x.tsv.gz
                 # Rename after to avoid getting itself with the previous '*' expansion
-                mv x.tsv.gz ${path_grounded_pq_touching_all_chromosomes_tsv_gz}
+                mv x.tsv.gz ${path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz}
             fi;
 
-            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R ${path_grounded_pq_touching_all_chromosomes_tsv_gz} "-e $e -m $m -j $j -n $n" 0 25000000 120 200
+            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R ${path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz} "-e $e -m $m -j $j -n $n" 0 25000000 120 200
         done
       done
     done
@@ -439,12 +490,12 @@ mv /lizardfs/guarracino/chromosome_communities/untangle/grounded/*.pdf /lizardfs
 # Merge
 for e in 50000 ; do
   for m in 1000 ; do
-    for j in 0 0.8 0.95; do
+    for j in 0.8 0.95; do
         echo "-e $e -m $m -j $j"
         
         j_str=$(echo $j | sed 's/\.//g')
         PDFs=$((seq 1 5; seq 10 10 50) | while read n; do \
-          echo /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz.pdf
+          echo /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.reliable.tsv.gz.pdf
         done | tr '\n' ' ')
         #echo $PDFs
         
@@ -454,7 +505,7 @@ for e in 50000 ; do
         #  -sOutputFile=/lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.grounded.pq_touching.tsv.gz.pdf \
         #  $PDFs
           
-        /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite $PDFs /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.merged.grounded.pq_touching.tsv.gz.pdf
+        /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite $PDFs /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.merged.grounded.pq_touching.reliable.tsv.gz.pdf
       done
     done
 done
@@ -494,7 +545,7 @@ j_str=$(echo $j | sed 's/\.//g')
 n=1
 ref=chm13#chr13
 
-# Brutal: remove untantled regions if they overlap with unreliable regions
+# Brutal: remove untangled regions if they overlap with unreliable regions
 touch xyz.tsv
 cat $path_targets_txt | while read ref; do
     echo $ref
