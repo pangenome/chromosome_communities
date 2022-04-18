@@ -1,4 +1,6 @@
-# chromosome communities in the HPRC
+# Chromosome communities in the human pangenome
+
+**INFO TO REMOVE**
 
 This repo contains scripts to evaluate the chromosome separation among the HPRCy1v2 assemblies.
 

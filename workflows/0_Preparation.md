@@ -1,9 +1,48 @@
-# Traces of recombination
+# Preparation
 
 ## Tools
 
 ```shell
 mkdir -p ~/tools $$ cd ~/tools
+
+git clone --recursive https://github.com/ekg/wfmash.git
+cd wfmash
+git checkout ad8aebae1be96847839778af534866bc9545adb9
+cmake -H. -Bbuild && cmake --build build -- -j 48
+mv build/bin/wfmash build/bin/wfmash-ad8aebae1be96847839778af534866bc9545adb9
+cd ..
+
+git clone --recursive https://github.com/ekg/seqwish.git
+cd seqwish
+git checkout 706ef7e2640e38a75ae7435fb57f7a6c8e3ada2c
+cmake -H. -Bbuild && cmake --build build -- -j 48
+mv bin/seqwish bin/seqwish-706ef7e2640e38a75ae7435fb57f7a6c8e3ada2c
+cd ..
+
+git clone --recursive https://github.com/pangenome/smoothxg.git
+cd smoothxg
+git checkout b3f4578f37000922cdd193c2d183951f48f6e612
+cmake -H. -Bbuild && cmake --build build -- -j 48
+mv bin/smoothxg bin/smoothxg-b3f4578f37000922cdd193c2d183951f48f6e612
+cd ..
+
+git clone --recursive https://github.com/pangenome/odgi.git
+cd odgi
+git checkout a4957db99179a9f2e8d43dfca73cb47680dfb956
+mv bin/odgi bin/odgi-a4957db99179a9f2e8d43dfca73cb47680dfb956
+cmake -H. -Bbuild && cmake --build build -- -j 48
+cd ..
+
+git clone --recursive https://github.com/pangenome/pggb.git
+cd pggb
+git checkout 94bd3564bf4cdfe3c05001bec78347fbfd73d8c9
+sed 's,"$fmt" wfmash,"$fmt" ~/tools/wfmash/build/bin/wfmash-ad8aebae1be96847839778af534866bc9545adb9,g' pggb -i
+sed 's,"$fmt" seqwish,"$fmt" ~/tools/seqwish/bin/seqwish-706ef7e2640e38a75ae7435fb57f7a6c8e3ada2c,g' pggb -i
+sed 's,"$fmt" smoothxg,"$fmt" ~/tools/smoothxg/bin/smoothxg-b3f4578f37000922cdd193c2d183951f48f6e612,g' pggb -i
+sed 's,"$fmt" odgi,"$fmt" ~/tools/odgi/bin/odgi-a4957db99179a9f2e8d43dfca73cb47680dfb956,g' pggb -i
+mv pggb pggb-94bd3564bf4cdfe3c05001bec78347fbfd73d8c9
+cd ..
+
 
 git clone --recursive https://github.com/ekg/fastix.git
 cd fastix
@@ -12,39 +51,34 @@ cargo build --release
 mv target/release/fastix target/release/fastix-331c1159ea16625ee79d1a82522e800c99206834
 cd ..
 
-git clone --recursive https://github.com/pangenome/odgi.git
-cd odgi
-git checkout 694948ccf31e7b565449cc056668e9dcc8cc0a3e
-cmake -H. -Bbuild && cmake --build build -- -j 48
-mv bin/odgi bin/odgi-694948ccf31e7b565449cc056668e9dcc8cc0a3e
-cd ..
-
-(echo pggb wfmash seqwish smoothxg odgi gfaffix | tr ' ' '\n') | while read tool; do ls -l $(which $tool); done | cut -f 13 -d ' '
-/gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb
-/gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash
-/gnu/store/v1q6ja2fy3c7fcz7bnr6k3x54amynhyp-seqwish-0.7.3+51ee550-1/bin/seqwish
-/gnu/store/p8wflvwwxiih4z9ds5hfkin8mjld6qw2-smoothxg-0.6.0+0f383e5-10/bin/smoothxg
-/gnu/store/2ln6zv8mk6aqqzcib39rgi11x2hn7mv9-odgi-0.6.2+9e9c481-13/bin/odgi
-/gnu/store/ccw48k7h8v1brz3ap0sj3bcwvvmk6xra-gfaffix-0.1.2.2/bin/gfaffix
+(echo gfaffix | tr ' ' '\n') | while read tool; do ls -l $(which $tool); done | cut -f 13 -d ' '
+/gnu/store/1lfrwkhdpp95l8hh8grv75yhssn6in3r-gfaffix-0.1.3/bin/gfaffix
 
 vg
-vg: variation graph tool, version v1.38.0 "Canossa"
+vg version v1.39.0 "Runzi"
 ```
 
-## Preparation
+## Data
 
 Clone the repository:
 
 ```shell
 cd /lizardfs/guarracino/
 git clone --recursive https://github.com/pangenome/chromosome_communities.git
+mkdir /lizardfs/guarracino/chromosome_communities/assemblies
+cd /lizardfs/guarracino/chromosome_communities/assemblies
+```
+
+Prepare a single FASTA with all HPRCy1v2genbank samples (94 haplotypes) plus 2 references:
+
+
+```shell
+sbatch -p workers -c 48 --job-name collect --wrap 'cat /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13+grch38.fa /lizardfs/erikg/HPRC/year1v2genbank/assemblies/*v2_genbank*fa | bgzip -@ 48 -c > /lizardfs/guarracino/chromosome_communities/assemblies/HPRCy1v2genbank+refs.fa.gz; samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/HPRCy1v2genbank+refs.fa.gz'
 ```
 
 Prepare verkko's HG002 contigs (HiFi+ONT-based):
 
 ```shell
-cd /lizardfs/guarracino/chromosome_communities/assemblies
-
 ### Get the "hg002-prox.fna" file from Globus (t2t-share/hg002/acros/beta folder)
 
 # Rename contigs
@@ -100,7 +134,7 @@ for hap in mat pat; do
   sbatch -c 24 -p workers --job-name HG002 --wrap 'hostname; cd /scratch; \time -v /gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash -t 24 -m -N -s 50k -p 95 '$reffa' '$hapfa' > /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.'$hap'.vs.hg002-prox.'$hap'.paf'
 done
 
-## Collect unmapped contigs and remap them in split mode
+## Collect unmapped contigs and map them again, but in split mode
 for hap in mat pat; do
   echo $hap
   reffa=/lizardfs/guarracino/chromosome_communities/assemblies/hg002-prox.renamed.$hap.fna.gz
@@ -119,9 +153,6 @@ for hap in mat pat; do
     sbatch -c 24 -p workers --job-name HG002 --wrap 'hostname; cd /scratch; \time -v /gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash -t 24 -m -s 50k -p 95 '$reffa' '$missingfa' > /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.'$hap'.split.vs.hg002-prox.'$hap'.paf'
   fi
 done
-
-# Nothing recoverable
-ls partitioning/HG002.*.split.vs.hg002-prox.*.paf
 
 for hap in mat pat; do
   echo $hap
@@ -149,7 +180,7 @@ done
 done
 ```
 
-Check the partitioning with CHM13:
+Check manually the partitioning with CHM13:
 
 ```shell
 ## Map against the CHM13 assembly (and manually check the output)
@@ -165,6 +196,52 @@ for hap in mat pat; do
   hapfa=/lizardfs/guarracino/chromosome_communities/assemblies/HG002.${hap}ernal.fa.gz 
   
   sbatch -c 48 -p workers --job-name HG002 --wrap 'hostname; cd /scratch; \time -v /gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash -t 48 -m -s 50k -p 90 '$reffa' '$hapfa' > /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.'$hap'.vs.CHM13.split.paf'
+done
+```
+
+More precise mapping information (pq-arms):
+
+#TODO chrX/Y centromeres are missing
+
+```shell
+mkdir -p /lizardfs/guarracino/chromosome_communities/assemblies/partitioning_with_pq/
+cd /lizardfs/guarracino/chromosome_communities/assemblies/partitioning_with_pq/
+
+# Prepare p/q-arms coordinates
+sed 's/chr/chm13#chr/g' /lizardfs/guarracino/chromosome_communities/data/chm13.centromeres.approximate.bed | \
+  bedtools sort | \
+  bedtools complement \
+    -i - \
+    -g <(cut -f 1,2 /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa.fai | grep 'chrM\|chrX' -v | sort) \
+  > tmp.bed
+# Take odd rows
+(echo -e "#chrom\tstart\tend"; sed -n 1~2p tmp.bed) > p_arms.bed
+# Take even rows
+(echo -e "#chrom\tstart\tend"; sed -n 2~2p tmp.bed) > q_arms.bed
+rm tmp.bed
+
+# Classify partitioned contigs with pq information
+ls /lizardfs/erikg/HPRC/year1v2genbank/approx_mappings/*.vs.ref.paf | grep split -v | while read PAF; do
+  HAPLOTYPE=$(basename $PAF .paf | cut -f 1,2 -d '.');
+  echo $HAPLOTYPE
+  
+  awk -v OFS='\t' '{print($6,$8,$9,$1)}' < $PAF > $HAPLOTYPE.vs.ref.bed
+
+  bedtools intersect \
+    -a <(cat $HAPLOTYPE.vs.ref.bed | bedtools sort) \
+    -b <(cat p_arms.bed | bedtools sort) | cut -f 4 | sort > $HAPLOTYPE.vs.ref.p_contigs.txt
+  bedtools intersect \
+    -a <(cat $HAPLOTYPE.vs.ref.bed | bedtools sort) \
+    -b <(cat q_arms.bed | bedtools sort) | cut -f 4 | sort > $HAPLOTYPE.vs.ref.q_contigs.txt
+    
+  grep -f <(comm -23 $HAPLOTYPE.vs.ref.p_contigs.txt $HAPLOTYPE.vs.ref.q_contigs.txt) $PAF | \
+    awk -v OFS='\t' '{print($1,$6"_p")}' > $HAPLOTYPE.partitioning_with_pq.tsv
+  grep -f <(comm -13 $HAPLOTYPE.vs.ref.p_contigs.txt $HAPLOTYPE.vs.ref.q_contigs.txt) $PAF | \
+    awk -v OFS='\t' '{print($1,$6"_q")}' >> $HAPLOTYPE.partitioning_with_pq.tsv
+  grep -f <(comm -12 $HAPLOTYPE.vs.ref.p_contigs.txt $HAPLOTYPE.vs.ref.q_contigs.txt) $PAF | \
+    awk -v OFS='\t' '{print($1,$6"_pq")}' >> $HAPLOTYPE.partitioning_with_pq.tsv
+    
+  rm $HAPLOTYPE.vs.ref.bed $HAPLOTYPE.vs.ref.p_contigs.txt $HAPLOTYPE.vs.ref.q_contigs.txt
 done
 ```
 
