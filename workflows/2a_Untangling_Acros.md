@@ -21,6 +21,15 @@ ls /lizardfs/erikg/HPRC/year1v2genbank/assemblies/*v2_genbank*fa | while read FA
   PAF=/lizardfs/guarracino/chromosome_communities/assemblies/partitioning_pq/$HAPLOTYPE.vs.ref.paf
   sbatch -p workers -c 12 --wrap "$RUN_WFMASH -t 12 -m -s 50k -l 150k -p 90 -H 0.001 $REFERENCE_FASTA $FASTA > $PAF"
 done
+
+# HiFi HG002 contigs are partitioned with `wfmash -N` (it is more strict) because they are not filtered to be pq-contigs
+ls /lizardfs/erikg/HPRC/year1v2genbank/assemblies/HG002*v2_genbank*fa | while read FASTA; do
+  HAPLOTYPE=$(basename $FASTA .fa | cut -f 1,2 -d '.');
+  echo $HAPLOTYPE
+  
+  PAF=/lizardfs/guarracino/chromosome_communities/assemblies/partitioning_pq/$HAPLOTYPE.vs.ref.p90.N.paf
+  sbatch -p workers -c 12 --wrap "$RUN_WFMASH -t 12 -m -s 50k -l 150k -p 90 -N -H 0.001 $REFERENCE_FASTA $FASTA > $PAF"
+done
 ```
 
 [comment]: <> (Collect unmapped contigs and remap them in split mode:)
@@ -166,18 +175,18 @@ Put all together with both the human references plus all partitioned HG002 HiFi 
 ```shell
 # Include long HG002 contigs that were not already taken
 comm -23 \
-  <( cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning_pq/HG002.*paf | \
+  <( cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning_pq/HG002.*.vs.ref.p90.N.paf | \
        grep 'chr13\|chr14\|chr15\|chr21\|chr22' | awk '$2 >= 300000' | cut -f 1 | sort | uniq ) \
-  <( cat chm13#chr*.pq_contigs.1kbps.hg002prox.fa.gz.fai | grep HG002 | cut -f 1 | sort | uniq ) | sort | uniq > HG002.contigs.txt
+  <( cat chm13#chr*.pq_contigs.1kbps.hg002prox.fa.gz.fai | grep HG002 | cut -f 1 | sort | uniq ) | sort | uniq > HG002.contigs.N.txt
 
 cat \
   <( samtools faidx $PATH_CHM13_FA $(grep 'chr13\|chr14\|chr15\|chr21\|chr22' $PATH_CHM13_FA.fai | cut -f 1) ) \
   <( samtools faidx $PATH_GRCH38_FA $(grep 'chr13\|chr14\|chr15\|chr21\|chr22' $PATH_GRCH38_FA.fai | grep '_' -v | cut -f 1) ) \
   <( zcat chm13#chr*.pq_contigs.1kbps.hg002prox.fa.gz ) \
-  <( samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/assemblies/HG002.paternal.f1_assembly_v2_genbank.fa $( grep '#1#' HG002.contigs.txt ) ) \
-  <( samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/assemblies/HG002.maternal.f1_assembly_v2_genbank.fa $( grep '#2#' HG002.contigs.txt ) ) | \
-  bgzip -@ 48 -c > chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz
-samtools faidx chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz
+  <( samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/assemblies/HG002.paternal.f1_assembly_v2_genbank.fa $( grep '#1#' HG002.contigs.N.txt ) ) \
+  <( samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/assemblies/HG002.maternal.f1_assembly_v2_genbank.fa $( grep '#2#' HG002.contigs.N.txt ) ) | \
+  bgzip -@ 48 -c > chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.N.fa.gz
+samtools faidx chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.N.fa.gz
 ```
 
 ### Collect all acrocentric contigs
@@ -216,6 +225,15 @@ sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && '$R
 num_of_haplotypes=$(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.fa.gz.fai | wc -l)
 num_of_haplotypes_plus_a_bit=$(echo "$num_of_haplotypes + 10" | bc) # 5 mat acros + 5 pat acros
 sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && '$RUN_PGGB' -i /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz -o chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n'$num_of_haplotypes_plus_a_bit' -t 48 -s 50k -l 250k -p 98 -F 0.001 -n '$num_of_haplotypes_plus_a_bit' -k 311 -G 13117,13219 -O 0.03 -T 48 -V chm13:#,grch38:#; mv /scratch/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n'$num_of_haplotypes_plus_a_bit' /lizardfs/guarracino/chromosome_communities/graphs';
+
+# HiFi HG002 contigs partitioned with wfmash -N
+num_of_haplotypes=$(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.fa.gz.fai | wc -l)
+num_of_haplotypes_plus_a_bit=$(echo "$num_of_haplotypes + 20" | bc) # 5 mat acros + 5 pat acros + a bit more
+sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && '$RUN_PGGB' -i /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.N.fa.gz -o chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.N.s50k.l250k.p98.n'$num_of_haplotypes_plus_a_bit' -t 48 -s 50k -l 250k -p 98 -F 0.001 -n '$num_of_haplotypes_plus_a_bit' -k 311 -G 13117,13219 -O 0.03 -T 48 -V chm13:#,grch38:#; mv /scratch/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.N.s50k.l250k.p98.n'$num_of_haplotypes_plus_a_bit' /lizardfs/guarracino/chromosome_communities/graphs';
+
+num_of_haplotypes=$(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.fa.gz.fai | wc -l)
+num_of_haplotypes_plus_a_bit=$(echo "$num_of_haplotypes + 20" | bc) # 5 mat acros + 5 pat acros + a bit more
+sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && '$RUN_PGGB' -i /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.N.fa.gz -o chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.N.s50k.l250k.p95.n'$num_of_haplotypes_plus_a_bit' -t 48 -s 50k -l 250k -p 95 -F 0.001 -n '$num_of_haplotypes_plus_a_bit' -k 311 -G 13117,13219 -O 0.03 -T 48 -V chm13:#,grch38:#; mv /scratch/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.N.s50k.l250k.p95.n'$num_of_haplotypes_plus_a_bit' /lizardfs/guarracino/chromosome_communities/graphs';
 ```
 
 ### Untangling
@@ -223,7 +241,8 @@ sbatch -p highmem -c 48 --job-name acropggb --wrap 'hostname; cd /scratch && '$R
 ```shell
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle
 
-path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n172/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fd7f7c0.04f1c29.0b16d5d.smooth.final.og
+path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.og
+#path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.s50k.l250k.p98.n152/chrACRO+refs.pq_contigs.1kbps.hg002prox.fa.gz.31257a6.04f1c29.eb4a615.smooth.final.og
 
 prefix=$(basename $path_input_og .og)
 run_odgi=/home/guarracino/tools/odgi/bin/odgi-a4957db99179a9f2e8d43dfca73cb47680dfb956
