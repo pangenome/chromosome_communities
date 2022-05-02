@@ -31,6 +31,12 @@ cd odgi
 git checkout a4957db99179a9f2e8d43dfca73cb47680dfb956
 cmake -H. -Bbuild && cmake --build build -- -j 48
 mv bin/odgi bin/odgi-a4957db99179a9f2e8d43dfca73cb47680dfb956
+
+# Fixed odgi untangle
+git checkout ed9390a47e6b029a753cbb83b29945eb48ca5c3b
+cmake -H. -Bbuild && cmake --build build -- -j 48
+mv bin/odgi bin/odgi-ed9390a47e6b029a753cbb83b29945eb48ca5c3b
+
 cd ..
 
 git clone --recursive https://github.com/pangenome/pggb.git
@@ -54,8 +60,8 @@ cd ..
 (echo gfaffix | tr ' ' '\n') | while read tool; do ls -l $(which $tool); done | cut -f 13 -d ' '
 /gnu/store/1lfrwkhdpp95l8hh8grv75yhssn6in3r-gfaffix-0.1.3/bin/gfaffix
 
-vg
-vg version v1.39.0 "Runzi"
+vg version | head -n 1
+vg version v1.40.0 "Suardi"
 ```
 
 ## Data

@@ -22,7 +22,7 @@ done
 # More stringent mapping for visualization
 for s in 50k; do
   for p in 95; do
-    for n in 5 7 13; do
+    for n in 5 7 13 39; do
       sbatch -p workers -c 48 --job-name all-vs-all --wrap 'hostname; cd /scratch; \time -v '$RUN_WFMASH' '$PATH_HPRCY1_FA_GZ' -t 48 -Y "#" -p '$p' -s '$s' -n '$n' -H 0.001 -m > HPRCy1v2genbank.self.s'$s'.p'$p'.n'$n'.h0001.paf && mv HPRCy1v2genbank.self.s'$s'.p'$p'.n'$n'.h0001.paf /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank/'
     done
   done
@@ -45,7 +45,7 @@ cd /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank/
 
 for s in 50k 10k; do
   for p in 95; do
-    for n in 93 7 5; do
+    for n in 93 39 13 7 5; do
       for l in 1000000; do
         #for prefix in HPRCy1v2genbank+refs HPRCy1v2genbank; do
         for prefix in HPRCy1v2genbank; do
@@ -66,7 +66,7 @@ To evaluate chromosome communities, we build an "alignment graph" from our mappi
 ```shell
 for s in 50k 10k; do
   for p in 95; do
-    for n in 93 7 5; do
+    for n in 93 39 13 7 5; do
       for l in 1000000; do
         #for prefix in HPRCy1v2genbank+refs HPRCy1v2genbank; do
         for prefix in HPRCy1v2genbank; do
@@ -91,7 +91,7 @@ Then we obtain the ``Leiden`` communities:
 
 for s in 50k 10k; do
   for p in 95; do
-    for n in 93 7 5; do
+    for n in 93 39 13 7 5; do
       for l in 1000000; do
         #for prefix in HPRCy1v2genbank+refs HPRCy1v2genbank; do
         for prefix in HPRCy1v2genbank; do            
@@ -141,7 +141,7 @@ Obtain files for `gephi`:
 ```shell
 s=50k
 p=95
-n=93
+n=39
 l=1000000
 
 # Add labels only to acrocentric chromosomes
@@ -149,7 +149,8 @@ l=1000000
   join -1 2 -2 1 -a 1 -e 'unmapped' -o '1.1 1.2 2.2' \
     <(sort -k 2,2 HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.paf.vertices.id2name.txt) \
     <(sort -k 1,1 /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/pq_info/*.partitioning_with_pq.tsv |\
-        grep 'chr13\|chr14\|chr15\|chr21\|chr22' | sed 's/chm13#//' | sed 's/grch38#//') | \
+        #grep 'chr13\|chr14\|chr15\|chr21\|chr22' | sed 's/chm13#//' | sed 's/grch38#//') | \
+        sed 's/chm13#//' | sed 's/grch38#//') | \
         awk '{print($1,$3,$3)}' | tr ' ' ',' \
 ) > HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.nodes.csv
   
