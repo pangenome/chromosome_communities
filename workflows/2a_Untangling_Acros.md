@@ -416,7 +416,7 @@ for e in 50000 ; do
           path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.reliable.tsv.gz
 
           if [[ ! -s ${path_grounded_pq_touching_reliable_tsv_gz} ]]; then
-            # Skip verkko's HG002 contigs because we don't have unreliable regions for it
+            # Skip verkko's HG002 contigs because we don't have unreliable regions for them
             zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' -v | cut -f 1 | sort | uniq | while read CONTIG; do
               SAMPLE=$( echo $CONTIG | cut -f 1 -d '#')
             
@@ -442,6 +442,38 @@ for e in 50000 ; do
                x.tsv | pigz -c > $path_grounded_pq_touching_reliable_tsv_gz
             rm x.tsv
           fi;
+        done
+      done
+    done
+  done
+done
+
+# Statistics
+path_grounded_pq_touching_reliable_stats_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.grounded.pq_touching.reliable.stats.tsv
+    
+echo -e "ground\te\tm\tjaccard\tn\tcontig\tuntangled.size\treliable.untangled.size\tfraction.removed" > $path_grounded_pq_touching_reliable_stats_tsv
+        
+for e in 50000 ; do
+  for m in 1000 ; do
+    for j in 0.8 0.95; do
+      j_str=$(echo $j | sed 's/\.//g')
+      (seq 1 5; seq 10 10 50) | while read n; do 
+        echo "-e $e -m $m -j $j -n $n"
+        
+        cat $path_targets_txt | while read ref; do
+          echo $ref
+
+          path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz
+          path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.reliable.tsv.gz
+
+          zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT' -v | cut -f 1 | grep chr -v | sort | uniq | while read CONTIG; do
+            UNTANGLED_SIZE=$( zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | cut -f 1,2,3 | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}' )
+            UNTANGLED_SIZE_RELIABLE=$( zgrep "^$CONTIG" $path_grounded_pq_touching_reliable_tsv_gz | cut -f 1,2,3 | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}' )
+            
+            FRACTION_REMOVED=$(echo "scale=4; 1 - $UNTANGLED_SIZE_RELIABLE/$UNTANGLED_SIZE" | bc)
+          
+            echo $ref $e $m $j $n $CONTIG $UNTANGLED_SIZE $UNTANGLED_SIZE_RELIABLE $FRACTION_REMOVED | tr ' ' '\t' >> $path_grounded_pq_touching_reliable_stats_tsv
+          done
         done
       done
     done
