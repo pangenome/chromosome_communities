@@ -43,6 +43,9 @@ xx <- xx %>%
 # To group by query
 xx$query.hacked <- paste(xx$query, xx$nth.best, sep ='-')
 
+xx <- xx %>%
+  arrange(query.hacked)
+
 p <- ggplot(
   xx,
   aes(
