@@ -507,12 +507,10 @@ for e in 50000 ; do
 done
 ```
 
-python3 scripts/support.py /home/guarracino/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.tsv.gz chm13#ACRO.len.tsv 1 1 | pigz -c > xxx.tsv.gz
-python3 scripts/support2.py xxx.tsv.gz | pigz -c > xxx2.tsv.gz
-
-Merge chromosomes:
+Compute support:
 
 ```shell
+# Merge chromosomes
 for e in 50000 ; do
   for m in 1000 ; do
     echo "-e $e -m $m"
@@ -529,7 +527,23 @@ for e in 50000 ; do
     fi;
   done
 done
+
+# Support
+for e in 50000 ; do
+  for m in 1000 ; do
+    echo "-e $e -m $m"
+
+    python3 /lizardfs/guarracino/chromosome_communities/scripts/scripts/support.py \
+      /home/guarracino/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.tsv.gz \
+      chm13#ACRO.len.tsv 1 1 | \
+      pigz -c > $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz
+    
+    python3 /lizardfs/guarracino/chromosome_communities/scripts/scripts/support2.py xxx.tsv.gz | pigz -c > $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz
+  done
+done
 ```
+
+
 
 Merged plots (not used):
 
