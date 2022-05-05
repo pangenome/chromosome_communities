@@ -30,7 +30,7 @@ if (length(unique(x$target)) > 5) {
 
 # Apply filters
 chr <- paste0('chm13#chr', num_chr)
-xx <- x[x$grounded.target == chr & x$nth.best <= n & x$ref.nth.best <= refn,]
+xx <- x[x$grounded.target == chr & x$nth.best <= nth.best & x$ref.nth.best <= ref.nth.best,]
 
 # Do not display HG002 contigs
 # Do not display dedicated annotation bars
