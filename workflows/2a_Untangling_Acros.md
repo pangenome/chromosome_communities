@@ -285,7 +285,7 @@ for e in 50000 ; do
         ( echo query query.begin query.end target target.begin target.end jaccard strand self.coverage nth.best ref ref.begin ref.end ref.jaccard ref.nth.best | tr ' ' '\t'
           join \
             <(zcat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.j0.n100.bed.gz | awk -v j=0 -v n=5 '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) \
-            <(zcat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz | awk -v j=0.7 -v n=10 '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) | \
+            <(zcat /lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz | awk -v j=0.8 -v n=10 '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) | \
           tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -10,14-17,20 | sort -k 1,3 -k 7,7nr -k 10,10n -k 14,14nr -k 15,15n ) | tr ' ' '\t' | pigz -c > ${path_grounded_tsv_gz}
       fi;
     done
@@ -488,13 +488,16 @@ for e in 50000 ; do
 done
 ```
 
-Merged plots:
+Annotated plots:
 
 ```shell
 # Dependencies
 #guix install r
 #guix install r-ggplot2
 #guix install r-ggforce
+#guix install r-tidyverse
+#guix install r-png
+#guix install r-ggpubr
 #guix install poppler # For pdfunite
 
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
@@ -503,13 +506,42 @@ for e in 50000 ; do
   for m in 1000 ; do
     echo "-e $e -m $m"
 
-    path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
-
-    Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all2.R ${path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz} "-e $e -m $m" 0 25000000 120 200 1 1
+    (seq 13 15; seq 21 22) | while read i; do
+      path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr${i}.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+      PREFIX=$(basename $path_grounded_pq_touching_reliable_tsv_gz .tsv.gz);
+      
+      Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
+        $path_grounded_pq_touching_reliable_tsv_gz \
+        0 25000000 \
+        91 \
+        5 1 \
+        $i \
+        /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+        /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$PREFIX.pdf
+    done
+    
+    # Merge chromosomes's PDF files
+    /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+      /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.pq_touching.reliable.pdf \
+      /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.merged.pdf
   done
 done
+```
 
-mv /lizardfs/guarracino/chromosome_communities/untangle/grounded/*.pdf /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
+Merged plots (not used):
+
+```shell
+#for e in 50000 ; do
+#  for m in 1000 ; do
+#    echo "-e $e -m $m"
+#
+#    path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+#
+#    Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all2.R ${path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz} "-e $e -m $m" 0 25000000 120 200 1 1
+#  done
+#done
+#
+#mv /lizardfs/guarracino/chromosome_communities/untangle/grounded/*.pdf /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
 
 # Merge
 #for e in 50000 ; do
