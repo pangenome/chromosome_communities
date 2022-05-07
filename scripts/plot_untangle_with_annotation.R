@@ -77,7 +77,7 @@ p <- ggplot(
 
     strip.text.x = element_blank(),
     strip.text.y = element_blank(),
-    axis.title.y=element_blank()
+    axis.title.y = element_blank()
   ) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values=colors) +

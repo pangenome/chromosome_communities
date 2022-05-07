@@ -436,8 +436,11 @@ for e in 50000 ; do
     done
   done
 done
+```
 
-# Statistics
+Statistics
+
+```shell
 path_grounded_pq_touching_reliable_stats_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.grounded.pq_touching.reliable.stats.tsv
     
 echo -e "ground\te\tm\tn\tref.n\tcontig\tuntangled.size\treliable.untangled.size\tfraction.removed" > $path_grounded_pq_touching_reliable_stats_tsv
@@ -540,6 +543,9 @@ done
 Compute support:
 
 ```shell
+#Take acrocentric chromosome lengths
+grep '^chm13' /lizardfs/guarracino/chromosome_communities/assemblies/chrA.pan+HG002chrAprox.fa.gz.fai | cut -f 1,2 > chm13#ACRO.len.tsv
+
 # Merge chromosomes
 for e in 50000 ; do
   for m in 1000 ; do
@@ -565,14 +571,18 @@ for e in 50000 ; do
     echo "-e $e -m $m"
 
     path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
-#    python3 /lizardfs/guarracino/chromosome_communities/scripts/support.py \
-#      $path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz \
-#      chm13#ACRO.len.tsv 1 1 | \
-#      pigz -c > /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz
-    
-#    python3 /lizardfs/guarracino/chromosome_communities/scripts/support2.py \
-#      /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz | \
-#      pigz -c > /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz
+    if [[ ! -s /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz ]]; then
+      python3 /lizardfs/guarracino/chromosome_communities/scripts/support.py \
+        $path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz \
+        chm13#ACRO.len.tsv 1 1 | \
+        pigz -c > /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz
+    done
+
+    if [[ ! -s /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz ]]; then
+      python3 /lizardfs/guarracino/chromosome_communities/scripts/support2.py \
+        /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz | \
+        pigz -c > /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz
+    done
     
     PREFIX=$(basename $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz .tsv.gz);
     (seq 13 15; seq 21 22) | while read i; do

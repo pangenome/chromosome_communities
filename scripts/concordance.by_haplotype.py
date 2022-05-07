@@ -6,7 +6,8 @@ import sys
 
 path_grounded_tsv_gz=sys.argv[1]
 path_target_length_txt=sys.argv[2]
-
+n=int(sys.argv[3])
+refn=int(sys.argv[4])
 
 # Read chromosome lengths
 ground_2_len_dict = {}
@@ -20,14 +21,19 @@ with open(path_target_length_txt) as f:
 # Read untangling information
 ground_2_group_2_query_2_pieces_dict = {}
 
-#query   query.begin query.end   target  target.begin    target.end  jaccard strand  self.coverage   ref ref.begin   ref.end grounded.target
+#query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target
 with gzip.open(path_grounded_tsv_gz, "rt") as f:
     f.readline()
 
     for line in f:
-        query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, ref, ref_begin, ref_end, grounded_target = line.strip().split('\t')
+        query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target = line.strip().split('\t')
 
         if query.startswith('HG002'):
+            nth_best = int(nth_best)
+            ref_nth_best = int(ref_nth_best)
+            if nth_best > n or ref_nth_best > refn:
+                continue
+
             ref_begin = int(ref_begin)
             ref_end = int(ref_end)
             target_int = int(target.split('chm13#chr')[-1])
@@ -64,8 +70,8 @@ for grounded_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_pie
 
             # Fill (slowly!) targets over the ground target
             query_2_filled_dict[query] = [0] * grounded_target_len
-            for start, stop, target_int in pieces_list:
-                for pos in range(start, stop):
+            for start, end, target_int in pieces_list:
+                for pos in range(start, end):
                     query_2_filled_dict[query][pos] = target_int
 
         last_pos = -1
