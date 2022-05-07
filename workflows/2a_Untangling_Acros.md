@@ -533,12 +533,26 @@ for e in 50000 ; do
   for m in 1000 ; do
     echo "-e $e -m $m"
 
-    python3 /lizardfs/guarracino/chromosome_communities/scripts/scripts/support.py \
+    python3 /lizardfs/guarracino/chromosome_communities/scripts/support.py \
       /home/guarracino/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.tsv.gz \
       chm13#ACRO.len.tsv 1 1 | \
       pigz -c > $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz
     
-    python3 /lizardfs/guarracino/chromosome_communities/scripts/scripts/support2.py xxx.tsv.gz | pigz -c > $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz
+    python3 /lizardfs/guarracino/chromosome_communities/scripts/support2.py \
+      $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz | \
+      pigz -c > $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz
+    
+    PREFIX=$(basename $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz .tsv.gz);
+    (seq 13 15; seq 21 22) | while read i; do
+      
+      Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_collapsed_with_annotations.R \
+        $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz \
+        0 25000000 \
+        76 \
+        $i \
+        /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+        /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$PREFIX.pdf
+    done
   done
 done
 ```

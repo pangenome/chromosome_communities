@@ -46,7 +46,10 @@ with gzip.open(path_support_tsv_gz, "rt") as f:
         elif current_line != last_line:
             ground_target_x, num_contigs_supporting_chr13_x, num_contigs_supporting_chr14_x, num_contigs_supporting_chr15_x, num_contigs_supporting_chr21_x, num_contigs_supporting_chr22_x = last_line.split('_')
             print(
-                '\t'.join([ground_target_x, last_start, last_end, num_contigs_supporting_chr13_x, num_contigs_supporting_chr14_x, num_contigs_supporting_chr15_x, num_contigs_supporting_chr21_x, num_contigs_supporting_chr22_x])
+                '\t'.join([str(x) for x in [
+                   ground_target_x, last_start, last_end,
+                   num_contigs_supporting_chr13_x, num_contigs_supporting_chr14_x, num_contigs_supporting_chr15_x, num_contigs_supporting_chr21_x, num_contigs_supporting_chr22_x
+                ]])
             )
 
             last_start = start
@@ -57,5 +60,8 @@ with gzip.open(path_support_tsv_gz, "rt") as f:
 
     ground_target_x, num_contigs_supporting_chr13_x, num_contigs_supporting_chr14_x, num_contigs_supporting_chr15_x, num_contigs_supporting_chr21_x, num_contigs_supporting_chr22_x = last_line.split('_')
     print(
-        '\t'.join([ground_target_x, last_start, last_end, num_contigs_supporting_chr13_x, num_contigs_supporting_chr14_x, num_contigs_supporting_chr15_x, num_contigs_supporting_chr21_x, num_contigs_supporting_chr22_x])
+        '\t'.join([str(x) for x in [
+           ground_target_x, last_start, last_end,
+           num_contigs_supporting_chr13_x, num_contigs_supporting_chr14_x, num_contigs_supporting_chr15_x, num_contigs_supporting_chr21_x, num_contigs_supporting_chr22_x
+        ]])
     )
