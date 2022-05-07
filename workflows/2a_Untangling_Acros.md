@@ -477,10 +477,12 @@ Annotated plots:
 #guix install r-tidyverse
 #guix install r-png
 #guix install r-ggpubr
+#guix install r-scales
 #guix install poppler # For pdfunite
 
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
 
+# Annotated plots with the first hit
 for e in 50000 ; do
   for m in 1000 ; do
     echo "-e $e -m $m"
@@ -492,17 +494,45 @@ for e in 50000 ; do
       Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
         $path_grounded_pq_touching_reliable_tsv_gz \
         0 25000000 \
-        91 \
-        5 1 \
+        91 0.8 \
+        0 \
+        1 1 \
         $i \
         /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-        /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$PREFIX.pdf
+        /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$PREFIX.n1.pdf
     done
     
     # Merge chromosomes's PDF files
     /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
-      /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.pq_touching.reliable.pdf \
-      /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.merged.pdf
+      /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.pq_touching.reliable.n1.pdf \
+      /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.n1.merged.pdf
+  done
+done
+
+# Annotated plots with the first 5 hits
+for e in 50000 ; do
+  for m in 1000 ; do
+    echo "-e $e -m $m"
+
+    (seq 13 15; seq 21 22) | while read i; do
+      path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr${i}.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+      PREFIX=$(basename $path_grounded_pq_touching_reliable_tsv_gz .tsv.gz);
+      
+      Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
+        $path_grounded_pq_touching_reliable_tsv_gz \
+        0 25000000 \
+        91 0.8 \
+        0.8 \
+        5 1 \
+        $i \
+        /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+        /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$PREFIX.n5.pdf
+    done
+    
+    # Merge chromosomes's PDF files
+    /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+      /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.pq_touching.reliable.n5.pdf \
+      /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.n5.merged.pdf
   done
 done
 ```
@@ -529,30 +559,37 @@ for e in 50000 ; do
 done
 
 # Support
+# guix install r-ggridges
 for e in 50000 ; do
   for m in 1000 ; do
     echo "-e $e -m $m"
 
-    python3 /lizardfs/guarracino/chromosome_communities/scripts/support.py \
-      /home/guarracino/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.tsv.gz \
-      chm13#ACRO.len.tsv 1 1 | \
-      pigz -c > $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz
+    path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+#    python3 /lizardfs/guarracino/chromosome_communities/scripts/support.py \
+#      $path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz \
+#      chm13#ACRO.len.tsv 1 1 | \
+#      pigz -c > /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz
     
-    python3 /lizardfs/guarracino/chromosome_communities/scripts/support2.py \
-      $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz | \
-      pigz -c > $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz
+#    python3 /lizardfs/guarracino/chromosome_communities/scripts/support2.py \
+#      /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz | \
+#      pigz -c > /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz
     
     PREFIX=$(basename $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz .tsv.gz);
     (seq 13 15; seq 21 22) | while read i; do
-      
-      Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_collapsed_with_annotations.R \
-        $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz \
+      echo chr$i
+      Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_collapsed_with_annotation.R \
+        /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz \
         0 25000000 \
-        76 \
+        84 \
         $i \
         /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-        /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$PREFIX.pdf
+        /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$PREFIX.chr$i.pdf
     done
+    
+    # Merge chromosomes's PDF files
+    /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+      /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.chr*pdf \
+      /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.merged.pdf
   done
 done
 ```

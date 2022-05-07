@@ -13,6 +13,7 @@ library(ggridges)
 library(ggplot2)
 library(ggsci)
 library(tidyverse)
+library(scales) # for pretty_breaks()
 
 x <- read.delim(path_support2_tsv)
 colnames(x) <- c("ground.target", "start", "end", "chr13", "chr14", "chr15", "chr21", "chr22")
@@ -25,7 +26,7 @@ d <- pivot_longer(x, chr13:chr22, "chromosome")
 p <- ggplot(d, aes(x=start + (end - start) / 2, y=value, color=chromosome)) +
   geom_step() +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0, 0, 0)) +
-  ylim(0,max(d$value)) +
+  scale_y_continuous(limits = c(0, max(10, max(d$value))), breaks=pretty_breaks()) +
   facet_wrap(~chromosome, scales = "free", ncol=1, labeller = labeller(variable = labels)) +
   theme_bw() +
   theme(
@@ -68,7 +69,7 @@ library(ggpubr)
 p_with_annotation <- ggpubr::ggarrange(
   ggplotted_img, p,
   labels=c('', ''),
-  heights = c(1, 2),
+  heights = c(1.8, 3),
   legend = "right", # legend position,
   common.legend = T,
   nrow = 2

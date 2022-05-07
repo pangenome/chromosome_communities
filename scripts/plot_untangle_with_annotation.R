@@ -1,20 +1,22 @@
 args <- commandArgs()
-path_untangle_grounded_all_tsv <- args[6]
+path_untangle_grounded_tsv <- args[6]
 x_min <- as.numeric(args[7])
 x_max <- as.numeric(args[8])
 width <- as.numeric(args[9])
-nth.best <- as.numeric(args[10])
-ref.nth.best <- as.numeric(args[11])
-num_chr <- as.numeric(args[12])
-path_annotation <- args[13]
-path_output <- args[14]
+height_bar <- as.numeric(args[10])
+panel_spacing <- as.numeric(args[11])
+nth.best <- as.numeric(args[12])
+ref.nth.best <- as.numeric(args[13])
+num_chr <- as.numeric(args[14])
+path_annotation <- args[15]
+path_output <- args[16]
 
 
 library(ggplot2)
 library(ggforce)
 library(tidyverse)
 
-x <- read.delim(path_untangle_grounded_all_tsv)
+x <- read.delim(path_untangle_grounded_tsv)
 
 # To have it as numeric column
 #x$self.coverage[x$self.coverage == '.'] <- 1
@@ -70,7 +72,7 @@ p <- ggplot(
     legend.text = element_text(size = 32),
     legend.position = "top",
 
-    panel.spacing = unit(0.8, "lines"),
+    panel.spacing = unit(panel_spacing, "lines"),
     #panel.border = element_rect(color = "grey", fill = NA, size = 1), #element_blank(),
 
     strip.text.x = element_blank(),
@@ -98,7 +100,7 @@ library(ggpubr)
 p_with_annotation <- ggpubr::ggarrange(
   ggplotted_img, p,
   labels=c('', ''),
-  heights = c(1, length(unique(xx$query))/3),
+  heights = c(height_bar*12, height_bar*length(unique(xx$query))*nth.best),
   legend = "right", # legend position,
   common.legend = T,
   nrow = 2
@@ -107,7 +109,7 @@ p_with_annotation <- ggpubr::ggarrange(
 ggsave(
   plot = p_with_annotation,
   path_output,
-  width = width, height = length(unique(xx$query)) * 4,
+  width = width, height = (12+length(unique(xx$query))*nth.best) * height_bar,
   units = "cm",
   dpi = 100, bg = "transparent",
   limitsize = FALSE
