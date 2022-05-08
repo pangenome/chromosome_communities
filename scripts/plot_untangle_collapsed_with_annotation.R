@@ -44,7 +44,7 @@ p <- ggplot(d, aes(x=start + (end - start) / 2, y=value, color=chromosome)) +
     strip.text.y = element_blank(),
     plot.margin = unit(c(0,1,0,5), "cm")
   ) + labs(
-  x = paste('chm13#chr13', 'position'),
+  x = paste(chr, 'position'),
   y = paste('count of HPRC contigs\n')
 ) +
   guides(colour = guide_legend(override.aes = list(size=10)))
@@ -79,7 +79,7 @@ p_with_annotation
 ggsave(
   plot = p_with_annotation,
   path_output,
-  width = width, height = 6 * 4,
+  width = width, height = 7 * 4,
   units = "cm",
   dpi = 100, bg = "transparent",
   limitsize = FALSE

@@ -114,6 +114,6 @@ ggsave(
   path_output,
   width = width, height = (12+length(unique(xx$query))*nth.best) * height_bar,
   units = "cm",
-  dpi = 300, bg = "transparent",
+  dpi = 300, bg = "white",
   limitsize = FALSE
 )

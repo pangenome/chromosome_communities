@@ -95,6 +95,6 @@ ggsave(
   path_output,
   width = width, height = (8+max(7, length(unique(xx$contig)))) * height_bar,
   units = "cm",
-  dpi = 100, bg = "transparent",
+  dpi = 100, bg = "white",
   limitsize = FALSE
 )

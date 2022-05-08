@@ -91,6 +91,6 @@ ggsave(
   path_output,
   width = width, height = 10 + (3+length(unique(xx$haplotype))) * height_bar,
   units = "cm",
-  dpi = 100, bg = "transparent",
+  dpi = 100, bg = "white",
   limitsize = FALSE
 )

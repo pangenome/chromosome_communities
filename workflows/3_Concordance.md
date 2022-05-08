@@ -13,11 +13,11 @@ prefix=$(basename $path_input_og .og)
 
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/
 
+# By haplotype
 for e in 50000 ; do
   for m in 1000 ; do
     echo "-e $e -m $m"
-  
-    # By haplotype
+
     path_concordance_by_haplotype_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.concordance.by_haplotype.tsv
     if [[ ! -s ${path_concordance_by_haplotype_tsv} ]]; then
       python3 /lizardfs/guarracino/chromosome_communities/scripts/concordance.by_haplotype.py $path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz chm13#ACRO.len.tsv 1 1 > $path_concordance_by_haplotype_tsv
@@ -38,9 +38,14 @@ for e in 50000 ; do
     /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
       /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$PREFIX.chr*.pdf \
       /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$PREFIX.merged.pdf
-  
+  done
+done
 
-    # By contig
+ # By contig
+for e in 50000 ; do
+  for m in 1000 ; do
+    echo "-e $e -m $m"
+
     path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
 
     path_concordance_by_contig_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.concordance.by_contig.tsv

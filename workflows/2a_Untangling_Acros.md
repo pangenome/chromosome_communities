@@ -508,8 +508,7 @@ for e in 50000 ; do
     /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
       /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.pq_touching.reliable.n1.pdf \
       /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.n1.merged.pdf
-    
-    rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.pq_touching.reliable.n1.pdf
+    #rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.pq_touching.reliable.n1.pdf
   done
 done
 
@@ -538,8 +537,7 @@ for e in 50000 ; do
     /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
       /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.pq_touching.reliable.n5.pdf \
       /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.n5.merged.pdf
-    
-    rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.pq_touching.reliable.n5.pdf
+    #rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.pq_touching.reliable.n5.pdf
   done
 done
 ```
@@ -563,6 +561,26 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   <(echo chm13#chr13 grch38#chr13 HG002#MAT#chr13.prox HG002#PAT#chr13.prox HG01361#2#JAGYYW010000010.1 HG01978#1#JAGYVS010000056.1 HG02486#1#JAGYVM010000043.1 HG03540#2#JAGYVX010000153.1 | tr ' ' '\n') \
   /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.subset.pdf
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  0 25000000 \
+  91 0.8 \
+  0.8 \
+  5 1 \
+  $i \
+  <(echo chm13#chr13 grch38#chr13 HG002#MAT#chr13.prox HG002#PAT#chr13.prox HG01361#2#JAGYYW010000010.1 HG01978#1#JAGYVS010000056.1 HG02486#1#JAGYVM010000043.1 HG03540#2#JAGYVX010000153.1 | tr ' ' '\n') \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n5.subset.pdf
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  0 25000000 \
+  91 0.8 \
+  0 \
+  1 1 \
+  $i \
+  <(zgrep '^chm\|grch\|^HG002#' $path_grounded_pq_touching_reliable_tsv_gz | cut -f 1 | grep "chr$i\|^HG002" | sort | uniq) \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.HG002.pdf
 
 i=14
 path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr${i}.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
@@ -577,7 +595,27 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   <(echo chm13#chr14 grch38#chr14 HG002#MAT#chr14.prox HG002#PAT#chr14.prox HG00735#1#JAHBCH010000039.1 HG00741#2#JAHALX010000038.1 HG01978#1#JAGYVS010000055.1 HG02630#1#JAHAOQ010000067.1 | tr ' ' '\n') \
   /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.subset.pdf
-  
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  0 25000000 \
+  91 0.8 \
+  0.8 \
+  5 1 \
+  $i \
+  <(echo chm13#chr14 grch38#chr14 HG002#MAT#chr14.prox HG002#PAT#chr14.prox HG00735#1#JAHBCH010000039.1 HG00741#2#JAHALX010000038.1 HG01978#1#JAGYVS010000055.1 HG02630#1#JAHAOQ010000067.1 | tr ' ' '\n') \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n5.subset.pdf
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  0 25000000 \
+  91 0.8 \
+  0 \
+  1 1 \
+  $i \
+  <(zgrep '^chm\|grch\|^HG002#' $path_grounded_pq_touching_reliable_tsv_gz | cut -f 1 | grep "chr$i\|^HG002" | sort | uniq) \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.HG002.pdf
+
 i=21
 path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr${i}.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
 PREFIX=$(basename $path_grounded_pq_touching_reliable_tsv_gz .tsv.gz);
@@ -643,13 +681,13 @@ for e in 50000 ; do
         $path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz \
         chm13#ACRO.len.tsv 1 1 | \
         pigz -c > /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz
-    done
+    fi
 
     if [[ ! -s /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz ]]; then
       python3 /lizardfs/guarracino/chromosome_communities/scripts/support2.py \
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz | \
         pigz -c > /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz
-    done
+    fi
     
     PREFIX=$(basename $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz .tsv.gz);
     (seq 13 15; seq 21 22) | while read i; do
