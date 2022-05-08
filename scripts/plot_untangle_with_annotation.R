@@ -8,15 +8,19 @@ panel_spacing <- as.numeric(args[11])
 nth.best <- as.numeric(args[12])
 ref.nth.best <- as.numeric(args[13])
 num_chr <- as.numeric(args[14])
-path_annotation <- args[15]
-path_output <- args[16]
+path_query_to_visualize <- args[15]
+path_annotation <- args[16]
+path_output <- args[17]
 
 
 library(ggplot2)
 library(ggforce)
 library(tidyverse)
 
-x <- read.delim(path_untangle_grounded_tsv)
+query_to_visualize <- read.delim(path_query_to_visualize, header = F)
+
+x <- read.delim(path_untangle_grounded_tsv) %>%
+  filter(query %in% query_to_visualize$V1)
 
 # To have it as numeric column
 #x$self.coverage[x$self.coverage == '.'] <- 1
@@ -38,7 +42,6 @@ xx <- x[x$grounded.target == chr & x$nth.best <= nth.best & x$ref.nth.best <= re
 # Do not display dedicated annotation bars
 # Do not display other acros references
 xx <- xx %>%
-  filter(!grepl('HG002#1', query) & !grepl('HG002#2', query)) %>%
   filter(!grepl('rDNA', query) & !grepl('centromere', query)) %>%
   filter(!grepl('chr', query) | grepl(paste0('chr', num_chr), query))
 
@@ -111,6 +114,6 @@ ggsave(
   path_output,
   width = width, height = (12+length(unique(xx$query))*nth.best) * height_bar,
   units = "cm",
-  dpi = 100, bg = "transparent",
+  dpi = 300, bg = "transparent",
   limitsize = FALSE
 )
