@@ -616,6 +616,40 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.HG002.pdf
 
+i=15
+path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr${i}.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+PREFIX=$(basename $path_grounded_pq_touching_reliable_tsv_gz .tsv.gz);
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  0 25000000 \
+  91 0.8 \
+  0 \
+  1 1 \
+  $i \
+  <(echo chm13#chr15 grch38#chr15 HG002#MAT#chr15.prox HG002#PAT#chr15.prox HG00741#2#JAHALX010000004.1 HG02486#2#JAGYVL010000058.1 HG03486#2#JAHEOP010000088.1 NA18906#2#JAHEON010000012.1 | tr ' ' '\n') \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.subset.pdf
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  0 25000000 \
+  91 0.8 \
+  0.8 \
+  5 1 \
+  $i \
+  <(echo chm13#chr15 grch38#chr15 HG002#MAT#chr15.prox HG002#PAT#chr15.prox HG00741#2#JAHALX010000004.1 HG02486#2#JAGYVL010000058.1 HG03486#2#JAHEOP010000088.1 NA18906#2#JAHEON010000012.1 | tr ' ' '\n') \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n5.subset.pdf
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  0 25000000 \
+  91 0.8 \
+  0 \
+  1 1 \
+  $i \
+  <(zgrep '^chm\|grch\|^HG002#' $path_grounded_pq_touching_reliable_tsv_gz | cut -f 1 | grep "chr$i\|^HG002" | sort | uniq) \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.HG002.pdf
+
 i=21
 path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr${i}.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
 PREFIX=$(basename $path_grounded_pq_touching_reliable_tsv_gz .tsv.gz);
@@ -629,6 +663,16 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   <(echo chm13#chr21 grch38#chr21 HG002#MAT#chr21.prox HG002#PAT#chr21.prox HG00735#2#JAHBCG010000066.1 HG02886#1#JAHAOU010000106.1 NA18906#1#JAHEOO010000072.1 NA19240#2#JAHEOL010000065.1 | tr ' ' '\n') \
   /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.subset.pdf
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  0 25000000 \
+  91 0.8 \
+  0 \
+  1 1 \
+  $i \
+  <(zgrep '^chm\|grch\|^HG002#' $path_grounded_pq_touching_reliable_tsv_gz | cut -f 1 | grep "chr$i\|^HG002" | sort | uniq) \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.HG002.pdf
   
 i=22
 path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr${i}.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
@@ -643,6 +687,16 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   <(echo chm13#chr22 grch38#chr22 HG002#MAT#chr22.prox HG002#PAT#chr22.prox HG00735#1#JAHBCH010000040.1 HG01361#1#JAGYYX010000045.1 HG02055#1#JAHEPK010000087.1 HG03098#1#JAHEPM010000147.1 | tr ' ' '\n') \
   /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.subset.pdf
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  0 25000000 \
+  91 0.8 \
+  0 \
+  1 1 \
+  $i \
+  <(zgrep '^chm\|grch\|^HG002#' $path_grounded_pq_touching_reliable_tsv_gz | cut -f 1 | grep "chr$i\|^HG002" | sort | uniq) \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.HG002.pdf
 ```
 
 Compute support:
