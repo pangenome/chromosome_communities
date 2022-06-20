@@ -28,7 +28,7 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
     for line in f:
         query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target = line.strip().split('\t')
 
-        if query.startswith('HG002'):
+        if query.startswith('HG002#'):
             nth_best = int(nth_best)
             ref_nth_best = int(ref_nth_best)
             if nth_best > n or ref_nth_best > refn:
@@ -78,6 +78,7 @@ for grounded_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_pie
         last_list = None
         last_query_list = None
         last_verkko = 0
+        current_verkko = 0
         for pos in range(grounded_target_len):
             current_list = []
             current_query_list = []
