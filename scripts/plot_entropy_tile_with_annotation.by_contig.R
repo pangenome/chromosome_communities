@@ -58,7 +58,7 @@ p <- ggplot(xx,
 
     #axis.title.y=element_blank()
   ) +
-  labs(alpha="Shannon Diversity Index", fill="Target") +
+  labs(alpha="SDI", fill="Target") +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values=colors) +
   labs(x ="Position")
