@@ -36,7 +36,7 @@ xx <- x[x$grounded.target == chr,]
 
 p <- ggplot(xx,
     aes(
-        x = start.pos + (end.pos - start.pos - start.pos) / 2,
+        x = start.pos + (end.pos - start.pos) / 2,
         width = end.pos - start.pos - 200,
         y = contig, alpha=shannon_div_index,
         fill = grounded.target
