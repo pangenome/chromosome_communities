@@ -34,11 +34,13 @@ if (num_chr == 13) {
 chr <- paste0('chm13#chr', num_chr)
 xx <- x[x$grounded.target == chr,]
 
-p <- ggplot(x,
-    aes(x = start.pos + (end.pos - start.pos - start.pos) / 2,
-    width = end.pos - start.pos - start.pos - 200,
-    y = contig, alpha=shannon_div_index,
-    fill = grounded.target)
+p <- ggplot(xx,
+    aes(
+        x = start.pos + (end.pos - start.pos - start.pos) / 2,
+        width = end.pos - start.pos - 200,
+        y = contig, alpha=shannon_div_index,
+        fill = grounded.target
+    )
    ) +
   geom_tile() +
   #ggtitle(title) +
