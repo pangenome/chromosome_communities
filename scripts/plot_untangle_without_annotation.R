@@ -82,4 +82,4 @@ p <- ggplot(
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values = colors) +
   labs(x = "Position")
-ggsave(plot = p, path_output, width = width, height = height, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
+ggsave(plot = p, path_output, width = width, height = (12+length(unique(xx$query))*nth.best), units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
