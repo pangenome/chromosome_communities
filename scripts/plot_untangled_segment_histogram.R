@@ -18,7 +18,7 @@ library(tidyverse)
 query_to_consider <- read.delim(path_query_to_consider, header = F)
 
 x <- read.delim(path_untangle_grounded_tsv) %>%
-  filter(query %in% query_to_visualize$V1)
+  filter(query %in% query_to_consider$V1)
 
 colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
 if (length(unique(x$target)) > 5) {
