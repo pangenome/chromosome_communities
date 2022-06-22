@@ -3,11 +3,10 @@
 import gzip
 import sys
 
-
-path_grounded_tsv_gz=sys.argv[1]
-path_target_length_txt=sys.argv[2]
-n=int(sys.argv[3])
-refn=int(sys.argv[4])
+path_grounded_tsv_gz = sys.argv[1]
+path_target_length_txt = sys.argv[2]
+n = int(sys.argv[3])
+refn = int(sys.argv[4])
 
 # Read chromosome lengths
 ground_2_len_dict = {}
@@ -17,16 +16,16 @@ with open(path_target_length_txt) as f:
         ground, target_len = line.strip().split('\t')
         ground_2_len_dict[ground] = int(target_len)
 
-
 # Read untangling information
 ground_2_group_2_query_2_pieces_dict = {}
 
-#query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target
+# query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target
 with gzip.open(path_grounded_tsv_gz, "rt") as f:
     f.readline()
 
     for line in f:
-        query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target = line.strip().split('\t')
+        query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target = line.strip().split(
+            '\t')
 
         if query.startswith('HG002#'):
             nth_best = int(nth_best)
@@ -49,7 +48,6 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
                 ground_2_group_2_query_2_pieces_dict[grounded_target][group][query] = []
             ground_2_group_2_query_2_pieces_dict[grounded_target][group][query].append((ref_begin, ref_end, target_int))
 
-
 # Scan each group for concordance
 print('\t'.join([
     'grounded.target',
@@ -62,11 +60,11 @@ for grounded_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_pie
     grounded_target_len = ground_2_len_dict[grounded_target]
 
     for group, query_2_pieces_dict in group_2_query_2_pieces_dict.items():
-        #print(grounded_target, group, query_2_pieces_dict.keys())
+        # print(grounded_target, group, query_2_pieces_dict.keys())
 
         query_2_filled_dict = {}
         for query, pieces_list in query_2_pieces_dict.items():
-            #print(f'Fill {query} on {grounded_target}')
+            # print(f'Fill {query} on {grounded_target}')
 
             # Fill (slowly!) targets over the ground target
             query_2_filled_dict[query] = [0] * grounded_target_len
@@ -89,7 +87,7 @@ for grounded_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_pie
                     current_list.append(target)
                     current_query_list.append(query)
                     if query.split('#')[1] in ['PAT', 'MAT']:
-                        current_verkko = target # The information is present in verkko's assembly
+                        current_verkko = target  # The information is present in verkko's assembly
 
             if last_pos < 0:
                 # First time
