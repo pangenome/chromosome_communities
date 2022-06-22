@@ -6,7 +6,7 @@ width <- as.numeric(args[9])
 panel_spacing <- as.numeric(args[10])
 nth.best <- as.numeric(args[11])
 ref.nth.best <- as.numeric(args[12])
-num_chr <- as.numeric(args[13])
+num_chr <- args[13]
 path_query_to_consider <- args[14]
 path_output <- args[15]
 
