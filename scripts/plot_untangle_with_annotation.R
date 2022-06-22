@@ -8,7 +8,7 @@ panel_spacing <- as.numeric(args[11])
 nth.best <- as.numeric(args[12])
 ref.nth.best <- as.numeric(args[13])
 num_chr <- as.numeric(args[14])
-path_query_to_visualize <- args[15]
+path_query_to_consider <- args[15]
 path_annotation <- args[16]
 path_output <- args[17]
 
@@ -17,10 +17,10 @@ library(ggplot2)
 library(ggforce)
 library(tidyverse)
 
-query_to_visualize <- read.delim(path_query_to_visualize, header = F)
+query_to_consider <- read.delim(path_query_to_consider, header = F)
 
 x <- read.delim(path_untangle_grounded_tsv) %>%
-  filter(query %in% query_to_visualize$V1)
+  filter(query %in% query_to_consider$V1)
 
 # To have it as numeric column
 #x$self.coverage[x$self.coverage == '.'] <- 1
@@ -38,15 +38,14 @@ if (length(unique(x$target)) > 5) {
 chr <- paste0('chm13#chr', num_chr)
 xx <- x[x$grounded.target == chr & x$nth.best <= nth.best & x$ref.nth.best <= ref.nth.best,]
 
-# Do not display HG002 contigs
-# Do not display dedicated annotation bars
-# Do not display other acros references
+# Do not consider dedicated annotation bars
+# Do not consider other acros references
 xx <- xx %>%
   filter(!grepl('rDNA', query) & !grepl('centromere', query)) %>%
   filter(!grepl('chr', query) | grepl(paste0('chr', num_chr), query))
 
 # To group by query
-xx$query.hacked <- paste(xx$query, xx$nth.best, sep ='-')
+xx$query.hacked <- paste(xx$query, xx$nth.best, sep = "-")
 
 xx <- xx %>%
   arrange(query.hacked)
@@ -55,9 +54,9 @@ p <- ggplot(
   xx,
   aes(
     x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin - 200,
-    y = ordered(query.hacked, levels=rev(unique(query.hacked))),
+    y = ordered(query.hacked, levels = rev(unique(query.hacked))),
     fill = target,
-    alpha=jaccard
+    alpha = jaccard
   )
 ) +
   geom_tile() +
@@ -83,8 +82,8 @@ p <- ggplot(
     axis.title.y = element_blank()
   ) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
-  scale_fill_manual(values=colors) +
-  labs(x ="Position")
+  scale_fill_manual(values = colors) +
+  labs(x = "Position")
 #ggsave(plot = p, paste0(path_untangle_grounded_all_tsv, '.pdf'), width = width, height = height, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
 
 
