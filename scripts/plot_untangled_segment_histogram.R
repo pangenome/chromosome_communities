@@ -1,4 +1,4 @@
-
+args <- commandArgs()
 path_untangle_grounded_tsv <- args[6]
 x_min <- as.numeric(args[7])
 x_max <- as.numeric(args[8])
