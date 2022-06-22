@@ -588,6 +588,19 @@ for e in 50000  ; do
     done
   done
 done
+
+# Merge files for all acrocentric chromosomes (used for histogram and support)
+for e in 50000  ; do
+  for m in 1000 ; do
+    path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+    if [[ ! -s ${path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz} ]]; then
+      cat \
+        <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.pq_touching.reliable.tsv.gz | grep 'self.coverage' -m 1) \
+        <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.pq_touching.reliable.tsv.gz | grep 'self.coverage' -v ) |\
+        pigz -c -9 > $path_grounded_pq_touching_reliable_ALL_tsv_gz
+    fi;
+  done
+done
 ```
 
 Statistics on removed regions:
@@ -623,21 +636,6 @@ done
 Statistics on untangled segment lengths:
 
 ```shell
-# Merge files for all acrocentric chromosomes
-for e in 50000  ; do
-  for m in 1000 ; do
-    path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
-
-    # Header
-    zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.pq_touching.reliable.tsv.gz | grep 'self.coverage' -m 1 > x.tsv
-    # Data
-    zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.pq_touching.reliable.tsv.gz | grep 'self.coverage' -v >> x.tsv
-    
-    pigz -c x.tsv -9 > $path_grounded_pq_touching_reliable_ALL_tsv_gz
-    rm x.tsv
-  done
-done
-
 for e in 50000  ; do
   for m in 1000 ; do
     path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
@@ -653,8 +651,6 @@ for e in 50000  ; do
       /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.nref1.histogram.pdf
   done
 done
-
-
 ```
 
 Annotated plots:
@@ -896,60 +892,46 @@ Compute support:
 #Take acrocentric chromosome lengths
 grep '^chm13' /lizardfs/guarracino/chromosome_communities/assemblies/chrA.pan+HG002chrAprox.fa.gz.fai | cut -f 1,2 > chm13#ACRO.len.tsv
 
-# Merge chromosomes
-for e in 50000 ; do
-  for m in 10000 ; do
-    echo "-e $e -m $m"
-
-    path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
-    if [[ ! -s ${path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz} ]]; then
-      # Merge single reference results
-      cat \
-        <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.*.e$e.m$m.grounded.pq_touching.reliable.tsv.gz | head -n 1) \
-        <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.*.e$e.m$m.grounded.pq_touching.reliable.tsv.gz | grep query -v) |\
-        pigz -c > x.tsv.gz
-      # Rename after to avoid getting itself with the previous '*' expansion
-      mv x.tsv.gz ${path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz}
-    fi;
-  done
-done
-
 # Support
 # guix install r-ggridges
 for e in 50000 ; do
-  for m in 10000 ; do
-    echo "-e $e -m $m"
+  for m in 1000 ; do
+    for refn in 1 10; do
+      echo "-e $e -m $m -refn $refn"
 
-    path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
-    if [[ ! -s /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz ]]; then
-      python3 /lizardfs/guarracino/chromosome_communities/scripts/support.py \
-        $path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz \
-        chm13#ACRO.len.tsv 1 1 | \
-        pigz -c > /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz
-    fi
-
-    if [[ ! -s /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz ]]; then
-      python3 /lizardfs/guarracino/chromosome_communities/scripts/support2.py \
-        /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.tsv.gz | \
-        pigz -c > /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz
-    fi
+      path_grounded_pq_touching_reliable_ALL_support_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.n1.nref${refn}.tsv.gz
+      #if [[ ! -s  $path_grounded_pq_touching_reliable_ALL_support_tsv_gz ]]; then
+        path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+        python3 /lizardfs/guarracino/chromosome_communities/scripts/support.py \
+          $path_grounded_pq_touching_reliable_ALL_tsv_gz \
+          chm13#ACRO.len.tsv 1 $refn | \
+          pigz -c > $path_grounded_pq_touching_reliable_ALL_support_tsv_gz
+      #fi
     
-    PREFIX=$(basename $prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz .tsv.gz);
-    (seq 13 15; seq 21 22) | while read i; do
-      echo chr$i
-      Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_collapsed_with_annotation.R \
-        /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.tsv.gz \
-        0 25000000 \
-        84 \
-        $i \
-        /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-        /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.chr$i.pdf
+      path_grounded_pq_touching_reliable_ALL_support2_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.n1.nref${refn}.tsv.gz
+      #if [[ ! -s $path_grounded_pq_touching_reliable_ALL_support2_tsv_gz ]]; then
+        python3 /lizardfs/guarracino/chromosome_communities/scripts/support2.py \
+          $path_grounded_pq_touching_reliable_ALL_support_tsv_gz | \
+          pigz -c > $path_grounded_pq_touching_reliable_ALL_support2_tsv_gz
+      #fi
+        
+      PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_support2_tsv_gz .tsv.gz);
+      (seq 13 15; seq 21 22) | while read i; do
+        echo chr$i
+        Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_collapsed_with_annotation.R \
+          $path_grounded_pq_touching_reliable_ALL_support2_tsv_gz \
+          0 25000000 \
+          84 \
+          $i \
+          /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+          /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.chr$i.n1.nref${refn}.pdf
+      done
+        
+      # Merge chromosomes's PDF files
+      /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+        /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.n1.nref${refn}.chr*pdf \
+        /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.n1.nref${refn}.merged.pdf
     done
-    
-    # Merge chromosomes's PDF files
-    /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
-      /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.chr*pdf \
-      /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support2.merged.pdf
   done
 done
 ```

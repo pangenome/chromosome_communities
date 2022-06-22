@@ -3,12 +3,10 @@
 import gzip
 import sys
 
-
-path_grounded_tsv_gz=sys.argv[1]
-path_target_length_txt=sys.argv[2]
-n=int(sys.argv[3])
-refn=int(sys.argv[4])
-
+path_grounded_tsv_gz = sys.argv[1]
+path_target_length_txt = sys.argv[2]
+n = int(sys.argv[3])
+refn = int(sys.argv[4])
 
 # Read chromosome lengths
 ground_2_len_dict = {}
@@ -18,16 +16,16 @@ with open(path_target_length_txt) as f:
         ground, target_len = line.strip().split('\t')
         ground_2_len_dict[ground] = int(target_len)
 
-
 # Read untangling information
 ground_2_group_2_query_2_pieces_dict = {}
 
-#query, query.begin, query.end, target, target.begin, target.end, jaccard, strand, self.coverage, nth.best, ref, ref.begin, ref.end, ref.jaccard, ref.nth.best, grounded.target
+# query, query.begin, query.end, target, target.begin, target.end, jaccard, strand, self.coverage, nth.best, ref, ref.begin, ref.end, ref.jaccard, ref.nth.best, grounded.target
 with gzip.open(path_grounded_tsv_gz, "rt") as f:
     f.readline()
 
     for line in f:
-        query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target = line.strip().split('\t')
+        query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target = line.strip().split(
+            '\t')
 
         if '#chr' in query or 'HG002#1' in query or 'HG002#2' in query:
             continue
@@ -49,7 +47,8 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
         if group not in ground_2_group_2_query_2_pieces_dict[grounded_target]:
             ground_2_group_2_query_2_pieces_dict[grounded_target][group] = {}
         if query not in ground_2_group_2_query_2_pieces_dict[grounded_target][group]:
-            ground_2_group_2_query_2_pieces_dict[grounded_target][group][query] = set() # `set` to avoid counting multiple times segment with self.coverage > 1
+            ground_2_group_2_query_2_pieces_dict[grounded_target][group][
+                query] = set()  # `set` to avoid counting multiple times segment with self.coverage > 1
         ground_2_group_2_query_2_pieces_dict[grounded_target][group][query].add((ref_begin, ref_end, target_int))
 
 # Debugging print
@@ -82,16 +81,16 @@ for grounded_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_pie
     ground_target_list = [[0, 0, 0, 0, 0] for _ in range(grounded_target_len)]
 
     for group, query_2_pieces_dict in group_2_query_2_pieces_dict.items():
-        #print(grounded_target, group, query_2_pieces_dict.keys())
+        # print(grounded_target, group, query_2_pieces_dict.keys())
 
         for query, pieces_list in query_2_pieces_dict.items():
             print(grounded_target, group, query, file=sys.stderr)
             for start, end, target_int in pieces_list:
                 for pos in range(start, end):
-                    #print(pos, ground_target_list[pos])
+                    # print(pos, ground_target_list[pos])
                     ground_target_list[pos][acros2index_dict[target_int]] += 1
 
     for pos, counter_list in enumerate(ground_target_list):
-        print('\t'.join([str(x) for x in [grounded_target, pos, pos+1] + counter_list]))
+        print('\t'.join([str(x) for x in [grounded_target, pos, pos + 1] + counter_list]))
 
     del ground_target_list
