@@ -8,31 +8,25 @@ Use HG002's chrY as an alternative reference, as GRCh38's chrY is incomplete. In
 cd /lizardfs/guarracino/chromosome_communities/assemblies
 
 # Get HG002 chromosome X and Y
-wget https://s3-us-west-2.amazonaws.com/human-pangenomics/submissions/21edcb42-02c4-4e9f-b226-6773e62484a4--RU-HG002-commons/assembly/curated_round2/HG002.mat.cur.20211005.fasta.gz
-gunzip HG002.mat.cur.20211005.fasta.gz
-samtools faidx HG002.mat.cur.20211005.fasta
-samtools faidx HG002.mat.cur.20211005.fasta SX | sed 's/SX/HG002#MAT#chrX/g' |\
-  bgzip -@ 48 -c > hg002.chrX.fa.gz
 
-~/tools/fastix/target/release/fastix-331c1159ea16625ee79d1a82522e800c99206834 -p 'HG002#PAT#' /lizardfs/erikg/T2T/liftover/split_chrY/chm13v2.0_chrY.fasta |\
-  bgzip -@ 48 -c > hg002.chrY.fa.gz
-```
+PATH_CHM13_FA_GZ=/lizardfs/erikg/human/chm13v2.0.fa.gz
+PATH_GRCH38_FA_GZ=/lizardfs/guarracino/chromosome_communities/assemblies/GCA_000001405.15_GRCh38_no_alt_analysis_set_maskedGRC_exclusions_v2_maskedcentromeres_auto_XY.fa.gz
 
-Put HG002's chrX and chrY with the partitioned chrXs and chrYs.
+PATH_HPRCY1_FA_GZ=/lizardfs/guarracino/chromosome_communities/assemblies/HPRCy1v2genbank.fa.gz
 
-```shell
-# Prepare sequence order, with all references on the top
-grep chr /lizardfs/erikg/HPRC/year1v2genbank/parts/chrS.pan.fa.fai | cut -f 1 > sequence_order.txt
-grep chr /lizardfs/erikg/HPRC/year1v2genbank/parts/chrS.pan.fa.fai -v | cut -f 1 >> sequence_order.txt
+cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.partitions.tsv | awk -v OFS='\t' '($2 == "chrX" || $2 == "chrY") {print $1}' | sort > chrXY_contigs.txt
 
+# HiFi-based assemblies + hg01978 verkko + hg002-bakeoff + hg002 verkko
 cat \
-  <(zcat hg002.chrX.fa.gz) \
-  <(zcat hg002.chrY.fa.gz) \
-  <(samtools faidx /lizardfs/erikg/HPRC/year1v2genbank/parts/chrS.pan.fa $(cat sequence_order.txt)) |\
-   bgzip -@ 48 > chrS.pan+HG002chrXY.fa.gz
-samtools faidx chrS.pan+HG002chrXY.fa.gz
-
-rm sequence_order.txt
+  <( samtools faidx $PATH_CHM13_FA_GZ $(grep 'chrX\|chrY' $PATH_CHM13_FA_GZ.fai | cut -f 1) | sed 's/^>/>chm13#/g' ) \
+  <( samtools faidx $PATH_GRCH38_FA_GZ $(grep 'chrX\|chrY' $PATH_GRCH38_FA_GZ.fai | grep '_' -v | cut -f 1) ) \
+  <(samtools faidx $PATH_HPRCY1_FA_GZ $(comm -12 <(cut -f 1 "$PATH_HPRCY1_FA_GZ".fai | sort) <(cat chrXY_contigs.txt))) \
+  <(samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/hg01978.mat.fa $(comm -12 <(cut -f 1 /lizardfs/guarracino/chromosome_communities/assemblies/hg01978.mat.fa.fai | sort) <(cat chrXY_contigs.txt))) \
+  <(samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/hg01978.pat.fa $(comm -12 <(cut -f 1 /lizardfs/guarracino/chromosome_communities/assemblies/hg01978.pat.fa.fai | sort) <(cat chrXY_contigs.txt))) \
+  <(samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/hg002-bakeoff.mat.fa $(comm -12 <(cut -f 1 /lizardfs/guarracino/chromosome_communities/assemblies/hg002-bakeoff.mat.fa.fai | sort) <(cat chrXY_contigs.txt))) \
+  <(samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/hg002-bakeoff.pat.fa $(comm -12 <(cut -f 1 /lizardfs/guarracino/chromosome_communities/assemblies/hg002-bakeoff.pat.fa.fai | sort) <(cat chrXY_contigs.txt))) | \
+  bgzip -@ 48 -c > chrSEX+refs.fa.gz
+samtools faidx chrSEX+refs.fa.gz
 ```
 
 ### Pangenome building
@@ -42,63 +36,65 @@ Apply `pggb` on the chromosome-partitioned HPRC dataset:
 ```shell
 mkdir -p /lizardfs/guarracino/chromosome_communities/graphs
 
-num_of_haplotypes=$(cut -f 1,2 -d '#' /lizardfs/guarracino/chromosome_communities/assemblies/chrS.pan+HG002chrXY.fa.gz.fai | sort | uniq | wc -l)
-sbatch -p highmem -c 48 --job-name sexpggb --wrap 'hostname; cd /scratch && /gnu/store/swnkjnc9wj6i1cl9iqa79chnf40r1327-pggb-0.2.0+640bf6b-5/bin/pggb -i /lizardfs/guarracino/chromosome_communities/assemblies/chrS.pan+HG002chrXY.fa.gz -o chrS.pan+HG002chrXY.s100k.l300k.p98.n'$num_of_haplotypes' -t 48 -s 100k -l 300k -p 98 -n '$num_of_haplotypes' -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrS.pan+HG002chrXY.s100k.l300k.p98.n'$num_of_haplotypes' /lizardfs/guarracino/chromosome_communities/graphs';
+RUN_PGGB=/home/guarracino/tools/pggb/pggb-a4a6668d9ece42c80ce69dc354f0cb59a849286f
+
+num_of_haplotypes=$(cut -f 1,2 -d '#' /lizardfs/guarracino/chromosome_communities/assemblies/chrSEX+refs.fa.gz.fai | sort | uniq | wc -l)
+sbatch -p highmem -c 48 --job-name sexpggb --wrap "hostname; cd /scratch && $RUN_PGGB -i /lizardfs/guarracino/chromosome_communities/assemblies/chrSEX+refs.fa.gz -o chrSEX+refs.s50k.l250k.p98.n${num_of_haplotypes} -t 48 -s 50k -l 250k -p 98 -n ${num_of_haplotypes} -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrSEX+refs.s50k.l250k.p98.n${num_of_haplotypes} /lizardfs/guarracino/chromosome_communities/graphs";
 ```
 
 ### Untangling
 
 ```shell
-path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.og
+mkdir -p /lizardfs/guarracino/chromosome_communities/untangle_sex/
+
+path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle_sex/chm13.SEX.target_paths.txt
+path_fasta_fai=/lizardfs/guarracino/chromosome_communities/assemblies/chrSEX+refs.fa.gz.fai
+grep chm13 $path_fasta_fai | cut -f 1 > $path_targets_txt
+
+
+path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrSEX+refs.s50k.l250k.p98.n102/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.og
 prefix=$(basename $path_input_og .og)
 
-run_odgi=/home/guarracino/tools/odgi/bin/odgi-694948ccf31e7b565449cc056668e9dcc8cc0a3e
-path_fasta_fai=/lizardfs/guarracino/chromosome_communities/assemblies/chrS.pan+HG002chrXY.fa.gz.fai
+RUN_ODGI=/home/guarracino/tools/odgi/bin/odgi-e2de6cbca0169b0720dca0c668743399305e92bd
+```
 
+```shell
 # All references and emit cut points
-for refpattern in HG002; do
-  path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
-  grep $refpattern $path_fasta_fai | cut -f 1 > $path_targets_txt
+for e in 50000; do
+  for m in 1000 2000 5000; do
+    path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.bed.gz
+    path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.cut_points.txt
     
-  for e in 5000 50000 100000; do
-    for m in 500 1000 10000; do
+    if [[ ! -s ${path_cut_points_txt} ]]; then
       echo "-e $e -m $m"
-    
-      path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$refpattern#SEX.e$e.m$m.bed.gz
-      path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$refpattern#SEX.e$e.m$m.cut_points.txt
-    
-      if [[ ! -s ${path_cut_points_txt} ]]; then
-        sbatch -p workers -c 24 --job-name sexuntangle --wrap '\time -v '$run_odgi' untangle -t 24 -P -i '$path_input_og' -R '$path_targets_txt' -e '$e' -m '$m' --cut-points-output '$path_cut_points_txt' -j 0 -n 1 | pigz -c > '$path_bed_gz';'
+      sbatch -p workers -c 16 --job-name sexuntangle --wrap "\time -v $RUN_ODGI untangle -t 16 -P -i $path_input_og -R $path_targets_txt -e $e -m $m --cut-points-output $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_bed_gz"
+    fi;
+  done
+done
+  
+# Single reference by using the same cut points
+for e in 50000  ; do
+  for m in 1000 2000 5000; do
+    echo "-e $e -m $m"
+      
+    cat $path_targets_txt | while read ref; do
+      echo $ref
+      
+      path_ref_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz
+      if [[ ! -s ${path_ref_bed_gz} ]]; then
+        path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#ACRO.e$e.m$m.j0.n100.cut_points.txt
+        
+        sbatch -p workers -c 8 --job-name acrountangle --wrap "\time -v $RUN_ODGI untangle -t 8 -P -i $path_input_og -r $ref -e $e -m $m --cut-points-input $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_ref_bed_gz"
       fi;
     done
   done
 done
 
-# Single reference by using the same cut points
-for refpattern in HG002; do
-  path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
-  
-  for e in 5000 50000 100000; do
-    for m in 500 1000 10000; do
-      echo "-e $e -m $m"
-        
-      cat $path_targets_txt | while read ref; do
-        echo $ref
-            
-        path_ref_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz
-        if [[ ! -s ${path_ref_bed_gz} ]]; then
-          path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$refpattern#SEX.e$e.m$m.cut_points.txt
-                    
-          sbatch -p workers -c 24 --job-name sexuntangle --wrap '\time -v '$run_odgi' untangle -t 24 -P -i '$path_input_og' -r '$ref' -e '$e' -m '$m' --cut-points-input '$path_cut_points_txt' -j 0 -n 100 | pigz -c > '$path_ref_bed_gz';'
-        fi;
-      done
-    done
-  done
-done
 
 # Grounding
-mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded
+mkdir -p /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded
 
+### TO UPDATE ###
 for refpattern in HG002; do
   path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
 

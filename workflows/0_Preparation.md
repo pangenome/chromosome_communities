@@ -28,15 +28,9 @@ cd ..
 
 git clone --recursive https://github.com/pangenome/odgi.git
 cd odgi
-git checkout a4957db99179a9f2e8d43dfca73cb47680dfb956
-cmake -H. -Bbuild && cmake --build build -- -j 48
-mv bin/odgi bin/odgi-a4957db99179a9f2e8d43dfca73cb47680dfb956
-
-# Fixed odgi untangle
 git checkout ed9390a47e6b029a753cbb83b29945eb48ca5c3b
 cmake -H. -Bbuild && cmake --build build -- -j 48
-mv bin/odgi bin/odgi-ed9390a47e6b029a753cbb83b29945eb48ca5c3b
-
+mv bin/odgi bin/odgi-e2de6cbca0169b0720dca0c668743399305e92bd
 cd ..
 
 git clone --recursive https://github.com/pangenome/pggb.git
@@ -45,10 +39,9 @@ git checkout a4a6668d9ece42c80ce69dc354f0cb59a849286f
 sed 's,"$fmt" wfmash,"$fmt" ~/tools/wfmash/build/bin/wfmash-ad8aebae1be96847839778af534866bc9545adb9,g' pggb -i
 sed 's,"$fmt" seqwish,"$fmt" ~/tools/seqwish/bin/seqwish-706ef7e2640e38a75ae7435fb57f7a6c8e3ada2c,g' pggb -i
 sed 's,"$fmt" smoothxg,"$fmt" ~/tools/smoothxg/bin/smoothxg-b3f4578f37000922cdd193c2d183951f48f6e612,g' pggb -i
-sed 's,"$fmt" odgi,"$fmt" ~/tools/odgi/bin/odgi-a4957db99179a9f2e8d43dfca73cb47680dfb956,g' pggb -i
+sed 's,"$fmt" odgi,"$fmt" ~/tools/odgi/bin/odgi-e2de6cbca0169b0720dca0c668743399305e92bd,g' pggb -i
 mv pggb pggb-a4a6668d9ece42c80ce69dc354f0cb59a849286f
 cd ..
-
 
 git clone --recursive https://github.com/ekg/fastix.git
 cd fastix
@@ -127,87 +120,55 @@ for hap in maternal paternal; do
 done
 rm HG002.*.f1_assembly_v2_genbank.fa.gz
 
-# HG002 has low quality, so no pq-contigs. We use verkko's assemblies to collect all its acro-centric contigs
+# HG002 has low quality, so no pq-contigs
 mkdir -p partitioning
 
 for hap in mat pat; do
   samtools faidx hg002-prox.renamed.fna $(grep $hap hg002-prox.renamed.fna.fai -i | cut -f 1) | bgzip -@ 48 -c > hg002-prox.renamed.$hap.fna.gz
   samtools faidx hg002-prox.renamed.$hap.fna.gz
 done
-
-## Map against the verkko's assemblies (more strict identity threshold)
-#RUN_WFMASH=/home/guarracino/tools/wfmash/build/bin/wfmash-ad8aebae1be96847839778af534866bc9545adb9
-#
-#for hap in mat pat; do
-#  reffa=/lizardfs/guarracino/chromosome_communities/assemblies/hg002-prox.renamed.$hap.fna.gz
-#  hapfa=/lizardfs/guarracino/chromosome_communities/assemblies/HG002.${hap}ernal.fa.gz 
-#  
-#  sbatch -c 24 -p workers --job-name HG002 --wrap 'hostname; cd /scratch; \time -v '$RUN_WFMASH' -t 24 -m -N -s 50k -p 95 '$reffa' '$hapfa' > /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.'$hap'.vs.hg002-prox.'$hap'.paf'
-#done
-#
-### Collect unmapped contigs and map them again, but in split mode
-#for hap in mat pat; do
-#  echo $hap
-#  reffa=/lizardfs/guarracino/chromosome_communities/assemblies/hg002-prox.renamed.$hap.fna.gz
-#  
-#  hapfa=/lizardfs/guarracino/chromosome_communities/assemblies/HG002.${hap}ernal.fa.gz
-#  nonsplitpaf=/lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.$hap.vs.hg002-prox.$hap.paf
-#
-#  comm -23 <(cut -f 1 $hapfa.fai | sort) <(cut -f 1 $nonsplitpaf | sort) > partitioning/HG002.$hap.vs.hg002-prox.$hap.missing.txt
-#  if [[ $(wc -l partitioning/HG002.$hap.vs.hg002-prox.$hap.missing.txt | cut -f 1 -d\ ) != 0 ]];
-#  then
-#    missingfa=/lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.$hap.vs.hg002-prox.$hap.missing.fa.gz
-#    
-#    samtools faidx $hapfa $(tr '\n' ' ' < partitioning/HG002.$hap.vs.hg002-prox.$hap.missing.txt) | bgzip -@ 48 -c > $missingfa
-#    samtools faidx $missingfa
-#    
-#    sbatch -c 24 -p workers --job-name HG002 --wrap 'hostname; cd /scratch; \time -v /gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash -t 24 -m -s 50k -p 95 '$reffa' '$missingfa' > /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.'$hap'.split.vs.hg002-prox.'$hap'.paf'
-#  fi
-#done
-#
-#for hap in mat pat; do
-#  echo $hap
-#
-#  cat partitioning/HG002.$hap.split.vs.hg002-prox.$hap.paf | \
-#   awk '{ print $1,$11,$0 }' | tr ' ' '\t' |  sort -n -r -k 1,2 | \
-#   awk '$1 != last { print; last = $1; }' | awk -v OFS='\t' '{print($1,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)}' > partitioning/HG002.$hap.split.vs.hg002-prox.$hap.recovered.paf
-#done
-#
-#
-### Subset by acrocentric chromosome
-#( seq 13 15; seq 21 22 ) | while read f; do  
-#  for hap in mat pat; do
-#    echo $f $hap
-#    hapfa=/lizardfs/guarracino/chromosome_communities/assemblies/HG002.${hap}ernal.fa.gz
-#  
-#    awk '$6 ~ "chr'$f'.prox$"' $( echo partitioning/HG002.$hap.vs.hg002-prox.$hap.paf; echo partitioning/HG002.$hap.split.vs.hg002-prox.$hap.recovered.paf ) | cut -f 1 > partitioning/hg002.$f.$hap.contigs.txt
-#    
-#    samtools faidx $hapfa $(cat partitioning/hg002.$f.$hap.contigs.txt) >> hg002.chr$f.hifi.fa
-#  done
-#  echo "bgzip..."
-#  
-#  bgzip -@ 48 hg002.chr$f.hifi.fa
-#  samtools faidx hg002.chr$f.hifi.fa.gz
-#done
 ```
 
 Check manually the partitioning with CHM13:
 
 ```shell
+RUN_WFMASH=/home/guarracino/tools/wfmash/build/bin/wfmash-ad8aebae1be96847839778af534866bc9545adb9
+
 ## Map against the CHM13 assembly (and manually check the output)
 for hap in mat pat; do
   reffa=/lizardfs/guarracino/chromosome_communities/assemblies/chm13.fa.gz
   hapfa=/lizardfs/guarracino/chromosome_communities/assemblies/HG002.${hap}ernal.fa.gz 
   
-  sbatch -c 48 -p workers --job-name HG002 --wrap 'hostname; cd /scratch; \time -v /gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash -t 48 -m -N -s 50k -p 90 -n 1 '$reffa' '$hapfa' > /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.'$hap'.vs.CHM13.n1.paf'
+  sbatch -c 48 -p workers --job-name HG002 --wrap "hostname; cd /scratch; \time -v $RUN_WFMASH -t 48 -m -N -s 50k -p 90 -n 1 $reffa $hapfa > /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.${hap}.vs.CHM13.n1.paf"
 done
 
 for hap in mat pat; do
   reffa=/lizardfs/guarracino/chromosome_communities/assemblies/chm13.fa.gz
   hapfa=/lizardfs/guarracino/chromosome_communities/assemblies/HG002.${hap}ernal.fa.gz 
   
-  sbatch -c 48 -p workers --job-name HG002 --wrap 'hostname; cd /scratch; \time -v /gnu/store/d6ajy0ajxkbb22gkgi32g5c4jy8rs8bv-wfmash-0.6.0+948f168-21/bin/wfmash -t 48 -m -s 50k -p 90 '$reffa' '$hapfa' > /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.'$hap'.vs.CHM13.split.paf'
+  sbatch -c 48 -p workers --job-name HG002 --wrap "hostname; cd /scratch; \time -v $RUN_WFMASH -t 48 -m -s 50k -p 90 $reffa $hapfa > /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/HG002.${hap}.vs.CHM13.split.paf"
 done
+```
+
+Prepare HG002-bakeoff contigs:
+
+```shell
+cd /lizardfs/guarracino/chromosome_communities/assemblies/
+
+/home/guarracino/tools/fastix/target/release/fastix-331c1159ea16625ee79d1a82522e800c99206834 -p 'HG002-bakeoff#MAT#' <(zcat HG002.mat.cur.20211005.fasta.gz ) > hg002-bakeoff.mat.fa && samtools faidx hg002-bakeoff.mat.fa
+/home/guarracino/tools/fastix/target/release/fastix-331c1159ea16625ee79d1a82522e800c99206834 -p 'HG002-bakeoff#PAT#' <(zcat HG002.pat.cur.20211005.fasta.gz ) > hg002-bakeoff.pat.fa && samtools faidx hg002-bakeoff.pat.fa
+```
+
+### HG01978 (verkko)
+
+Prepare verkko's HG01978 contigs (HiFi+ONT-based):
+
+```shell
+### Get the "assembly.{m,p}at.scaff.fa.gz" files from Globus (t2t-share/HG01978/verkko-asm/v1 folder)
+
+# Rename contigs
+zcat assembly.mat.scaff.fa.gz | sed 's/^>mat/>HG01978#MAT#mat/g' > hg01978.mat.fa && samtools faidx hg01978.mat.fa
+zcat assembly.pat.scaff.fa.gz | sed 's/^>pat/>HG01978#PAT#pat/g' > hg01978.pat.fa && samtools faidx hg01978.pat.fa
 ```
 
 ### Chromosome partitioning
@@ -221,8 +182,9 @@ cd /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/
 REFERENCES_FASTA=/lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13+grch38.fa
 RUN_WFMASH=/home/guarracino/tools/wfmash/build/bin/wfmash-ad8aebae1be96847839778af534866bc9545adb9
 
-
-ls /lizardfs/erikg/HPRC/year1v2genbank/assemblies/*v2_genbank*fa | while read FASTA; do
+(ls /lizardfs/erikg/HPRC/year1v2genbank/assemblies/*v2_genbank*fa; \
+  ls /lizardfs/guarracino/chromosome_communities/assemblies/hg01978.*at.fa; \
+  ls /lizardfs/guarracino/chromosome_communities/assemblies/hg002-bakeoff.*at.fa) | while read FASTA; do
   HAPLOTYPE=$(basename $FASTA .fa | cut -f 1,2 -d '.');
   echo $HAPLOTYPE
   
@@ -234,7 +196,9 @@ done
 Collect unmapped contigs and remap them in split mode:
 
 ```shell
-ls /lizardfs/erikg/HPRC/year1v2genbank/assemblies/*v2_genbank*fa | while read FASTA; do
+(ls /lizardfs/erikg/HPRC/year1v2genbank/assemblies/*v2_genbank*fa; \
+  ls /lizardfs/guarracino/chromosome_communities/assemblies/hg01978.*at.fa; \
+  ls /lizardfs/guarracino/chromosome_communities/assemblies/hg002-bakeoff.*at.fa) | while read FASTA; do
   HAPLOTYPE=$(basename $FASTA .fa | cut -f 1,2 -d '.');
   echo $HAPLOTYPE
   
@@ -246,7 +210,7 @@ ls /lizardfs/erikg/HPRC/year1v2genbank/assemblies/*v2_genbank*fa | while read FA
   then 
     samtools faidx $FASTA $(tr '\n' ' ' < $UNALIGNED.txt) > $UNALIGNED.fa
     samtools faidx $UNALIGNED.fa
-    sbatch -p lowmem -c 12 --wrap "$RUN_WFMASH -t 12 -m -s 50k -l 150k -p 90 -H 0.001 $REFERENCES_FASTA $UNALIGNED.fa > $UNALIGNED.split.vs.ref.paf"
+    sbatch -p workers -c 12 --wrap "$RUN_WFMASH -t 12 -m -s 50k -l 150k -p 90 -H 0.001 $REFERENCES_FASTA $UNALIGNED.fa > $UNALIGNED.split.vs.ref.paf"
   fi
 done
 ```
@@ -311,6 +275,58 @@ ls /lizardfs/erikg/HPRC/year1v2genbank/approx_mappings/*.vs.ref.paf | while read
     awk -v OFS='\t' '{print($1,$6"_pq")}' >> $HAPLOTYPE.partitioning_with_pq.tsv
     
   rm $HAPLOTYPE.vs.ref.bed $HAPLOTYPE.vs.ref.p_contigs.txt $HAPLOTYPE.vs.ref.q_contigs.txt
+done
+```
+
+### Chromosome partitioning (alternative approach)
+
+Put the CHM13 (v2.0) and GRCh38 references together:
+
+```shell
+cd /lizardfs/guarracino/chromosome_communities/assemblies
+
+cat \
+  <( /home/guarracino/tools/fastix/target/release/fastix-331c1159ea16625ee79d1a82522e800c99206834 -p 'chm13#' <(zcat /lizardfs/erikg/human/chm13v2.0.fa.gz) ) \
+  <( zcat GCA_000001405.15_GRCh38_no_alt_analysis_set_maskedGRC_exclusions_v2_maskedcentromeres_auto_XY.fa.gz) \
+  <( samtools faidx /lizardfs/guarracino/pggb-paper/hsapiens/assemblies/grch38.fa.gz $(echo "grch38#chrM" "grch38#chrEBV") ) | \
+  bgzip -c -@ 48 > chm13v2+grch38masked.fa.gz
+  samtools faidx chm13v2+grch38masked.fa.gz
+```
+
+Map contigs against the references:
+
+```shell
+mkdir -p /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/
+cd /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/
+
+REFERENCES_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz
+RUN_WFMASH=/home/guarracino/tools/wfmash/build/bin/wfmash-ad8aebae1be96847839778af534866bc9545adb9
+
+(ls /lizardfs/erikg/HPRC/year1v2genbank/assemblies/*v2_genbank*fa; \
+  ls /lizardfs/guarracino/chromosome_communities/assemblies/hg01978.*at.fa; \
+  ls /lizardfs/guarracino/chromosome_communities/assemblies/hg002-bakeoff.*at.fa) | while read FASTA; do
+  HAPLOTYPE=$(basename $FASTA .fa | cut -f 1,2 -d '.');
+  echo $HAPLOTYPE
+  
+  PAF=/lizardfs/guarracino/chromosome_communities/assemblies/partitioning/$HAPLOTYPE.vs.refs.paf
+  sbatch -p workers -c 12 --wrap "$RUN_WFMASH -t 12 -m -s 5k -p 90 -H 0.001 $REFERENCES_FASTA $FASTA > $PAF"
+done
+```
+
+Get the best target for each contig:
+
+
+```shell
+(ls /lizardfs/erikg/HPRC/year1v2genbank/assemblies/*v2_genbank*fa; \
+  ls /lizardfs/guarracino/chromosome_communities/assemblies/hg01978.*at.fa; \
+  ls /lizardfs/guarracino/chromosome_communities/assemblies/hg002-bakeoff.*at.fa) | while read FASTA; do
+  HAPLOTYPE=$(basename $FASTA .fa | cut -f 1,2 -d '.');
+  echo $HAPLOTYPE
+  
+  PAF=/lizardfs/guarracino/chromosome_communities/assemblies/partitioning/$HAPLOTYPE.vs.refs.paf
+
+  # We remove the reference prefixes because we are interested in the chromosome
+  python3 /lizardfs/guarracino/chromosome_communities/scripts/partition_by_weighted_mappings.py <(sed 's/chm13#//g;s/grch38#//g' $PAF) > $HAPLOTYPE.vs.refs.partitions.tsv
 done
 ```
 
