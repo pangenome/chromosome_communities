@@ -33,7 +33,7 @@ xx <- x[x$nth.best <= nth.best & x$ref.nth.best <= ref.nth.best,]
 # Do not consider other acros references
 xx <- xx %>%
   filter(!grepl('rDNA', query) & !grepl('centromere', query)) %>%
-  filter(!grepl('chr', query) | grepl(paste0('chr', num_chr), query))
+  filter(!grepl('chr', query))
 
 # To group by query
 xx$query.hacked <- paste(xx$query, xx$nth.best, sep = "-")
