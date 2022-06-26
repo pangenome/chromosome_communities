@@ -28,7 +28,7 @@ cd ..
 
 git clone --recursive https://github.com/pangenome/odgi.git
 cd odgi
-git checkout ed9390a47e6b029a753cbb83b29945eb48ca5c3b
+git checkout e2de6cbca0169b0720dca0c668743399305e92bd
 cmake -H. -Bbuild && cmake --build build -- -j 48
 mv bin/odgi bin/odgi-e2de6cbca0169b0720dca0c668743399305e92bd
 cd ..
@@ -55,6 +55,9 @@ cd ..
 
 vg version | head -n 1
 vg version v1.40.0 "Suardi"
+
+
+gephi + "givecolortonodes" plugin (https://gephi.org/plugins/#/plugin/givecolortonodes)
 ```
 
 ## Data
@@ -317,6 +320,8 @@ Get the best target for each contig:
 
 
 ```shell
+cd /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/
+
 (ls /lizardfs/erikg/HPRC/year1v2genbank/assemblies/*v2_genbank*fa; \
   ls /lizardfs/guarracino/chromosome_communities/assemblies/hg01978.*at.fa; \
   ls /lizardfs/guarracino/chromosome_communities/assemblies/hg002-bakeoff.*at.fa) | while read FASTA; do
@@ -328,6 +333,38 @@ Get the best target for each contig:
   # We remove the reference prefixes because we are interested in the chromosome
   python3 /lizardfs/guarracino/chromosome_communities/scripts/partition_by_weighted_mappings.py <(sed 's/chm13#//g;s/grch38#//g' $PAF) > $HAPLOTYPE.vs.refs.partitions.tsv
 done
+```
+
+Get acrocentric contigs:
+
+```shell
+cd /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/
+
+REFERENCES_FASTA=/lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz
+
+rm chrACRO+refs.fa.gz
+rm chrACRO.fa.gz
+(seq 13 15; seq 21 22) | while read i; do
+  echo chr$i
+  
+  samtools faidx $REFERENCES_FASTA $(grep chr$i $REFERENCES_FASTA.fai | cut -f 1) >> chrACRO+refs.fa
+  
+  zcat /lizardfs/guarracino/chromosome_communities/assemblies/hg002.chr$i.prox.fa.gz >> chrACRO+refs.fa
+  zcat /lizardfs/guarracino/chromosome_communities/assemblies/hg002.chr$i.prox.fa.gz >> chrACRO.fa
+  
+  ls /lizardfs/erikg/HPRC/year1v2genbank/assemblies/*v2_genbank*fa | while read FASTA; do
+    HAPLOTYPE=$(basename $FASTA .fa | cut -f 1,2 -d '.');
+    echo $HAPLOTYPE
+      
+    samtools faidx $FASTA $(grep chr$i $HAPLOTYPE.vs.refs.partitions.tsv | cut -f 1) >> chrACRO+refs.fa
+    samtools faidx $FASTA $(grep chr$i $HAPLOTYPE.vs.refs.partitions.tsv | cut -f 1) >> chrACRO.fa
+  done
+done
+bgzip -@ 48 chrACRO+refs.fa && samtools faidx chrACRO+refs.fa.gz
+bgzip -@ 48 chrACRO.fa && samtools faidx chrACRO.fa.gz
+
+
+
 ```
 
 [comment]: <> (## Get coverage analysis BED files)

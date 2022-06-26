@@ -46,7 +46,7 @@ cd /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank/
 for s in 50k 10k; do
   for p in 95; do
     for n in 93 39 13 7 5; do
-      for l in 1000000; do
+      for l in 0 1000000; do
         #for prefix in HPRCy1v2genbank+refs HPRCy1v2genbank; do
         for prefix in HPRCy1v2genbank; do
           if [[ -s $prefix.self.s$s.p$p.n$n.h0001.paf ]]; then
@@ -67,7 +67,7 @@ To evaluate chromosome communities, we build an "alignment graph" from our mappi
 for s in 50k 10k; do
   for p in 95; do
     for n in 93 39 13 7 5; do
-      for l in 1000000; do
+      for l in 0 1000000; do
         #for prefix in HPRCy1v2genbank+refs HPRCy1v2genbank; do
         for prefix in HPRCy1v2genbank; do
           if [[ -s $prefix.self.s$s.p$p.n$n.h0001.l$l.paf ]]; then
@@ -92,7 +92,7 @@ Then we obtain the ``Leiden`` communities:
 for s in 50k 10k; do
   for p in 95; do
     for n in 93 39 13 7 5; do
-      for l in 1000000; do
+      for l in 0 1000000; do
         #for prefix in HPRCy1v2genbank+refs HPRCy1v2genbank; do
         for prefix in HPRCy1v2genbank; do            
           PAF=$prefix.self.s$s.p$p.n$n.h0001.l$l.paf
@@ -129,11 +129,9 @@ Finally, we check how chromosomes where partitioned (or, in the all-vs-all mappi
 ```shell
 s=50k
 p=95
-n=93
+n=39
 l=1000000
-ls HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.paf.edges.weights.txt.community.*.txt | while read f; do echo $f; cat $f | sort | uniq -c | awk '$1 > 0' | grep unmapped -v; done
-
-ls HPRCy1v2genbank+refs.self.s$s.p$p.n$n.l$l.paf.edges.weights.txt.community.*.txt | while read f; do echo $f; grep chr $f; done
+ls HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.paf.edges.weights.txt.community.*.txt | while read f; do echo $f; cat $f | cut -f 2 -d '#' | sort | uniq -c | sort -k 1nr | awk '$1 > 0' ; done
 ```
 
 Obtain files for `gephi`:
@@ -154,6 +152,14 @@ l=1000000
         awk '{print($1,$3,$3)}' | tr ' ' ',' \
 ) > HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.nodes.csv
   
+# Add color column (for the "givecolortonodes" plugin)
+(echo "Id,Label,Chromosome,ColorOfNode"; \
+  join -1 3 -2 1 \
+    <(sed '1d' HPRCy1v2genbank.self.s50k.p95.n39.h0001.l1000000.nodes.csv | tr ',' ' ' | sort -k 3) \
+    <(sed '1d' /home/guarracino/git/chromosome_communities/data/chromosome.colors.csv | tr ',' ' ' | sort -k 1) | \
+      awk -v OFS=',' '{print $2,$1,$3,$4}') \
+     > HPRCy1v2genbank.self.s50k.p95.n39.h0001.l1000000.nodes.colored.csv
+
 ( echo "Source,Target,Weight"; \
   paste -d ' ' HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.paf.edges.list.txt HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.paf.edges.weights.txt | tr ' ' ','
 ) > HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.edges.csv

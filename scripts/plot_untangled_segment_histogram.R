@@ -43,9 +43,9 @@ xx <- xx %>%
 
 
 
-
-xx$ref.end <- as.numeric(xx$ref.end)
-xx$ref.begin <- as.numeric(xx$ref.begin)
+# Before as.character, then as.numeric, else the numbers will correspond each factor level (1, 2) rather than the levels themselves!
+xx$ref.end <- as.numeric(as.character(xx$ref.end))
+xx$ref.begin <- as.numeric(as.character(xx$ref.begin))
 xx$ref_len <- xx$ref.end - xx$ref.begin
 
 xx <- xx[xx$ref.end <= 25000000,]
