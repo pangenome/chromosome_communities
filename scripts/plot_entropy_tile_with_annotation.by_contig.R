@@ -165,6 +165,7 @@ p <- ggplot(yy, aes(x=start.pos + (end.pos - start.pos) / 2, y=average_sdi, colo
     x = paste(chr, 'position'),
     y = paste('')
   ) +
+  scale_color_manual(values=colors) +
   guides(colour = guide_legend(override.aes = list(size=10)))
 #p
 
