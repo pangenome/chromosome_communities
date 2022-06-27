@@ -24,8 +24,7 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
     f.readline()
 
     for line in f:
-        query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target = line.strip().split(
-            '\t')
+        query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target = line.strip().split('\t')
 
         if '#chr' in query or 'HG002#1' in query or 'HG002#2' in query:
             continue
@@ -47,8 +46,8 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
         if group not in ground_2_group_2_query_2_pieces_dict[grounded_target]:
             ground_2_group_2_query_2_pieces_dict[grounded_target][group] = {}
         if query not in ground_2_group_2_query_2_pieces_dict[grounded_target][group]:
-            ground_2_group_2_query_2_pieces_dict[grounded_target][group][
-                query] = set()  # `set` to avoid counting multiple times segment with self.coverage > 1
+            # `set` to avoid counting multiple times segment with self.coverage > 1
+            ground_2_group_2_query_2_pieces_dict[grounded_target][group][query] = set()
         ground_2_group_2_query_2_pieces_dict[grounded_target][group][query].add((ref_begin, ref_end, target_int))
 
 # Debugging print
@@ -73,24 +72,25 @@ print('\t'.join([
     'num.contigs.supporting.chr21',
     'num.contigs.supporting.chr22'
 ]))
-for grounded_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_pieces_dict.items():
-    print(grounded_target, file=sys.stderr)
-    grounded_target_len = ground_2_len_dict[grounded_target]
+for ground_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_pieces_dict.items():
+    print(ground_target, file=sys.stderr)
+    ground_target_len = ground_2_len_dict[ground_target]
 
     # Prepare the counts for each base across the ground_target
-    ground_target_list = [[0, 0, 0, 0, 0] for _ in range(grounded_target_len)]
+    ground_target_list = [[0, 0, 0, 0, 0] for _ in range(ground_target_len)]
 
     for group, query_2_pieces_dict in group_2_query_2_pieces_dict.items():
-        # print(grounded_target, group, query_2_pieces_dict.keys())
+        # print(ground_target, group, query_2_pieces_dict.keys())
 
         for query, pieces_list in query_2_pieces_dict.items():
-            print(grounded_target, group, query, file=sys.stderr)
+            print(ground_target, group, query, file=sys.stderr)
+
             for start, end, target_int in pieces_list:
                 for pos in range(start, end):
                     # print(pos, ground_target_list[pos])
                     ground_target_list[pos][acros2index_dict[target_int]] += 1
 
     for pos, counter_list in enumerate(ground_target_list):
-        print('\t'.join([str(x) for x in [grounded_target, pos, pos + 1] + counter_list]))
+        print('\t'.join([str(x) for x in [ground_target, pos, pos + 1] + counter_list]))
 
     del ground_target_list

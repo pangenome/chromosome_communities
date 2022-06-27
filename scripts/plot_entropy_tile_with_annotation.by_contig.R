@@ -32,19 +32,19 @@ if (num_chr == 13) {
 
 # Apply filters
 chr <- paste0('chm13#chr', num_chr)
-xx <- x[x$grounded.target == chr,]
+xx <- x[x$ground.target == chr,]
 
 p <- ggplot(xx,
     aes(
         x = start.pos + (end.pos - start.pos) / 2,
         width = end.pos - start.pos - 200,
         y = contig, alpha=shannon_div_index,
-        fill = grounded.target
+        fill = ground.target
     )
    ) +
   geom_tile() +
   #ggtitle(title) +
-  facet_col(~grounded.target, scales = "free_y", space = "free", labeller = labeller(variable = labels)) +
+  facet_col(~ground.target, scales = "free_y", space = "free", labeller = labeller(variable = labels)) +
   theme(
     plot.title = element_text(hjust = 0.5),
 
