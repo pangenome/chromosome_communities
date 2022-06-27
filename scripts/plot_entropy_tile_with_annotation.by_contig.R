@@ -139,7 +139,7 @@ p <- ggplot(yy,
 p_with_annotation <- ggpubr::ggarrange(
   ggplotted_img, p,
   labels=c('', ''),
-  heights = c(height_bar*8, height_bar*max(7, length(unique(yy$ground.target))) / 3),
+  heights = c(height_bar*8, height_bar*max(7, length(unique(yy$ground.target))) / 2),
   legend = "right", # legend position,
   common.legend = T,
   nrow = 2
