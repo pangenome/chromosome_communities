@@ -78,6 +78,6 @@ for key, info_list in key_2_info_dict.items():
             info_list.extend(info_without_max_jaccard_list)
             info_list.sort(key=lambda x: x[0], reverse=False)  # sort by nth.best (rank)
 
-            # print the lines
-            for x in info_list:
-                print(x[3])
+    # print the lines
+    for x in info_list:
+        print(x[3])
