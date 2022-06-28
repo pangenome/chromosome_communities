@@ -435,6 +435,44 @@ for e in 50000; do
     done
   done
 done
+
+# Fix best hits (if there are multiple best hits, put as first the chromosome of origin of the contig)
+for e in 50000; do
+  for m in 1000 2000 5000 10000 20000; do
+
+    path_ref_fixed_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.j0.n100.fixed.bed.gz
+    if [[ ! -s ${path_ref_fixed_bed_gz} ]]; then
+      echo "-e $e -m $m"
+      
+      path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.j0.n100.bed.gz
+      python3 /lizardfs/guarracino/chromosome_communities/scripts/fix_best_hit.py \
+        $path_bed_gz \
+        <(cat \
+            <(cat assemblies/partitioning/*.partitions.tsv | sed 's/chr/chm13#chr/') \
+            <(cut -f 1,6  /lizardfs/guarracino/chromosome_communities/assemblies/partitioning_pq/HG002.*.vs.ref.p90.N.paf) \
+            <(echo -e chm13#chr13"\t"chm13#chr13) \
+            <(echo -e chm13#chr14"\t"chm13#chr14) \
+            <(echo -e chm13#chr15"\t"chm13#chr15) \
+            <(echo -e chm13#chr21"\t"chm13#chr21) \
+            <(echo -e chm13#chr22"\t"chm13#chr22) \
+            <(echo -e grch38#chr13"\t"chm13#chr13) \
+            <(echo -e grch38#chr14"\t"chm13#chr14) \
+            <(echo -e grch38#chr15"\t"chm13#chr15) \
+            <(echo -e grch38#chr21"\t"chm13#chr21) \
+            <(echo -e grch38#chr22"\t"chm13#chr22) \
+            <(echo -e HG002#MAT#chr13.prox"\t"chm13#chr13) \
+            <(echo -e HG002#MAT#chr14.prox"\t"chm13#chr14) \
+            <(echo -e HG002#MAT#chr15.prox"\t"chm13#chr15) \
+            <(echo -e HG002#MAT#chr21.prox"\t"chm13#chr21) \
+            <(echo -e HG002#MAT#chr22.prox"\t"chm13#chr22) \
+            <(echo -e HG002#PAT#chr13.prox"\t"chm13#chr13) \
+            <(echo -e HG002#PAT#chr14.prox"\t"chm13#chr14) \
+            <(echo -e HG002#PAT#chr15.prox"\t"chm13#chr15) \
+            <(echo -e HG002#PAT#chr21.prox"\t"chm13#chr21) \
+            <(echo -e HG002#PAT#chr22.prox"\t"chm13#chr22)) | pigz -c -9 > $path_ref_fixed_bed_gz
+    fi;
+  done
+done
 ```
 
 Grounding (applying filters):
