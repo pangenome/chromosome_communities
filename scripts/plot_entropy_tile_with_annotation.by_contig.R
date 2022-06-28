@@ -141,7 +141,7 @@ if (FALSE) {
 
 
 library(scales) # for pretty_breaks()
-p <- ggplot(yy, aes(x=start.pos + (end.pos - start.pos) / 2, y=average_sdi, color=ground.target)) +
+p <- ggplot(yy, aes(x=start.pos, y=average_sdi, color=ground.target)) +
   geom_step() +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0, 0, 0)) +
   scale_y_continuous(limits = c(0, max(2, max(y$average_sdi))), breaks=pretty_breaks()) +
