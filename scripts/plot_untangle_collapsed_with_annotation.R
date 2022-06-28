@@ -26,7 +26,7 @@ d <- pivot_longer(x, chr13:chr22, "chromosome")
 p <- ggplot(d, aes(x=start, y=value, color=chromosome)) +
   geom_step() +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0, 0, 0)) +
-  scale_y_continuous(limits = c(0, max(10, 10)), breaks=pretty_breaks()) +
+  scale_y_continuous(limits = c(0, max(10, max(d$value))), breaks=pretty_breaks()) +
   facet_wrap(~chromosome, scales = "free", ncol=1, labeller = labeller(variable = labels)) +
   theme_bw() +
   theme(
