@@ -49,8 +49,8 @@ p <- ggplot(d, aes(x=start, y=value, color=chromosome)) +
 ) +
   guides(colour = guide_legend(override.aes = list(size=10)))
 #p
-p_all_together <- ggplot(d, aes(x=start, y=value, color=chromosome), alpha=0.5) +
-  geom_step() +
+p_all_together <- ggplot(d, aes(x=start, y=value, color=chromosome)) +
+  geom_step(alpha=0.5) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0, 0, 0)) +
   scale_y_continuous(limits = c(0, max(10, max(d$value))), breaks=pretty_breaks()) +
   #facet_wrap(~chromosome, scales = "free", ncol=1, labeller = labeller(variable = labels)) +
