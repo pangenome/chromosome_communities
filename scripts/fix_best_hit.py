@@ -31,8 +31,12 @@ with gzip.open(path_untangle_tsv_gz, "rt") as f:
             key_2_info_dict[key] = []
         key_2_info_dict[key].append([int(nth_best), float(score), ref_name, line])
 
+
+num_hits_fixed = 0
+num_query_bps_fixed = 0
+
 for key, info_list in key_2_info_dict.items():
-    query_name = key[0]
+    (query_name, query_start, query_end) = key
 
     info_list.sort(key=lambda x: x[0], reverse=False)  # sort by nth.best (rank)
     #print(key, [x[0:3] for x in info_list])
@@ -53,6 +57,9 @@ for key, info_list in key_2_info_dict.items():
 
         # If there are multiple best-hits and there is the grounded target in one of them, and it is not the first one, then fix this
         if len(info_with_max_jaccard_list) > 1 and contig_to_chr[query_name] in targets_with_max_jaccard_set and contig_to_chr[query_name] != info_with_max_jaccard_list[0][2]:
+            num_hits_fixed += 1
+            num_query_bps_fixed += (int(query_end) - int(query_start))
+
             # Find the first case with the target we want (contig_to_chr[query_name])
             i = 0
             for nth_best, jaccard, ref_name, line in info_with_max_jaccard_list:
@@ -81,3 +88,5 @@ for key, info_list in key_2_info_dict.items():
     # print the lines
     for x in info_list:
         print(x[3])
+
+print(f'Fixed {num_hits_fixed} hits covering {num_query_bps_fixed} bps on the queries.', file=sys.stderr)
