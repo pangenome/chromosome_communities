@@ -5,7 +5,7 @@ x_max <- as.numeric(args[8])
 width <- as.numeric(args[9])
 num_chr <- as.numeric(args[10])
 path_annotation <- args[11]
-path_output <- args[12]
+prefix_output <- args[12]
 
 
 # library
@@ -49,7 +49,32 @@ p <- ggplot(d, aes(x=start + (end - start) / 2, y=value, color=chromosome)) +
 ) +
   guides(colour = guide_legend(override.aes = list(size=10)))
 
-
+p_all_together <- ggplot(d, aes(x=start + (end - start) / 2, y=value, color=chromosome, alpha=0.5)) +
+  geom_step() +
+  scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0, 0, 0)) +
+  scale_y_continuous(limits = c(0, max(10, max(d$value))), breaks=pretty_breaks()) +
+  #facet_wrap(~chromosome, scales = "free", ncol=1, labeller = labeller(variable = labels)) +
+  theme_bw() +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    
+    text = element_text(size = 20),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    
+    legend.title = element_text(size = 20),
+    legend.text = element_text(size = 20),
+    legend.position = "top",
+    
+    strip.text.x = element_blank(),
+    strip.text.y = element_blank(),
+    plot.margin = unit(c(0,1,0,5), "cm")
+  ) + labs(
+    x = paste(chr, 'position'),
+    y = paste('count of HPRC contigs\n')
+  ) +
+  guides(colour = guide_legend(override.aes = list(size=10)))
+#p_all_together
 
 library(png)
 library(grid)
@@ -74,13 +99,33 @@ p_with_annotation <- ggpubr::ggarrange(
   common.legend = T,
   nrow = 2
 )
-p_with_annotation
+#p_with_annotation
 
 ggsave(
   plot = p_with_annotation,
-  path_output,
+  paste0(prefix_output, '.separated.pdf'),
   width = width, height = 7 * 4,
   units = "cm",
   dpi = 100, bg = "transparent",
   limitsize = FALSE
 )
+
+
+p_all_together_with_annotation <- ggpubr::ggarrange(
+  ggplotted_img, p_all_together,
+  labels=c('', ''),
+  heights = c(1.8, 1),
+  legend = "right", # legend position,
+  common.legend = T,
+  nrow = 2
+)
+#p_with_annotation
+ggsave(
+  plot = p_all_together_with_annotation,
+  paste0(prefix_output, '.together.pdf'),
+  width = width, height = 7 * 2,
+  units = "cm",
+  dpi = 100, bg = "transparent",
+  limitsize = FALSE
+)
+
