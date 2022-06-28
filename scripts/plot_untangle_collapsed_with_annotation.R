@@ -23,10 +23,10 @@ chr <- paste0('chm13#chr', num_chr)
 x <- x[x$ground.target == chr, ]
 d <- pivot_longer(x, chr13:chr22, "chromosome")
 
-p <- ggplot(d, aes(x=start + (end - start) / 2, y=value, color=chromosome)) +
+p <- ggplot(d, aes(x=start, y=value, color=chromosome)) +
   geom_step() +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0, 0, 0)) +
-  scale_y_continuous(limits = c(0, max(10, max(d$value))), breaks=pretty_breaks()) +
+  scale_y_continuous(limits = c(0, max(10, 10)), breaks=pretty_breaks()) +
   facet_wrap(~chromosome, scales = "free", ncol=1, labeller = labeller(variable = labels)) +
   theme_bw() +
   theme(
@@ -45,11 +45,11 @@ p <- ggplot(d, aes(x=start + (end - start) / 2, y=value, color=chromosome)) +
     plot.margin = unit(c(0,1,0,5), "cm")
   ) + labs(
   x = paste(chr, 'position'),
-  y = paste('count of HPRC contigs\n')
+  y = paste('# contigs\n')
 ) +
   guides(colour = guide_legend(override.aes = list(size=10)))
-
-p_all_together <- ggplot(d, aes(x=start + (end - start) / 2, y=value, color=chromosome, alpha=0.5)) +
+#p
+p_all_together <- ggplot(d, aes(x=start, y=value, color=chromosome), alpha=0.5) +
   geom_step() +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0, 0, 0)) +
   scale_y_continuous(limits = c(0, max(10, max(d$value))), breaks=pretty_breaks()) +
@@ -71,7 +71,7 @@ p_all_together <- ggplot(d, aes(x=start + (end - start) / 2, y=value, color=chro
     plot.margin = unit(c(0,1,0,5), "cm")
   ) + labs(
     x = paste(chr, 'position'),
-    y = paste('count of HPRC contigs\n')
+    y = paste('# contigs\n')
   ) +
   guides(colour = guide_legend(override.aes = list(size=10)))
 #p_all_together
@@ -99,8 +99,6 @@ p_with_annotation <- ggpubr::ggarrange(
   common.legend = T,
   nrow = 2
 )
-#p_with_annotation
-
 ggsave(
   plot = p_with_annotation,
   paste0(prefix_output, '.separated.pdf'),
@@ -119,7 +117,6 @@ p_all_together_with_annotation <- ggpubr::ggarrange(
   common.legend = T,
   nrow = 2
 )
-#p_with_annotation
 ggsave(
   plot = p_all_together_with_annotation,
   paste0(prefix_output, '.together.pdf'),
@@ -128,4 +125,3 @@ ggsave(
   dpi = 100, bg = "transparent",
   limitsize = FALSE
 )
-
