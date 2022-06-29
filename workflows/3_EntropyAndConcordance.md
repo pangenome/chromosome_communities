@@ -38,12 +38,12 @@ for e in 50000; do
       /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.by_contig.pdf \
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.by_contig.merged.pdf
-      #rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.by_contig.pdf
+      rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.by_contig.pdf
       
       /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.by_chromosome.pdf \
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.by_chromosome.merged.pdf
-      #rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.by_chromosome.pdf
+      rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.by_chromosome.pdf
     done
   done
 done
@@ -55,9 +55,6 @@ done
 Compute the concordance between verkko's HG002 and HiFi's HG002:
 
 ```shell
-mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance
-cd /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance
-
 path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.og
 prefix=$(basename $path_input_og .og)
 
@@ -93,6 +90,7 @@ for e in 50000; do
       /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$PREFIX.chr*.pdf \
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$PREFIX.merged.pdf
+      rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$PREFIX.chr*.pdf
     done
   done
 done
@@ -127,6 +125,7 @@ for e in 50000; do
       /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$PREFIX.chr*.pdf \
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$PREFIX.merged.pdf
+      rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$PREFIX.chr*.pdf
     done
   done
 done

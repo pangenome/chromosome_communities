@@ -13,7 +13,7 @@ library(ggforce)
 
 x <- read.delim(path_entropy_tsv)
 
-x[x$shannon_div_index == -1, ]$shannon_div_index = NA
+x[x$shannon_div_index == -1, ]$shannon_div_index <- NA
 
 if (num_chr == 13) {
   colors <- c("#F8766D")

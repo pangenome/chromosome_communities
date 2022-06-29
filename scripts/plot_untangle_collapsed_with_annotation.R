@@ -1,5 +1,5 @@
 args <- commandArgs()
-path_support2_tsv <- args[6]
+path_support_dedup_tsv <- args[6]
 x_min <- as.numeric(args[7])
 x_max <- as.numeric(args[8])
 width <- as.numeric(args[9])
@@ -15,7 +15,7 @@ library(ggsci)
 library(tidyverse)
 library(scales) # for pretty_breaks()
 
-x <- read.delim(path_support2_tsv)
+x <- read.delim(path_support_dedup_tsv)
 colnames(x) <- c("ground.target", "start", "end", "chr13", "chr14", "chr15", "chr21", "chr22")
 
 # Apply filters
