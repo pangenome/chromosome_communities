@@ -43,8 +43,6 @@ p_panels <- c()
 for (num_chr in c(13, 14, 15, 21, 22)) {
   print(num_chr)
 
-  path_annotation <- file.path(dir_annotation, paste0('hgt_genome_euro_chr', num_chr, '_0_25Mbp.png'))
-  
   if (num_chr == 13) {
     colors <- c("#F8766D")
   } else if (num_chr == 14) {
@@ -59,10 +57,8 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
     colors <- c("#000000")
   }
   
-  chr <- paste0('chm13#chr', num_chr)
-  
-  
   # Annotation
+  path_annotation <- file.path(dir_annotation, paste0('hgt_genome_euro_chr', num_chr, '_0_25Mbp.png'))
   img <- readPNG(path_annotation)
   p_annotation <- ggplot() +
     annotation_custom(
@@ -74,6 +70,8 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
     )
   
 
+  chr <- paste0('chm13#chr', num_chr)
+  
   # Apply filters
   s_chr <- s[s$ground.target == chr, ]
   s_chr_long <- pivot_longer(s_chr, chr13:chr22, "chromosome")
@@ -162,6 +160,14 @@ p_figure <- ggpubr::ggarrange(
 ggsave(
   plot = p_figure,
   file.path(path_output, 'Figure4.pdf'),
+  width = width, height = height*5,
+  units = "cm",
+  dpi = 100, bg = "white",
+  limitsize = FALSE
+)
+ggsave(
+  plot = p_figure,
+  file.path(path_output, 'Figure4.png'),
   width = width, height = height*5,
   units = "cm",
   dpi = 100, bg = "white",
