@@ -6,7 +6,7 @@ path_output <- args[9]
 
 x_min <- 0
 x_max <- 25500000
-widt <- 100
+width <- 100
 height <- 32
 
 panel_spacing <- 0
