@@ -52,6 +52,7 @@ p <- ggplot(xx, aes(x=ref_len)) +
   geom_histogram(aes(fill=grounded.target)) +
   #geom_density(alpha=.2, fill="#FF6666") +
   facet_grid(~grounded.target, scales = "free_y", space = "free") +
+  theme_bw() +
   theme(
     plot.title = element_text(hjust = 0.5),
     
@@ -70,8 +71,8 @@ p <- ggplot(xx, aes(x=ref_len)) +
     strip.text.y = element_blank(),
     axis.title.y = element_blank()
   ) +
-  scale_x_continuous(limits = c(0, max_len), expand = c(0, 0)) +
+  scale_x_continuous(limits = c(x_min, max_len), expand = c(0, 0)) +
   scale_fill_manual(name = "Target", values = colors) +
-  labs(x = "Length") 
+  labs(x = "Length")
 
 ggsave(plot = p, path_output, width = width, height = height, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
