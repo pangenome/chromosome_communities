@@ -49,7 +49,7 @@ xx$ref_len <- xx$ref.end - xx$ref.begin
 xx <- xx[xx$ref.end >= x_min && xx$ref.end <= x_max,]
 
 p <- ggplot(xx, aes(x=ref_len)) + 
-  geom_histogram(aes(colour=grounded.target, fill=grounded.target))+
+  geom_histogram(aes(fill=grounded.target)) +
   #geom_density(alpha=.2, fill="#FF6666") +
   facet_grid(~grounded.target, scales = "free_y", space = "free") +
   theme(
@@ -71,12 +71,7 @@ p <- ggplot(xx, aes(x=ref_len)) +
     axis.title.y = element_blank()
   ) +
   scale_x_continuous(limits = c(0, max_len), expand = c(0, 0)) +
-  scale_fill_manual(values = colors) +
-  labs(x = "Length") +
-  guides(
-    fill = guide_legend(title="Target", override.aes = list(size=10))
-  )
-
-
+  scale_fill_manual(name = "Target", values = colors) +
+  labs(x = "Length") 
 
 ggsave(plot = p, path_output, width = width, height = height, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
