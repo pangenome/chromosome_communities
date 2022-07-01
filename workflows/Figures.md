@@ -88,7 +88,7 @@ n=7
 done
 ```
 
-## Figure 13, 14, 15, 16, 17
+## Figure 12, 13, 14, 15, 16
 
 For each chromosome:
 - top: annotation bars;
@@ -103,7 +103,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/SuppFig_Anno
   ~
 ```
 
-## Figure 18
+## Figure 17
 
 For each chromosome, length distribution of the untangled query segments.
 
@@ -117,5 +117,5 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_segme
   $(echo "$e + 15000" | bc) \
   1 1 \
   <(zgrep '^HG002#1\|^HG002#2' -v $path_grounded_pq_touching_reliable_ALL_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
-  ~/SuppFigure18.pdf
+  ~/SuppFigure17.pdf
 ```
