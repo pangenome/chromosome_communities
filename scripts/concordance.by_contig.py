@@ -44,8 +44,8 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
             if group not in ground_2_group_2_query_2_pieces_dict[grounded_target]:
                 ground_2_group_2_query_2_pieces_dict[grounded_target][group] = {}
             if query not in ground_2_group_2_query_2_pieces_dict[grounded_target][group]:
-                ground_2_group_2_query_2_pieces_dict[grounded_target][group][query] = []
-            ground_2_group_2_query_2_pieces_dict[grounded_target][group][query].append((ref_begin, ref_end, target_int))
+                ground_2_group_2_query_2_pieces_dict[grounded_target][group][query] = set()
+            ground_2_group_2_query_2_pieces_dict[grounded_target][group][query].add((ref_begin, ref_end, target_int))
 
 # Scan each group for concordance
 print('\t'.join([

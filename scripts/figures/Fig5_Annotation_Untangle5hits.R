@@ -17,6 +17,9 @@ ref_nth_best <- 1
 library(ggplot2)
 library(ggforce)
 library(tidyverse)
+library(png)
+library(grid)
+library(ggpubr)
 
 query_to_consider <- c()
 query_to_consider[[length(query_to_consider)+1]] <- c(

@@ -24,8 +24,7 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
     f.readline()
 
     for line in f:
-        query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target = line.strip().split(
-            '\t')
+        query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target = line.strip().split('\t')
 
         if query.startswith('HG002#'):
             nth_best = int(nth_best)
@@ -45,8 +44,9 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
             if group not in ground_2_group_2_query_2_pieces_dict[grounded_target]:
                 ground_2_group_2_query_2_pieces_dict[grounded_target][group] = {}
             if query not in ground_2_group_2_query_2_pieces_dict[grounded_target][group]:
-                ground_2_group_2_query_2_pieces_dict[grounded_target][group][query] = []
-            ground_2_group_2_query_2_pieces_dict[grounded_target][group][query].append((ref_begin, ref_end, target_int))
+                ground_2_group_2_query_2_pieces_dict[grounded_target][group][query] = set()
+            ground_2_group_2_query_2_pieces_dict[grounded_target][group][query].add((ref_begin, ref_end, target_int))
+
 
 # Scan each group for concordance
 print('\t'.join([
@@ -95,8 +95,8 @@ for grounded_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_pie
                 last_list = current_list.copy()
                 last_query_list = current_query_list.copy()
                 last_verkko = current_verkko
-            elif last_list != current_list or last_verkko != current_verkko:
-                if len(last_list) > 1 and current_verkko != 0:
+            elif last_list != current_list or last_query_list != current_query_list or last_verkko != current_verkko:
+                if len(last_list) > 0 and current_verkko != 0:
                     print('\t'.join([
                         grounded_target,
                         str(last_pos), str(pos - 1), group,
@@ -109,7 +109,7 @@ for grounded_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_pie
                 last_query_list = current_query_list.copy()
                 last_verkko = current_verkko
 
-        if len(last_list) > 1 and current_verkko != 0:
+        if len(last_list) > 0 and current_verkko != 0:
             print('\t'.join([
                 grounded_target,
                 str(last_pos), str(grounded_target_len - 1), group,
