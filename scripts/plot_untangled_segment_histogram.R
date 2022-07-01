@@ -74,7 +74,7 @@ p <- ggplot(xx, aes(x=ref_len)) +
   scale_fill_manual(values = colors) +
   labs(x = "Length") +
   guides(
-    colour = guide_legend(title="Target", override.aes = list(size=10))
+    fill = guide_legend(title="Target", override.aes = list(size=10))
   )
 
 
