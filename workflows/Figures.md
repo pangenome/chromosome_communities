@@ -33,7 +33,7 @@ done
 
 ## Supplementary figures
 
-## Figure 3, 4, 5, 6, 7
+## Figure 2, 3, 4, 5, 6
 
 For each chromosome:
 - top: annotation bars;
@@ -42,7 +42,7 @@ For each chromosome:
 ```shell
 path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 
-n=3
+n=2
 (seq 13 15; seq 21 22) | while read i; do
     echo "chr$i"
         
@@ -61,7 +61,7 @@ n=3
 done
 ```
 
-## Figure 8, 9, 10, 11, 12
+## Figure 7, 8, 9, 10, 11
 
 For each chromosome:
 - top: annotation bars;
@@ -70,7 +70,7 @@ For each chromosome:
 ```shell
 path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 
-n=8
+n=7
 (seq 13 15; seq 21 22) | while read i; do
     echo "chr$i"
     
