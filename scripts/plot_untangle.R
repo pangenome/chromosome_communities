@@ -14,7 +14,7 @@ if (length(unique(x$target)) > 5) {
   colors <- c(colors, "#FF0000", "#222222", "#0000FF")
 }
 
-p <- ggplot(x, aes(x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin - 200, y = query, fill = target)) +
+p <- ggplot(x, aes(x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin, y = query, fill = target)) +
   geom_tile() +
   ggtitle(title) +
   theme(

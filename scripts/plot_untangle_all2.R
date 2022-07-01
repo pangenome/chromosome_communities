@@ -29,7 +29,7 @@ if (length(unique(x$target)) > 5) {
 p <- ggplot(
     x,
     aes(
-      x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin - 200, y = query, fill = target#, alpha=self.coverage
+      x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin, y = query, fill = target#, alpha=self.coverage
     )
   ) +
   geom_tile() +

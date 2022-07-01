@@ -43,7 +43,7 @@ yy <- y[y$ground.target == chr,]
 p <- ggplot(xx[!is.na(xx$shannon_div_index),],
     aes(
         x = start.pos + (end.pos - start.pos) / 2,
-        width = end.pos - start.pos - 200,
+        width = end.pos - start.pos,
         y = contig, alpha=shannon_div_index,
         fill = ground.target
     )
@@ -109,7 +109,7 @@ if (FALSE) {
   p <- ggplot(yy[!is.na(yy$average_sdi),],
               aes(
                 x = start.pos + (end.pos - start.pos) / 2,
-                width = end.pos - start.pos - 200,
+                width = end.pos - start.pos,
                 y = ground.target, alpha=average_sdi,
                 fill = ground.target
               )

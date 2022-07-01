@@ -53,7 +53,7 @@ xx <- xx %>%
 p <- ggplot(
   xx,
   aes(
-    x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin - 200,
+    x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin ,
     y = ordered(query.hacked, levels = rev(unique(query.hacked))),
     fill = target,
     alpha = jaccard

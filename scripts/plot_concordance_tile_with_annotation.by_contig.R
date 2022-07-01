@@ -42,7 +42,7 @@ p <- ggplot(
   xx,
   aes(
     x = start.pos + (end.pos - start.pos) / 2,
-    width = end.pos - start.pos - 200,
+    width = end.pos - start.pos,
     y = contig,
     alpha= concordance, fill = grounded.target)
 ) +

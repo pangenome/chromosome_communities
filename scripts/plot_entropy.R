@@ -14,7 +14,7 @@ for(ground in unique(x$ground.target)) {
 
   p <- ggplot(
       x_sub,
-      aes(x = start + (end - start) / 2, width = end - start - 200, y = shannon_div_index)
+      aes(x = start + (end - start) / 2, width = end - start, y = shannon_div_index)
     ) +
     facet_col(~query, scales = "free_y", space = "free", labeller = labeller(variable = labels)) +
     geom_point() +
@@ -26,7 +26,7 @@ for(ground in unique(x$ground.target)) {
 }
 
 #query	ground.target	start	end	shannon_div_index
-#p <- ggplot(x, aes(x = start + (end - start) / 2, width = end - start - 200, y = shannon_div_index)) +
+#p <- ggplot(x, aes(x = start + (end - start) / 2, width = end - start, y = shannon_div_index)) +
 #  facet_grid(query~ground.target) +
 #  geom_point() +
 #  ggtitle(title)

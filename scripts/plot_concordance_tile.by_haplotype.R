@@ -15,7 +15,7 @@ p <- ggplot(
   x,
   aes(
     x = start.pos + (end.pos - start.pos) / 2,
-    width = end.pos - start.pos - 200,
+    width = end.pos - start.pos,
     y = haplotype,
     alpha= num.different.targets, fill = grounded.target)
   ) +

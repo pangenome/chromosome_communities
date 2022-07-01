@@ -126,7 +126,7 @@ for (i in seq_along(chromosomes)){
     xx,
     aes(
       x = ref.begin + (ref.end - ref.begin) / 2,
-      width = ref.end - ref.begin - 200,
+      width = ref.end - ref.begin,
       y = ordered(query.hacked, levels = rev(unique(query.hacked))),
       fill = target,
       alpha = jaccard

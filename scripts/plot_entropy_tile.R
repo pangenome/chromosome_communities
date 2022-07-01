@@ -11,7 +11,7 @@ x <- read.delim(path_entropy_tsv)
 
 x <- x[x$shannon_div_index != -1, ]
 
-p <- ggplot(x, aes(x = start + (end - start) / 2, width = end - start - 200, y = query, alpha=shannon_div_index, fill = ground.target)) +
+p <- ggplot(x, aes(x = start + (end - start) / 2, width = end - start, y = query, alpha=shannon_div_index, fill = ground.target)) +
   geom_tile() +
   ggtitle(title) +
   facet_col(~ground.target, scales = "free_y", space = "free", labeller = labeller(variable = labels)) +
