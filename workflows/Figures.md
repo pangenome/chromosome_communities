@@ -102,3 +102,20 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/SuppFig_Anno
   /lizardfs/guarracino/chromosome_communities/data/annotation/ \
   ~
 ```
+
+## Figure 18
+
+For each chromosome, length distribution of the untangled query segments.
+
+```shell
+path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_segment_histogram.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  0 25000000 \
+  60 15 \
+  $(echo "$e + 15000" | bc) \
+  1 1 \
+  <(zgrep '^HG002#1\|^HG002#2' -v $path_grounded_pq_touching_reliable_ALL_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+  ~/SuppFigure18.pdf
+```

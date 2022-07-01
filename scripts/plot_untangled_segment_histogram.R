@@ -41,14 +41,12 @@ xx$query.hacked <- paste(xx$query, xx$nth.best, sep = "-")
 xx <- xx %>%
   arrange(query.hacked)
 
-
-
 # Before as.character, then as.numeric, else the numbers will correspond each factor level (1, 2) rather than the levels themselves!
 xx$ref.end <- as.numeric(as.character(xx$ref.end))
 xx$ref.begin <- as.numeric(as.character(xx$ref.begin))
 xx$ref_len <- xx$ref.end - xx$ref.begin
 
-xx <- xx[xx$ref.end <= 25000000,]
+xx <- xx[xx$ref.end >= x_min && xx$ref.end <= x_max,]
 
 p <- ggplot(xx, aes(x=ref_len)) + 
   geom_histogram(aes(colour=grounded.target, fill=grounded.target))+
@@ -74,6 +72,11 @@ p <- ggplot(xx, aes(x=ref_len)) +
   ) +
   scale_x_continuous(limits = c(0, max_len), expand = c(0, 0)) +
   scale_fill_manual(values = colors) +
-  labs(x = "Length")
-p
+  labs(x = "Length") +
+  guides(
+    colour = guide_legend(title="Target", override.aes = list(size=10))
+  )
+
+
+
 ggsave(plot = p, path_output, width = width, height = height, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
