@@ -76,7 +76,6 @@ for grounded_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_pie
         last_list = None
         last_query_list = None
         last_verkko = 0
-        current_verkko = 0
         for pos in range(grounded_target_len):
             current_list = []
             current_query_list = []
@@ -96,7 +95,7 @@ for grounded_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_pie
                 last_query_list = current_query_list.copy()
                 last_verkko = current_verkko
             elif last_list != current_list or last_query_list != current_query_list or last_verkko != current_verkko:
-                if len(last_list) > 0 and current_verkko != 0:
+                if len(last_list) > 1 and last_verkko != 0:
                     print('\t'.join([
                         grounded_target,
                         str(last_pos), str(pos - 1), group,
@@ -109,7 +108,7 @@ for grounded_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_pie
                 last_query_list = current_query_list.copy()
                 last_verkko = current_verkko
 
-        if len(last_list) > 0 and current_verkko != 0:
+        if len(last_list) > 1 and last_verkko != 0:
             print('\t'.join([
                 grounded_target,
                 str(last_pos), str(grounded_target_len - 1), group,
