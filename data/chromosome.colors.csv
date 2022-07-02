@@ -65,10 +65,10 @@ chr8_q,#D3D3D3
 chr9_p,#D3D3D3
 chr9_pq,#D3D3D3
 chr9_q,#D3D3D3
-chrX_p,#D3D3D3
-chrX_pq,#D3D3D3
-chrX_q,#D3D3D3
-chrY_p,#D3D3D3
-chrY_pq,#D3D3D3
-chrY_q,#D3D3D3
+chrX_p,#9590FF
+chrX_pq,#9590FF
+chrX_q,#9590FF
+chrY_p,#9590FF
+chrY_pq,#9590FF
+chrY_q,#9590FF
 unmapped,#D3D3D3

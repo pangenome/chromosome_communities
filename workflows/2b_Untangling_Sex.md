@@ -82,10 +82,10 @@ for e in 50000  ; do
       
       path_ref_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz
       if [[ ! -s ${path_ref_bed_gz} ]]; then
-        path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#ACRO.e$e.m$m.j0.n100.cut_points.txt
+        path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.cut_points.txt
         
-        sbatch -p workers -c 8 --job-name acrountangle --wrap "\time -v $RUN_ODGI untangle -t 8 -P -i $path_input_og -r $ref -e $e -m $m --cut-points-input $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_ref_bed_gz"
-      fi;
+        sbatch -p workers -c 8 --job-name sexuntangle --wrap "\time -v $RUN_ODGI untangle -t 8 -P -i $path_input_og -r $ref -e $e -m $m --cut-points-input $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_ref_bed_gz"
+      fi
     done
   done
 done
@@ -94,71 +94,85 @@ done
 # Grounding
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded
 
-### TO UPDATE ###
-for refpattern in HG002; do
-  path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
+for e in 50000  ; do
+  for m in 1000  ; do
+    cat $path_targets_txt | while read ref; do            
+      path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.tsv.gz
+            
+      if [[ ! -s ${path_grounded_tsv_gz} ]]; then
+        echo "-e $e -m $m $ref"
 
-  for e in 5000 50000 100000; do
-    for m in 500 1000 10000; do
-      for j in 0 0.8; do
-        j_str=$(echo $j | sed 's/\.//g')
-        (seq 1 5; seq 10 10 50) | while read n; do 
-          echo "-e $e -m $m -j $j -n $n"
-                
-          cat $path_targets_txt | while read ref; do
-            echo -e "\t"$ref
-
-            path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz
-            if [[ ! -s ${path_grounded_tsv_gz} ]]; then
-              path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$refpattern#SEX.e$e.m$m.bed.gz
-              path_ref_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz
-              
-              # Grounding
-              ( echo query query.begin query.end target target.begin target.end jaccard strand self.coverage ref ref.begin ref.end | tr ' ' '\t'
-                join \
-                  <(zcat $path_bed_gz | awk '{ print $1"_"$2, $0 }' | tr ' ' '\t' | sort -k 1,1) \
-                  <(zcat $path_ref_bed_gz | awk -v j=$j -v n=$n '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) | \
-                tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -9,14-16 ) | tr ' ' '\t' | pigz -c > x.tsv.gz
-              
-              # Contigs overlapping (or close at least 100kbps to) a PAR
-              # Note that chrX PAR is from chm13, not HG002
-              ref_chr=$(echo $ref | rev | cut -f 1 -d '#' | rev)
-              bedtools intersect \
-                -a <(zcat x.tsv.gz | awk -v OFS="\t" '{print $10,$11,$12,$1, "", "+"}' | grep query -v | bedtools sort) \
-                -b <(grep $ref_chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed |\
-                  bedtools sort |\
-                  bedtools slop -b 100000 -g /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.sizes |\
-                  awk -v OFS='\t' -v ref=$ref '{print(ref,$2,$3)}') | \
-                #awk '$3-$2+1>=100000' | \
-                cut -f 4 | \
-                #Remove references to avoid grepping everything later (with zgrep -f)
-                grep -v chr |\
-                sort | uniq > $ref.tmp.txt
-     
-              # Add grounded.target column, re-add the references, and add annotation
-              cat \
-                <(zcat x.tsv.gz | head -n 1 | awk -v OFS='\t' '{print $0, "grounded.target"}') \
-                <(zgrep x.tsv.gz -f $ref.tmp.txt | awk -v OFS='\t' -v ref=$ref '{print $0, ref}') \
-                <(zcat x.tsv.gz | awk -v OFS='\t' -v ref=$ref '$1 ~ /chr/ { print $0, ref}' ) \
-                <(grep $ref_chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.approximate.bed | \
-                  awk -v OFS='\t' -v ref=$ref '{print $1"#"$4,".",".",ref,".",".",".",".",".",".",$2,$3, ref}') |\
-                pigz -c > $path_grounded_tsv_gz
-
-              rm x.tsv.gz
-            fi;
-          done
-        done
-      done
+        # Grounding
+        ( echo query query.begin query.end target target.begin target.end jaccard strand self.coverage nth.best ref ref.begin ref.end ref.jaccard ref.nth.best | tr ' ' '\t'
+          join \
+            <(zcat /lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.bed.gz | awk -v j=0 -v n=5 '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) \
+            <(zcat /lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz | awk -v j=0 -v n=10 '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) | \
+          tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -10,14-17,20 | sort -k 1,3 -k 7,7nr -k 10,10n -k 14,14nr -k 15,15n ) | tr ' ' '\t' | pigz -c > x.tsv.gz
+                    
+        # Contigs overlapping (or close at least 100kbps to) a PAR
+        ref_chr=$(echo $ref | sed 's/chm13#//')
+        bedtools intersect \
+          -a <(zcat x.tsv.gz | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
+          -b <(grep $ref_chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed |\
+            bedtools sort |\
+            bedtools slop -b 100000 -g /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.sizes |\
+            awk -v OFS='\t' -v ref=$ref '{print(ref,$2,$3)}') | \
+          #awk '$3-$2+1>=100000' | \
+          cut -f 4 | \
+          #Remove references to avoid grepping everything later (with zgrep -f)
+          grep -v chr |\
+          sort | uniq > $ref.tmp.txt
+           
+        # Add grounded.target column, re-add the references, and add annotation
+        cat \
+          <(zcat x.tsv.gz | head -n 1 | awk -v OFS='\t' '{print $0, "grounded.target"}') \
+          <(zgrep x.tsv.gz -f $ref.tmp.txt | awk -v OFS='\t' -v ref=$ref '{print $0, ref}') \
+          <(zcat x.tsv.gz | awk -v OFS='\t' -v ref=$ref '$1 ~ /chr/ { print $0, ref}' ) \
+          <(grep $ref_chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed | \
+            awk -v OFS='\t' -v ref=$ref '{print "chm13#"$1,".",".",$1,".",".","1","+","1","1",ref,$2,$3,"1","1",ref}') |\
+          pigz -c -9 > $path_grounded_tsv_gz
+        rm x.tsv.gz
+      fi;
     done
   done
 done
 ```
 
+
 Plot:
 
 ```shell
+for e in 50000  ; do
+  for m in 1000  ; do
+    for refn in 1 10; do
+      (echo X; echo Y) | while read i; do      
+        echo "-e $e -m $m -refn $refn chr$i"
+    
+        path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr$i.e$e.m$m.grounded.tsv.gz
+        PREFIX=$(basename $path_grounded_tsv_gz .tsv.gz);
+        
+        Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
+          $path_grounded_tsv_gz \
+          0 155000000 \
+          91 \
+          0 \
+          1 $refn \
+          $i \
+          <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+          /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.pdf
+      done
+      
+      # Merge chromosomes's PDF files
+      /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+        /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.n1.nref${refn}.pdf \
+        /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chrSEX.e$e.m$m.grounded.pq_touching.reliable.n1.nref${refn}.merged.pdf
+      #rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.n1.nref${refn}.pdf
+    done
+  done
+done
+
 for refpattern in HG002; do
-  path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
+  path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle_sex/$refpattern.target_paths.txt
 
   for e in 5000 50000 100000; do
     for m in 500 1000 10000; do
@@ -167,12 +181,12 @@ for refpattern in HG002; do
         (seq 1 5; seq 10 10 50) | while read n; do 
           echo "-e $e -m $m -j $j -n $n"
     
-          path_grounded_all_references_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$refpattern#chrSEX.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz
+          path_grounded_all_references_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$refpattern#chrSEX.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz
           if [[ ! -s ${path_grounded_all_references_tsv_gz} ]]; then
             # Merge single reference results
             cat \
-              <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$refpattern*.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz | head -n 1) \
-              <(zcat /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$refpattern*.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz | grep query -v) |\
+              <(zcat /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$refpattern*.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz | head -n 1) \
+              <(zcat /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$refpattern*.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz | grep query -v) |\
               pigz -c > x.tsv.gz
             # Rename after to avoid getting itself with the previous '*' expansion
             mv x.tsv.gz $path_grounded_all_references_tsv_gz

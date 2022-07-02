@@ -397,6 +397,7 @@ grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.p
 
 
 RUN_ODGI=/home/guarracino/tools/odgi/bin/odgi-e2de6cbca0169b0720dca0c668743399305e92bd
+RUN_ODGI=/home/guarracino/tools/odgi/bin/odgi-jaccard-gt-1
 
 # Chosen
 path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.og
@@ -409,9 +410,9 @@ prefix=$(basename $path_input_og .og)
 ```shell
 # All references and emit cut points
 for e in 50000; do
-  for m in 1000 2000 5000 10000 20000; do
-    path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.j0.n100.bed.gz
-    path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.j0.n100.cut_points.txt
+  for m in 1000; do
+    path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle_jaccard_gt_1/$prefix.untangle.chm13#ACRO.e$e.m$m.j0.n100.bed.gz
+    path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle_jaccard_gt_1/$prefix.untangle.chm13#ACRO.e$e.m$m.j0.n100.cut_points.txt
     
     if [[ ! -s ${path_cut_points_txt} ]]; then
       echo "-e $e -m $m"
@@ -422,17 +423,17 @@ done
 
 # Single reference by using the same cut points
 for e in 50000; do
-  for m in 1000 2000 5000 10000 20000; do
+  for m in 1000; do
     echo "-e $e -m $m"
       
     cat $path_targets_txt | while read ref; do
       echo $ref
       
-      path_ref_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz
+      path_ref_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle_jaccard_gt_1/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz
       if [[ ! -s ${path_ref_bed_gz} ]]; then
-        path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.j0.n100.cut_points.txt
+        path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle_jaccard_gt_1/$prefix.untangle.chm13#ACRO.e$e.m$m.j0.n100.cut_points.txt
         
-        sbatch -p workers -c 9 --job-name acrountangle --wrap "\time -v $RUN_ODGI untangle -t 10 -P -i $path_input_og -r $ref -e $e -m $m --cut-points-input $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_ref_bed_gz"
+        sbatch -p workers -c 24 --job-name acrountangle --wrap "\time -v $RUN_ODGI untangle -t 24 -P -i $path_input_og -r $ref -e $e -m $m --cut-points-input $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_ref_bed_gz"
       fi;
     done
   done
@@ -440,7 +441,7 @@ done
 
 # Fix best hits (if there are multiple best hits, put as first the chromosome of origin of the contig)
 for e in 50000; do
-  for m in 1000 2000 ; do
+  for m in 1000 ; do
 
     path_ref_fixed_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.j0.n100.fixed.bed.gz
     if [[ ! -s ${path_ref_fixed_bed_gz} ]]; then
@@ -802,7 +803,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   $i \
   <(echo chm13#chr13 grch38#chr13 HG002#MAT#chr13.prox HG002#PAT#chr13.prox HG01361#2#JAGYYW010000010.1 HG01978#1#JAGYVS010000056.1 HG02486#1#JAGYVM010000043.1 HG03540#2#JAGYVX010000153.1 | tr ' ' '\n') \
   /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.subset.pdf
+  ~/$PREFIX.n1.subset.pdf
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
   $path_grounded_pq_touching_reliable_tsv_gz \
   0 25000000 \
@@ -836,7 +837,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   $i \
   <(echo chm13#chr14 grch38#chr14 HG002#MAT#chr14.prox HG002#PAT#chr14.prox HG00735#1#JAHBCH010000039.1 HG00741#2#JAHALX010000038.1 HG01978#1#JAGYVS010000055.1 HG02630#1#JAHAOQ010000067.1 | tr ' ' '\n') \
   /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.subset.pdf
+  ~/$PREFIX.n1.subset.pdf
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
   $path_grounded_pq_touching_reliable_tsv_gz \
   0 25000000 \
@@ -870,7 +871,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   $i \
   <(echo chm13#chr15 grch38#chr15 HG002#MAT#chr15.prox HG002#PAT#chr15.prox HG00741#2#JAHALX010000004.1 HG02486#2#JAGYVL010000058.1 HG03486#2#JAHEOP010000088.1 NA18906#2#JAHEON010000012.1 | tr ' ' '\n') \
   /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.subset.pdf
+  ~/$PREFIX.n1.subset.pdf
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
   $path_grounded_pq_touching_reliable_tsv_gz \
   0 25000000 \
@@ -904,7 +905,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   $i \
   <(echo chm13#chr21 grch38#chr21 HG002#MAT#chr21.prox HG002#PAT#chr21.prox HG00735#2#JAHBCG010000066.1 HG02886#1#JAHAOU010000106.1 NA18906#1#JAHEOO010000072.1 NA19240#2#JAHEOL010000065.1 | tr ' ' '\n') \
   /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.subset.pdf
+  ~/$PREFIX.n1.subset.pdf
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
   $path_grounded_pq_touching_reliable_tsv_gz \
   0 25000000 \
@@ -928,7 +929,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   $i \
   <(echo chm13#chr22 grch38#chr22 HG002#MAT#chr22.prox HG002#PAT#chr22.prox HG00735#1#JAHBCH010000040.1 HG01361#1#JAGYYX010000045.1 HG02055#1#JAHEPK010000087.1 HG03098#1#JAHEPM010000147.1 | tr ' ' '\n') \
   /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.subset.pdf
+  ~/$PREFIX.n1.subset.pdf
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
   $path_grounded_pq_touching_reliable_tsv_gz \
   0 25000000 \

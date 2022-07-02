@@ -142,6 +142,15 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
     nrow = 3
   )
   
+  #ggsave(
+  #  plot = p_panel,
+  #  file.path(path_output, paste0(num_chr, '.png')),
+  #  width = width, height = height,
+  #  units = "cm",
+  #  dpi = 100, bg = "white",
+  #  limitsize = FALSE
+  #)
+  
   p_panels[[length(p_panels)+1]] <- p_panel
 }
 

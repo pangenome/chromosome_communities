@@ -171,6 +171,15 @@ for (i in seq_along(chromosomes)){
     common.legend = T,
     nrow = 2
   )
+  
+  #ggsave(
+  #  plot = p_panel,
+  #  file.path(path_output, paste0(num_chr, '.png')),
+  #  width = width*1, height = height,
+  #  units = "cm",
+  #  dpi = 100, bg = "white",
+  #  limitsize = FALSE
+  #)
 
   p_panels[[length(p_panels)+1]] <- p_panel
 }
