@@ -185,7 +185,9 @@ for (i in seq_along(chromosomes)){
   
   xx <- xx %>%
     arrange(query.hacked)
-  
+
+  xx[xx$jaccard > 1,]$jaccard <- 1
+
   p_untangle <- ggplot(
     xx,
     aes(
