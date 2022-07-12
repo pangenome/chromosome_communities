@@ -28,6 +28,7 @@ for i, filename in enumerate(sys.argv[1:]):
     with open(filename) as f:
         for line in f:
             label = line.strip().split('#')[-1].split('_')[0]
+            label = label.replace('unmapped', 'not.partitioned')
             labels_set.add(label)
             community_to_labels_dict[i].append(label)
 
