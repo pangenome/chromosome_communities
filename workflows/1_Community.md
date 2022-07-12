@@ -7,41 +7,108 @@ We first apply all-to-all approximate mapping:
 ```shell
 RUN_WFMASH=/home/guarracino/tools/wfmash/build/bin/wfmash-ad8aebae1be96847839778af534866bc9545adb9
 
-# Fixed mapper
-RUN_WFMASH=/home/guarracino/tools/wfmash/build/bin/wfmash-19234a4a153ea3f3acce6f4ac192afc70bbb7fda
+mkdir -p /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank
 
-mkdir -p /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank_fixed
+# Mappings with chm13v2 included
+PATH_HPRCY1_REFS_FA_GZ=/lizardfs/guarracino/chromosome_communities/assemblies/HPRCy1v2genbank+chm13v2.fa.gz
+
+w=800
+for s in 20k; do
+  for ln in 5; do
+    s_no_k=${s::-1}
+    l_no_k=$(echo $s_no_k '*' $ln | bc)
+    l=${l_no_k}k
+    
+    for p in 98; do    
+      if [[ $s == "100k" && $p == "98" ]]; then
+        w=20000
+      elif [[ $s == "100k" && $p == "95" ]]; then
+        w=10000
+      elif [[ $s == "50k" && $p == "98" ]]; then
+        w=10000
+      elif [[ $s == "50k" && $p == "95" ]]; then
+        w=5000
+      elif [[ $s == "20k" && $p == "98" ]]; then
+        w=4000
+      elif [[ $s == "20k" && $p == "95" ]]; then
+        w=2000
+      fi
+    
+      echo $s $p $l $w
+      
+      # There are 95 haplotypes, so the max `-n` should be equal to `95 - 1`
+      # More stringent runs (`-n` < 94) are for visualization
+      for n in 94 5 3; do
+        sbatch -p workers -c 48 --job-name all-vs-all --wrap "hostname; cd /scratch; \time -v $RUN_WFMASH $PATH_HPRCY1_REFS_FA_GZ -t 48 -Y '#' -p $p -s $s -l $l -n $n -H 0.001 -w $w -m > HPRCy1v2genbank+chm13v2.self.s$s.l$l.p$p.n$n.h0001.paf && mv HPRCy1v2genbank+chm13v2.self.s$s.l$l.p$p.n$n.h0001.paf /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank/"
+      done
+    done
+  done
+done
 
 # Mappings with references included
 PATH_HPRCY1_REFS_FA_GZ=/lizardfs/guarracino/chromosome_communities/assemblies/HPRCy1v2genbank+refs.fa.gz
-for s in 100k; do
-  for p in 98 95; do
-    # There are 96 haplotypes, so the max `-n` should be equal to `96 - 1`
-    # More stringent mappings (`-n` < 95) are for visualization
-    for n in 95 5 3; do
-      sbatch -p workers -c 48 --job-name all-vs-all --wrap "hostname; cd /scratch; \time -v $RUN_WFMASH $PATH_HPRCY1_REFS_FA_GZ -t 48 -Y '#' -p $p -s $s -n $n -H 0.001 -w 1250 -m > HPRCy1v2genbank+refs.self.s$s.p$p.n$n.h0001.paf && mv HPRCy1v2genbank+refs.self.s$s.p$p.n$n.h0001.paf /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank_fixed/"
+
+w=800
+for s in 20k; do
+  for ln in 5; do
+    s_no_k=${s::-1}
+    l_no_k=$(echo $s_no_k '*' $ln | bc)
+    l=${l_no_k}k
+    
+    for p in 98; do    
+      if [[ $s == "100k" && $p == "98" ]]; then
+        w=20000
+      elif [[ $s == "100k" && $p == "95" ]]; then
+        w=10000
+      elif [[ $s == "50k" && $p == "98" ]]; then
+        w=10000
+      elif [[ $s == "50k" && $p == "95" ]]; then
+        w=5000
+      elif [[ $s == "20k" && $p == "98" ]]; then
+        w=4000
+      elif [[ $s == "20k" && $p == "95" ]]; then
+        w=2000
+      fi
+    
+      echo $s $p $l $w
+    
+      for n in 95 5 3; do
+        sbatch -p workers -c 48 --job-name all-vs-all --wrap "hostname; cd /scratch; \time -v $RUN_WFMASH $PATH_HPRCY1_REFS_FA_GZ -t 48 -Y '#' -p $p -s $s -l $l -n $n -H 0.001 -w $w -m > HPRCy1v2genbank+refs.self.s$s.l$l.p$p.n$n.h0001.paf && mv HPRCy1v2genbank+refs.self.s$s.l$l.p$p.n$n.h0001.paf /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank/"
+      done
     done
   done
 done
-for s in 50k; do
-  for p in 98 95; do
-    # There are 96 haplotypes, so the max `-n` should be equal to `96 - 1`
-    # More stringent mappings (`-n` < 95) are for visualization
-    for n in 95 5 3; do
-      sbatch -p workers -c 48 --job-name all-vs-all --wrap "hostname; cd /scratch; \time -v $RUN_WFMASH $PATH_HPRCY1_REFS_FA_GZ -t 48 -Y '#' -p $p -s $s -n $n -H 0.001 -w 625 -m > HPRCy1v2genbank+refs.self.s$s.p$p.n$n.h0001.paf && mv HPRCy1v2genbank+refs.self.s$s.p$p.n$n.h0001.paf /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank_fixed/"
-    done
-  done
-done
+
 
 # Mappings without references included
 PATH_HPRCY1_FA_GZ=/lizardfs/guarracino/chromosome_communities/assemblies/HPRCy1v2genbank.fa.gz
 
-for s in 100k; do
-  for p in 95 98; do
-    # There are 96 haplotypes, so the max `-n` should be equal to `96 - 1`
-    # More stringent mappings (`-n` < 95) are for visualization
-    for n in 93 5 3; do
-      sbatch -p workers -c 48 --job-name all-vs-all --wrap "hostname; cd /scratch; \time -v $RUN_WFMASH $PATH_HPRCY1_FA_GZ -t 48 -Y '#' -p $p -s $s -n $n -H 0.001 -m > HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.paf && mv HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.paf /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank/"
+w=800
+for s in 100k 50k 20k; do
+  for ln in 3 5; do
+    s_no_k=${s::-1}
+    l_no_k=$(echo $s_no_k '*' $ln | bc)
+    l=${l_no_k}k
+    
+    for p in 98 95; do    
+      if [[ $s == "100k" && $p == "98" ]]; then
+        w=20000
+      elif [[ $s == "100k" && $p == "95" ]]; then
+        w=10000
+      elif [[ $s == "50k" && $p == "98" ]]; then
+        w=10000
+      elif [[ $s == "50k" && $p == "95" ]]; then
+        w=5000
+      elif [[ $s == "20k" && $p == "98" ]]; then
+        w=4000
+      elif [[ $s == "20k" && $p == "95" ]]; then
+        w=2000
+      fi
+    
+      echo $s $p $l $w
+      for n in 93; do
+        sbatch -p workers -c 48 --job-name all-vs-all --wrap "hostname; cd /scratch; \time -v $RUN_WFMASH $PATH_HPRCY1_FA_GZ -t 48 -Y '#' -p $p -s $s -l $l -n $n -H 0.001 -w $w -m > HPRCy1v2genbank.self.s$s.l$l.p$p.n$n.h0001.paf && mv HPRCy1v2genbank.self.s$s.l$l.p$p.n$n.h0001.paf /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank/"
+      done
     done
   done
 done
@@ -52,17 +119,23 @@ Then, we collect mappings between sequences at least `l` kbp long:
 ```shell
 cd /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank/
 
-for s in 10k 50k; do
-  for p in 98 95; do
-    for n in 95 93 5 3; do
-      for l in 1000000; do
-        for prefix in HPRCy1v2genbank+refs HPRCy1v2genbank; do
-        #for prefix in HPRCy1v2genbank+refs; do
-        #for prefix in HPRCy1v2genbank; do
-          if [[ -s $prefix.self.s$s.p$p.n$n.h0001.paf && ! -s $prefix.self.s$s.p$p.n$n.h0001.l$l.paf ]]; then
-            echo $s $p $n $l $prefix
-            awk -v len=$l '$2 >= len && $7 >= len' $prefix.self.s$s.p$p.n$n.h0001.paf > $prefix.self.s$s.p$p.n$n.h0001.l$l.paf
-          fi
+for s in 20k; do
+  for ln in 5; do
+    s_no_k=${s::-1}
+    l_no_k=$(echo $s_no_k '*' $ln | bc)
+    l=${l_no_k}k
+    
+    for p in 98; do  
+      for n in 94 93 5 3; do
+        for L in 1000000; do
+          for prefix in HPRCy1v2genbank+chm13v2 HPRCy1v2genbank; do
+          #for prefix in HPRCy1v2genbank+chm13v2; do
+          #for prefix in HPRCy1v2genbank; do
+            if [[ -s $prefix.self.s$s.l$l.p$p.n$n.h0001.paf && ! -s $prefix.self.s$s.l$l.p$p.n$n.h0001.l$L.paf ]]; then
+              echo $s $p $n $l $prefix
+              awk -v len=$L '$2 >= len && $7 >= len' $prefix.self.s$s.l$l.p$p.n$n.h0001.paf > $prefix.self.s$s.l$l.p$p.n$n.h0001.l$L.paf
+            fi
+          done
         done
       done
     done
@@ -74,17 +147,23 @@ To evaluate chromosome communities, we build an "alignment graph" from our mappi
 `pggb` repository. In this graph, nodes are contigs and edges are mappings between them.
 
 ```shell
-for s in 10k 50k; do
-  for p in 98 95; do
-    for n in 95 93 5 3; do
-      for l in 1000000; do
-        for prefix in HPRCy1v2genbank+refs HPRCy1v2genbank; do
-        #for prefix in HPRCy1v2genbank+refs; do
-        #for prefix in HPRCy1v2genbank; do
-          if [[ -s $prefix.self.s$s.p$p.n$n.h0001.l$l.paf && ! -s $prefix.self.s$s.p$p.n$n.h0001.l$l.paf.edges.list.txt ]]; then
-            echo $s $p $n $l $prefix
-            python3 /home/guarracino/tools/pggb/scripts/paf2net.py -p $prefix.self.s$s.p$p.n$n.h0001.l$l.paf
-          fi
+for s in 20k; do
+  for ln in 5; do
+    s_no_k=${s::-1}
+    l_no_k=$(echo $s_no_k '*' $ln | bc)
+    l=${l_no_k}k
+    
+    for p in 98; do  
+      for n in 94 93 5 3; do
+        for L in 1000000; do
+          for prefix in HPRCy1v2genbank+chm13v2 HPRCy1v2genbank; do
+          #for prefix in HPRCy1v2genbank+chm13v2; do
+          #for prefix in HPRCy1v2genbank; do
+            if [[ -s $prefix.self.s$s.l$l.p$p.n$n.h0001.l$L.paf && ! -s $prefix.self.s$s.l$l.p$p.n$n.h0001.l$L.paf.edges.list.txt ]]; then
+              echo $s $l $p $n $L $prefix
+              python3 /home/guarracino/tools/pggb/scripts/paf2net.py -p $prefix.self.s$s.l$l.p$p.n$n.h0001.l$L.paf
+            fi
+          done
         done
       done
     done
@@ -100,35 +179,67 @@ Then we obtain the ``Leiden`` communities:
 #  cut -f 1 /lizardfs/erikg/HPRC/year1v2genbank/parts/chr$i.pan.fa.fai | grep chr -v | grep MT -v | awk -v OFS='\t' -v chr=chr$i '{print($0,chr)}' >> contig2chr.tsv
 #done
 
-for s in 10k 50k; do
-  for p in 98 95; do
-    for n in 95 93 5 3; do
-      for l in 1000000; do
-        for prefix in HPRCy1v2genbank+refs HPRCy1v2genbank; do
-        #for prefix in HPRCy1v2genbank+refs; do
-        #for prefix in HPRCy1v2genbank; do
-          PAF=$prefix.self.s$s.p$p.n$n.h0001.l$l.paf
+for s in 20k; do
+  for ln in 5; do
+    s_no_k=${s::-1}
+    l_no_k=$(echo $s_no_k '*' $ln | bc)
+    l=${l_no_k}k
+    
+    for p in 98; do  
+      for n in 94 93 5 3; do
+        for L in 1000000; do
+          for prefix in HPRCy1v2genbank+chm13v2 HPRCy1v2genbank; do
+          #for prefix in HPRCy1v2genbank+chm13v2; do
+          #for prefix in HPRCy1v2genbank; do
+            PAF=$prefix.self.s$s.l$l.p$p.n$n.h0001.l$L.paf
           
-          if [[ -s $PAF && ! -s $PAF.edges.weights.txt.community.0.txt ]]; then
-            echo $s $p $n $l $prefix
-            
-            ID2NAME=$PAF.vertices.id2name.txt
-            if [ $prefix == "HPRCy1v2genbank" ]; then
-              # Prepare labels by contig
-              join -1 2 -2 1 -a 1 -e 'unmapped' -o '1.1 1.2 2.2' \
-                <(sort -k 2,2 $PAF.vertices.id2name.txt) \
-                <(sort -k 1,1 /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/pq_info/*.partitioning_with_pq.tsv) | cut -f 1,3 -d ' ' > $PAF.vertices.id2name.chr.txt
-                #<(sort -k 1,1 contig2chr.tsv) | cut -f 1,3 -d ' ' > $PAF.vertices.id2name.chr.txt
+            if [[ -s $PAF && ! -s $PAF.edges.weights.txt.community.0.txt ]]; then
+              echo $s $l $p $n $L $prefix
+             
+              ID2NAME=$PAF.vertices.id2name.txt
+              if [ $prefix == "HPRCy1v2genbank" ]; then
+                # Prepare labels by contig
+                join -1 2 -2 1 -a 1 -e 'unmapped' -o '1.1 1.2 2.2' \
+                  <(sort -k 2,2 $PAF.vertices.id2name.txt) \
+                  <(sort -k 1,1 /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/pq_info/*.partitioning_with_pq.tsv) | cut -f 1,3 -d ' ' > $PAF.vertices.id2name.chr.txt
+                  #<(sort -k 1,1 contig2chr.tsv) | cut -f 1,3 -d ' ' > $PAF.vertices.id2name.chr.txt
                 
-              ID2NAME=$PAF.vertices.id2name.chr.txt
-            fi
+                ID2NAME=$PAF.vertices.id2name.chr.txt
+              fi
             
-            # guix install python-igraph
-            python3 /home/guarracino/tools/pggb/scripts/net2communities.py \
-              -e $PAF.edges.list.txt \
-              -w $PAF.edges.weights.txt \
-              -n $ID2NAME --accurate-detection
-          fi
+              # guix install python-igraph
+              python3 /home/guarracino/tools/pggb/scripts/net2communities.py \
+                -e $PAF.edges.list.txt \
+                -w $PAF.edges.weights.txt \
+                -n $ID2NAME --accurate-detection
+            fi
+          done
+        done
+      done
+    done
+  done
+done
+```
+
+For the mappings with the reference(s), we apply the `Lovain` algorithm too:
+
+```shell
+for s in 20k; do
+  for ln in 5; do
+    s_no_k=${s::-1}
+    l_no_k=$(echo $s_no_k '*' $ln | bc)
+    l=${l_no_k}k
+    
+    for p in 98; do  
+      for n in 94 93 5 3; do
+        for L in 1000000; do
+          for prefix in HPRCy1v2genbank+chm13v2; do
+            PAF=$prefix.self.s$s.l$l.p$p.n$n.h0001.l$L.paf
+          
+            /home/guarracino/tools/pafnet/target/release/pafnet $PAF -e > $PAF.edgelist
+            /home/guarracino/tools/pafnet/target/release/pafnet $PAF -l > $PAF.names
+            /home/guarracino/tools/louvain/louvain $PAF.edgelist $PAF.louvain
+          done
         done
       done
     done
@@ -140,63 +251,83 @@ Finally, we check how chromosomes where partitioned (or, in the all-vs-all mappi
 
 ```shell
 cd /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank/
-s=50k
-p=98
-n=95
-l=1000000
-ls HPRCy1v2genbank+refs.self.s$s.p$p.n$n.h0001.l$l.paf.edges.weights.txt.community.*.txt | while read f; do echo $f; cat $f | grep chr; done
-
-s=50k
+s=100k
+l=300k
 p=95
-n=93
-l=1000000
-ls HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.paf.edges.weights.txt.community.*.txt | while read f; do echo $f; cat $f | cut -f 2 -d '#' | sort | uniq -c | sort -k 1nr | awk '$1 > 0' ; done
+n=95
+L=1000000
+ls HPRCy1v2genbank+chm13v2.self.s$s.l$l.p$p.n$n.h0001.l$L.paf.edges.weights.txt.community.*.txt | while read f; do echo $f; cat $f | grep chr; done
+ls HPRCy1v2genbank.self.s$s.l$l.p$p.n$n.h0001.l$L.paf.edges.weights.txt.community.*.txt | while read f; do echo $f; cat $f | cut -f 2 -d '#' | sort | uniq -c | sort -k 1nr | awk '$1 > 0' ; done
+
+
+s=20k
+l=100k
+p=98
+n=94
+L=1000000
+PAF=HPRCy1v2genbank+chm13v2.self.s$s.l$l.p$p.n$n.h0001.l$L.paf
+
+# Info communities
+(echo -e "id.community\tnum.contigs\tchm13.chromosome"; \
+join -a 1 -e 'EMPTY' \
+  <( cut -f 2 -d ' ' $PAF.louvain | sort -n | uniq -c | awk -v OFS='\t' '{print $2,$1}' | sort ) \
+  <( join <(tr ' ' '\t' < $PAF.louvain | sort -k 1b,1) <(tr ' ' '\t' < $PAF.names | sort -k 1b,1) | grep 'chm13\|grch38' | awk -v OFS='\t' '{ print $2, $3 }' | sort ) | \
+  sort -k 1,1n) | tr ' ' '\t' > $PAF.louvain.tsv
+
+# OLD
+join <(tr ' ' '\t' < $PAF.louvain | sort -k 1b,1 ) \
+     <(tr ' ' '\t' < $PAF.names | sort -k 1b,1) \
+    | grep 'chm13\|grch38' | awk '{ print $2, $3 }' | grep -v _ \
+    | sort -n | awk '{ c=$1 ; if (c == p) { x=x" "$2 } else { print x; x=$2 }; p = c; }'
 ```
 
 Obtain files for `gephi`:
 
 ```shell
 cd /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank/
-s=50k
-p=95
-n=5
-l=1000000
+s=20k
+l=100k
+p=98
+n=3
+L=1000000
+PAF=HPRCy1v2genbank+chm13v2.self.s$s.l$l.p$p.n$n.h0001.l$L.paf
 
 # Add labels only to acrocentric chromosomes
 ( echo "Id,Label,Chromosome"; \
   join -1 2 -2 1 -a 1 -e 'unmapped' -o '1.1 1.2 2.2' \
-    <(sort -k 2,2 HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.paf.vertices.id2name.txt) \
+    <(sort -k 2,2 $PAF.vertices.id2name.txt) \
     <(sort -k 1,1 /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/pq_info/*.partitioning_with_pq.tsv |\
         #grep 'chr13\|chr14\|chr15\|chr21\|chr22' | sed 's/chm13#//' | sed 's/grch38#//') | \
         sed 's/chm13#//' | sed 's/grch38#//') | \
         awk '{print($1,$3,$3)}' | tr ' ' ',' \
-) > HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.nodes.csv
+) > $PAF.nodes.csv
   
 # Add color column (for the "givecolortonodes" plugin)
 (echo "Id,Label,Chromosome,ColorOfNode"; \
   join -1 3 -2 1 \
-    <(sed '1d' HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.nodes.csv | tr ',' ' ' | sort -k 3) \
+    <(sed '1d' $PAF.nodes.csv | tr ',' ' ' | sort -k 3) \
     <(sed '1d' /lizardfs/guarracino/chromosome_communities/data/chromosome.colors.csv | tr ',' ' ' | sort -k 1) | \
       awk -v OFS=',' '{print $2,$1,$3,$4}') \
-     > HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.nodes.colored.csv
+     > $PAF.nodes.colored.csv
 
 ( echo "Source,Target,Weight"; \
-  paste -d ' ' HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.paf.edges.list.txt HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.paf.edges.weights.txt | tr ' ' ','
-) > HPRCy1v2genbank.self.s$s.p$p.n$n.h0001.l$l.edges.csv
-  
-  
+  paste -d ' ' $PAF.edges.list.txt $PAF.edges.weights.txt | tr ' ' ','
+) > $PAF.edges.csv
   
   
 
-s=50k
+
+s=20k
+l=100k
 p=98
-n=3
-l=1000000
+n=94
+L=1000000
+PAF=HPRCy1v2genbank+chm13v2.self.s$s.l$l.p$p.n$n.h0001.l$L.paf
 
 # Add labels only to acrocentric chromosomes
 ( echo "Id,Label,Chromosome"; \
   join -1 2 -2 1 -a 1 -e 'unmapped' -o '1.1 1.2 2.2' \
-    <(sort -k 2,2 HPRCy1v2genbank+refs.self.s$s.p$p.n$n.h0001.l$l.paf.vertices.id2name.txt) \
+    <(sort -k 2,2 $PAF.vertices.id2name.txt) \
     <(cat \
       <(sort -k 1,1 /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/pq_info/*.partitioning_with_pq.tsv |\
           #grep 'chr13\|chr14\|chr15\|chr21\|chr22' | sed 's/chm13#//' | sed 's/grch38#//') | \
@@ -212,17 +343,17 @@ l=1000000
       <(echo -e grch38#chr21"\t"chr21_pq) \
       <(echo -e grch38#chr22"\t"chr22_pq)) | \
         awk '{print($1,$3,$3)}' | tr ' ' ',' \
-) > HPRCy1v2genbank+refs.self.s$s.p$p.n$n.h0001.l$l.nodes.csv
+) > $PAF.nodes.csv
   
 # Add color column (for the "givecolortonodes" plugin)
 (echo "Id,Label,Chromosome,ColorOfNode"; \
   join -1 3 -2 1 \
-    <(sed '1d' HPRCy1v2genbank+refs.self.s$s.p$p.n$n.h0001.l$l.nodes.csv | tr ',' ' ' | sort -k 3) \
+    <(sed '1d' $PAF.nodes.csv | tr ',' ' ' | sort -k 3) \
     <(sed '1d' /lizardfs/guarracino/chromosome_communities/data/chromosome.colors.csv | tr ',' ' ' | sort -k 1) | \
       awk -v OFS=',' '{print $2,$1,$3,$4}') \
-     > HPRCy1v2genbank+refs.self.s$s.p$p.n$n.h0001.l$l.nodes.colored.csv
+     > $PAF.nodes.colored.csv
 
 ( echo "Source,Target,Weight"; \
-  paste -d ' ' HPRCy1v2genbank+refs.self.s$s.p$p.n$n.h0001.l$l.paf.edges.list.txt HPRCy1v2genbank+refs.self.s$s.p$p.n$n.h0001.l$l.paf.edges.weights.txt | tr ' ' ','
-) > HPRCy1v2genbank+refs.self.s$s.p$p.n$n.h0001.l$l.edges.csv
+  paste -d ' ' $PAF.edges.list.txt $PAF.edges.weights.txt | tr ' ' ','
+) > $PAF.edges.csv
 ```

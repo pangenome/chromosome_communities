@@ -12,12 +12,6 @@ cmake -H. -Bbuild && cmake --build build -- -j 48
 mv build/bin/wfmash build/bin/wfmash-ad8aebae1be96847839778af534866bc9545adb9
 cd ..
 
-# Fixed mapper
-git checkout 19234a4a153ea3f3acce6f4ac192afc70bbb7fda
-cmake -H. -Bbuild && cmake --build build -- -j 48
-mv build/bin/wfmash build/bin/wfmash-19234a4a153ea3f3acce6f4ac192afc70bbb7fda
-
-
 git clone --recursive https://github.com/ekg/seqwish.git
 cd seqwish
 git checkout 706ef7e2640e38a75ae7435fb57f7a6c8e3ada2c
