@@ -687,6 +687,10 @@ for e in 50000; do
     done
   done
 done
+
+# Check total over the contigs
+cat $path_grounded_pq_touching_reliable_stats_tsv | sed '1d' |\
+ awk -v OFS='t\' -F'\t' 'BEGIN{UNTANGLED_SIZE=0; UNTANGLED_SIZE_RELIABLE=0}{ UNTANGLED_SIZE+=$7; UNTANGLED_SIZE_RELIABLE+=$8 }END{print UNTANGLED_SIZE,UNTANGLED_SIZE_RELIABLE,UNTANGLED_SIZE-UNTANGLED_SIZE_RELIABLE, UNTANGLED_SIZE_RELIABLE/UNTANGLED_SIZE}' 
 ```
 
 Statistics on untangled segment lengths:

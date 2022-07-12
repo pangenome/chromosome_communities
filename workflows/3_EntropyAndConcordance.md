@@ -91,6 +91,24 @@ for e in 50000; do
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$PREFIX.chr*.pdf \
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$PREFIX.merged.pdf
       rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$PREFIX.chr*.pdf
+      
+      
+      # Statistics whole chromosome
+      python3 /lizardfs/guarracino/chromosome_communities/scripts/get_concordance_ratio.py $path_concordance_by_haplotype_tsv > $path_concordance_by_haplotype_tsv.stats.tsv
+      
+      # Statistics p arm
+      python3 /lizardfs/guarracino/chromosome_communities/scripts/get_concordance_ratio.py <(echo 'fake_header'; bedtools intersect \
+      python3 x.py <(echo 'fake_header'; bedtools intersect \
+        -a <( cat $path_concordance_by_haplotype_tsv | sed '1d' | awk -v OFS='\t' '{print($1,$2,$3,$4"_"$5)}' ) \
+        -b <( sed 's/^chr/chm13#chr/g' /lizardfs/guarracino/chromosome_communities/data/annotation/chm13.p_arms.approximate.acros.bed) |\
+         awk -v OFS='\t' '{split($4,a,/_/); print($1,$2,$3,a[1],a[2])}') > $path_concordance_by_haplotype_tsv.p_arms.stats.tsv
+      
+      # Statistics q arm
+      python3 x.py <(echo 'fake_header'; bedtools intersect \
+        -a <( cat $path_concordance_by_haplotype_tsv | sed '1d' | awk -v OFS='\t' '{print($1,$2,$3,$4"_"$5)}' ) \
+        -b <( sed 's/^chr/chm13#chr/g' /lizardfs/guarracino/chromosome_communities/data/annotation/chm13.q_arms.approximate.acros.bed) |\
+         awk -v OFS='\t' '{split($4,a,/_/); print($1,$2,$3,a[1],a[2])}') > $path_concordance_by_haplotype_tsv.q_arms.stats.tsv
+
     done
   done
 done

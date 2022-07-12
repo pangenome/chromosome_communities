@@ -251,14 +251,21 @@ Finally, we check how chromosomes where partitioned (or, in the all-vs-all mappi
 
 ```shell
 cd /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank/
-s=100k
-l=300k
-p=95
-n=95
+s=20k
+l=100k
+p=98
+n=94
 L=1000000
 ls HPRCy1v2genbank+chm13v2.self.s$s.l$l.p$p.n$n.h0001.l$L.paf.edges.weights.txt.community.*.txt | while read f; do echo $f; cat $f | grep chr; done
+
+s=20k
+l=100k
+p=98
+n=93
+L=1000000
 ls HPRCy1v2genbank.self.s$s.l$l.p$p.n$n.h0001.l$L.paf.edges.weights.txt.community.*.txt | while read f; do echo $f; cat $f | cut -f 2 -d '#' | sort | uniq -c | sort -k 1nr | awk '$1 > 0' ; done
 
+python3 /lizardfs/guarracino/chromosome_communities/scripts/get_table_about_communities.py HPRCy1v2genbank.self.s$s.l$l.p$p.n$n.h0001.l$L.paf.edges.weights.txt.community.*.txt | cut -f 1-25,27 > HPRCy1v2genbank.self.s$s.l$l.p$p.n$n.h0001.l$L.paf.edges.weights.txt.community.leiden.tsv
 
 s=20k
 l=100k
