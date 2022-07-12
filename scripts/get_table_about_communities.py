@@ -33,12 +33,14 @@ for i, filename in enumerate(sys.argv[1:]):
 
 import collections
 
-print('\t'.join(['num.community'] + [f'chr{x}' for x in range(1, 23)] + ['chrX', 'chrY', 'chrM', 'not.partitioned']))
+print('\t'.join(['community.of'] + [f'chr{x}' for x in range(1, 23)] + ['chrX', 'chrY', 'chrM', 'not.partitioned']))
 for community, label_list in community_to_labels_dict.items():
     counter_list = [0] * 26  # Max number of chromosomes (including the `not.partitioned` set)
 
-    for label, count in collections.Counter(label_list).items():
+    chr_2_count_dict = collections.Counter(label_list)
+    chr_with_max_count = max(chr_2_count_dict, key=chr_2_count_dict.get)
+    for label, count in chr_2_count_dict.items():
         counter_list[set_chr_nr(label) - 1] = count
 
     counter_list = [str(x) for x in counter_list]
-    print('\t'.join([str(community)] + counter_list))
+    print('\t'.join([chr_with_max_count] + counter_list))
