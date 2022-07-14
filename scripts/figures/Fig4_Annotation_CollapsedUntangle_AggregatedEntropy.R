@@ -7,7 +7,7 @@ path_output <- args[9]
 x_min <- 0
 x_max <- 25000000
 width <- 90
-height <- 28
+height <- 19
 
 
 # library
@@ -65,7 +65,7 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
       xmin = - Inf, xmax = Inf,
       ymin = - Inf, ymax = Inf
     ) + theme(
-      plot.margin = unit(c(0,1,0,0), "cm")
+      plot.margin = unit(c(0,1,0.5,0), "cm")
     )
   
 
@@ -93,7 +93,7 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
       
       strip.text.x = element_blank(),
       strip.text.y = element_blank(),
-      plot.margin = unit(c(0,1.03,0,4.44), "cm")
+      plot.margin = unit(c(0,1.03,0,6.74), "cm")
     ) + labs(
       x = paste(''),
       y = paste('# contigs\n')
@@ -124,7 +124,7 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
       
       strip.text.x = element_blank(),
       strip.text.y = element_blank(),
-      plot.margin = unit(c(0,1.03,0,4.27), "cm")
+      plot.margin = unit(c(0,1.03,0,6.7), "cm")
     ) + labs(
       x = paste('Position'),
       y = paste('Entropy\n')
@@ -136,12 +136,12 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
   p_panel <- ggpubr::ggarrange(
     p_annotation, p_collapsed_untangle, p_entropy_average,
     labels=c('', '', ''), font.label = list(size = 40, color = "black", face = "bold", family = NULL),
-    heights = c(1.8, 1.5, 1.5),
+    heights = c(0.95, 1, 1),
     legend = "right", # legend position,
     common.legend = T,
     nrow = 3
   )
-  
+
   #ggsave(
   #  plot = p_panel,
   #  file.path(path_output, paste0(num_chr, '.png')),
@@ -157,18 +157,18 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
 
 # Put panels together
 p_figure <- ggpubr::ggarrange(
-  p_panels[[1]], p_panels[[2]], p_panels[[3]], p_panels[[4]], p_panels[[5]],
-  labels=c('A', 'B', 'C', 'D', 'E'), font.label = list(size = 40, color = "black", face = "bold", family = NULL),
-  heights = c(1,1,1,1,1),
+  p_panels[[1]], NULL, p_panels[[2]], NULL, p_panels[[3]], NULL, p_panels[[4]], NULL, p_panels[[5]],
+  #labels=c('A', 'B', 'C', 'D', 'E'), font.label = list(size = 40, color = "black", face = "bold", family = NULL),
+  heights = c(1,0.05,1,0.05,1,0.05,1,0.05,1),
   legend = "right", # legend position,
   common.legend = T,
-  nrow = 5, ncol = 1
+  nrow = 9, ncol = 1
 )
 
 ggsave(
   plot = p_figure,
   file.path(path_output, 'Figure4.pdf'),
-  width = width, height = height*5,
+  width = width, height = height*5 + 4*height/20, # There are 4 NULL plots that have height == height/20
   units = "cm",
   dpi = 100, bg = "white",
   limitsize = FALSE
@@ -176,7 +176,7 @@ ggsave(
 ggsave(
   plot = p_figure,
   file.path(path_output, 'Figure4.png'),
-  width = width, height = height*5,
+  width = width, height = height*5 + 4*height/20, # There are 4 NULL plots that have height == height/20
   units = "cm",
   dpi = 100, bg = "white",
   limitsize = FALSE
