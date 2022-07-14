@@ -47,8 +47,8 @@ for num, label_list in num_2_labels_dict.items():
         counter_list[set_chr_nr(label) - 1] = count
 
     counter_list = [str(x) for x in counter_list]
-    if chr_with_max_count not in community_2_info_dict:
-        community_2_info_dict[chr_with_max_count] = []
+    if (num, chr_with_max_count) not in community_2_info_dict:
+        community_2_info_dict[(num, chr_with_max_count)] = []
     community_2_info_dict[(num, chr_with_max_count)].append(counter_list)
 
     #print('\t'.join([chr_with_max_count] + counter_list))
