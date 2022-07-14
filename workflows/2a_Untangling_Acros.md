@@ -739,7 +739,7 @@ for e in 50000; do
         Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
           $path_grounded_pq_touching_reliable_tsv_gz \
           0 25000000 \
-          91 0.8 \
+          90 0.7 \
           0 \
           1 $refn \
           $i \

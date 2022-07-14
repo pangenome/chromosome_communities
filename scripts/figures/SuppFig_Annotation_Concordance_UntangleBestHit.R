@@ -4,10 +4,11 @@ path_untangle_grounded_tsv <- args[7]
 dir_annotation <- args[8]
 path_output <- args[9]
 
+
 x_min <- 0
 x_max <- 25500000
-width <- 100
-height <- 32
+width <- 95
+height <- 26
 
 panel_spacing <- 0
 
@@ -102,6 +103,12 @@ c[c$num.different.targets != '0' & c$num.different.targets != '1',]$num.differen
 x <- read.delim(path_untangle_grounded_tsv) %>%
   filter(nth.best <= nth_best & ref.nth.best <= ref_nth_best)
 
+x$target <- as.character(x$target)
+
+for(j in chromosomes) {
+  x[x$target == paste0('chm13#chr', j),]$target = paste0('chr', j)
+}
+
 # To have it as numeric column
 #x$self.coverage[x$self.coverage == '.'] <- 1
 #x$self.coverage <- as.numeric(x$self.coverage)
@@ -111,13 +118,11 @@ colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
 
 chromosomes <- c(13, 14, 15, 21, 22)
 
-p_panels <- c()
-
 for (i in seq_along(chromosomes)){
   num_chr <- chromosomes[[i]]
   print(num_chr)
 
-    # Annotation
+  # Annotation
   path_annotation <- file.path(dir_annotation, paste0('hgt_genome_euro_chr', num_chr, '_0_25Mbp.png'))
   img <- readPNG(path_annotation)
   p_annotation <- ggplot() +
@@ -126,7 +131,7 @@ for (i in seq_along(chromosomes)){
       xmin = - Inf, xmax = Inf,
       ymin = - Inf, ymax = Inf
     ) + theme(
-      plot.margin = unit(c(0,8.03,0,1.86), "cm")
+      plot.margin = unit(c(0,7.95,0.5,-0.17), "cm")
     )
   
   
@@ -186,8 +191,10 @@ for (i in seq_along(chromosomes)){
   xx <- xx %>%
     arrange(query.hacked)
 
-  xx[xx$jaccard > 1,]$jaccard <- 1
-
+  if (sum(xx$jaccard > 1) > 0) {
+    xx[xx$jaccard > 1,]$jaccard <- 1
+  }
+  
   p_untangle <- ggplot(
     xx,
     aes(
@@ -213,7 +220,7 @@ for (i in seq_along(chromosomes)){
       legend.text = element_text(size = 20),
       legend.position = "top",
       
-      plot.margin = unit(c(0,0,0,0), "cm"),
+      plot.margin = unit(c(0,2.6,0,0), "cm"),
       
       panel.spacing = unit(panel_spacing, "lines"),
       #panel.border = element_rect(color = "grey", fill = NA, size = 1), #element_blank(),
@@ -235,7 +242,7 @@ for (i in seq_along(chromosomes)){
   p_panel <- ggpubr::ggarrange(
     p_annotation, p_concordance, p_untangle,
     labels=c('', '', ''), font.label = list(size = 40, color = "black", face = "bold", family = NULL),
-    heights = c(1.8, 0.7, 2.5),
+    heights = c(0.95, 0.7, 2.5),
     legend = "right", # legend position,
     common.legend = F,
     nrow = 3
