@@ -55,7 +55,7 @@ for num, label_list in num_2_labels_dict.items():
 
 chromosomes = community_2_info_dict.keys()
 for num, chr in sorted(chromosomes, key=lambda x: set_chr_nr(x[1])):
-    for i, info in enumerate(community_2_info_dict[chr]):
+    for i, info in enumerate(community_2_info_dict[(num, chr)]):
         suffix = ''
         if len(community_2_info_dict[(num, chr)]) > 1:
             suffix = f'_{i+1}'
