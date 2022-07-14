@@ -9,7 +9,7 @@
 convert Figure3a.png Figure3a.pdf
 convert Figure3b.png Figure3b.pdf
 convert Figure3c.png Figure3c.pdf
-...
+.......
 ```
 
 ### Figure 4
@@ -58,7 +58,7 @@ n=2
     Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation.R \
       $path_grounded_pq_touching_reliable_tsv_gz \
       0 25000000 \
-      91 0.8 \
+      90 0.7 \
       0 \
       1 1 \
       $i \
