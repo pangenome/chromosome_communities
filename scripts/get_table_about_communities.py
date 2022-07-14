@@ -59,4 +59,4 @@ for chr in sorted(chromosomes, key=lambda x: set_chr_nr(x)):
         suffix = ''
         if len(community_2_info_dict[chr]) > 1:
             suffix = f'_{i+1}'
-        print('\t'.join([chr + suffix] + counter_list))
+        print('\t'.join([num, chr + suffix] + counter_list))
