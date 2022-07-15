@@ -12,6 +12,11 @@ colnames(x)[1] <- 'query.name'
 
 x <- x[x$ref.start < 25000000 & x$ref.end <=25000000,]
 
+# Temporary fix
+x[x$query.name == 'chm13#chr13' & x$query.start == 0 & x$query.end == 4970529,]$inv = '+'
+x[x$query.name == 'chm13#chr13' & x$query.start == 0 & x$query.end == 4970529,]$ref.start = 0
+x[x$query.name == 'chm13#chr13' & x$query.start == 0 & x$query.end == 4970529,]$ref.end = 4970529
+
 #x_subset <- subset(x, query.name %in% c(
 #       "HG002#MAT#chr13.prox"
 #   )
