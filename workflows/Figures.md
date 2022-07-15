@@ -129,3 +129,18 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_segme
   <(zgrep '^HG002#1\|^HG002#2' -v $path_grounded_pq_touching_reliable_ALL_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
   ~/SuppFigure17.pdf
 ```
+
+
+## Figure XXX
+
+Untangling dot plot for all contigs:
+
+```shell
+f=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#ACRO.e50000.m1000.j0.n100.fixed.bed.gz
+(zcat $f | head -n 1; \
+zcat $f | awk '$8 == "-" { x=$6; $6=$5; $5=x; } { print }' | awk '$10 == 1') | tr ' ' '\t' | pigz -c > for_dot_plot.bed.gz
+
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/dot_plot_untangle.R \
+  for_dot_plot.bed.gz \
+  ~
+```
