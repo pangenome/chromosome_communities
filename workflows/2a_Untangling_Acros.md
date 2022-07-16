@@ -1005,27 +1005,70 @@ done
 ```
 
 
-Estimate regions that can recombine using multihit untangled regions:
+Estimate regions that can recombine using multi-hit untangled regions:
 
 ```shell
 for e in 50000; do
   for m in 1000 ; do
-    path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_jaccard_gt_1/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
-    PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz);
+    #path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_jaccard_gt_1/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+    path_grounded_pq_touching_reliable_ALL_tsv_gz=~/Downloads/Pangenomics/chromosome_communities/paper/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 
-    # todo prepare table
-    
+    PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz);
+   
     for j in `seq 0.8 0.01 1.0`; do
       j_str=$(echo $j | sed 's/\,//g')
       j=$(echo $j | sed 's/\,/./g')
-      python3 scripts/recombination_proxy_ranges.py $path_grounded_pq_touching_reliable_ALL_tsv_gz chm13#ACRO.len.tsv 5 0.$j 0 20000000 > xj${j_str}.bed
-      # todo fill table bedtools merge -i <(cut -f 4,5,6 x.bed | sed '1d' | bedtools sort ) | awk '{SUM+=$3-$2}END{print(SUM)}'
+      echo $e $m $j
+      
+      path_recombinant_regions_bed=$PREFIX.recombinant_regions.j${j_str}.bed
+      if [[ ! -s  $path_recombinant_regions_bed ]]; then
+        python3 scripts/recombination_proxy_ranges.py $path_grounded_pq_touching_reliable_ALL_tsv_gz $j > $path_recombinant_regions_bed
+      fi
     done
-  
   done
 done
 
+# Collect values in a table
+for e in 50000; do
+  for m in 1000 ; do
+    #path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_jaccard_gt_1/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+    path_grounded_pq_touching_reliable_ALL_tsv_gz=~/Downloads/Pangenomics/chromosome_communities/paper/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 
+    PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz);
+   
+    for j in `seq 0.8 0.01 1.0`; do
+      j_str=$(echo $j | sed 's/\,//g')
+      j=$(echo $j | sed 's/\,/./g')
+      echo $e $m $j
+      
+      path_recombinant_regions_bed=$PREFIX.recombinant_regions.j${j_str}.bed
+      if [[ ! -s  $path_recombinant_regions_bed ]]; then
+        python3 scripts/recombination_proxy_ranges.py $path_grounded_pq_touching_reliable_ALL_tsv_gz $j > $path_recombinant_regions_bed
+      fi
+    done
+  done
+done
+
+for e in 50000; do
+  for m in 1000 ; do
+    #path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_jaccard_gt_1/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+    path_grounded_pq_touching_reliable_ALL_tsv_gz=~/Downloads/Pangenomics/chromosome_communities/paper/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+
+    PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz);
+    
+    rm $PREFIX.recombinant_regions.table.tsv
+    for j in `seq 0.8 0.01 1.0`; do
+      j_str=$(echo $j | sed 's/\,//g')
+      j=$(echo $j | sed 's/\,/./g')
+      echo $e $m $j
+      
+      path_recombinant_regions_bed=$PREFIX.recombinant_regions.j${j_str}.bed
+      bedtools merge -i <(cut -f 4,5,6 $path_recombinant_regions_bed | sed '1d' | bedtools sort ) | awk -v j=$j -v OFS='\t' '{SUM+=$3-$2}END{print(j,SUM)}' >> $PREFIX.recombinant_regions.table.tsv
+    done
+  done
+done
+
+      # todo fill table 
 # Unmerged query segments
 cat x.bed | wc -l
 72206
@@ -1038,7 +1081,7 @@ bedtools merge -i <(cut -f 1,2,3 x.bed | sed '1d' ) | wc -l
 bedtools merge -i <(cut -f 4,5,6 x.bed | sed '1d' | bedtools sort ) | wc -l
 946
 
-# Sum. length of merged ground segments
+
 bedtools merge -i <(cut -f 4,5,6 x.bed | sed '1d' | bedtools sort ) | awk '{SUM+=$3-$2}END{print(SUM)}'
 16224243
 ```

@@ -4,20 +4,11 @@ import gzip
 import sys
 
 path_grounded_tsv_gz = sys.argv[1]
-path_target_length_txt = sys.argv[2]
-n = int(sys.argv[3])
-score_treshold = float(sys.argv[4])
+score_treshold = float(sys.argv[2])
 
 
 refn = 1  # In this way, the grounded interval is always the same for all `n` target hits of each segment
 
-# Read chromosome lengths
-ground_2_len_dict = {}
-
-with open(path_target_length_txt) as f:
-    for line in f:
-        ground, target_len = line.strip().split('\t')
-        ground_2_len_dict[ground] = int(target_len)
 
 # Read untangling information
 ground_2_group_2_query_2_segment_2_hits_dict = {}
@@ -34,7 +25,7 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
 
         nth_best = int(nth_best)
         ref_nth_best = int(ref_nth_best)
-        if nth_best > n or ref_nth_best > refn:
+        if ref_nth_best > refn:
             continue
 
         jaccard = float(jaccard)
