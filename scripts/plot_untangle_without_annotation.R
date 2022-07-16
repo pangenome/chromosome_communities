@@ -48,7 +48,10 @@ xx$query.hacked <- paste(xx$query, xx$nth.best, sep = "-")
 xx <- xx %>%
   arrange(query.hacked)
 
-xx[xx$jaccard > 1,]$jaccard <- 1
+# To avoid errors
+if (sum(xx$jaccard > 1) > 0) {
+  xx[xx$jaccard > 1,]$jaccard <- 1
+}
 
 p <- ggplot(
   xx,

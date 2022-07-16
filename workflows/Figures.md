@@ -2,16 +2,6 @@
 
 ## Main figures
 
-### Figure 3
-
-```shell
-# Remove `<policy domain="coder" rights="none" pattern="PDF" />` from /etc/ImageMagick-6/policy.xml:
-convert Figure3a.png Figure3a.pdf
-convert Figure3b.png Figure3b.pdf
-convert Figure3c.png Figure3c.pdf
-.......
-```
-
 ### Figure 4
 
 For each chromosome:

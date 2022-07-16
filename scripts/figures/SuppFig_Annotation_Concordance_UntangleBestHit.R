@@ -191,6 +191,7 @@ for (i in seq_along(chromosomes)){
   xx <- xx %>%
     arrange(query.hacked)
 
+  # To avoid errors
   if (sum(xx$jaccard > 1) > 0) {
     xx[xx$jaccard > 1,]$jaccard <- 1
   }

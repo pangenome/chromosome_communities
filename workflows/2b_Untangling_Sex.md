@@ -73,7 +73,7 @@ for e in 50000; do
 done
   
 # Single reference by using the same cut points
-for e in 50000  ; do
+for e in 50000; do
   for m in 1000 2000 5000; do
     echo "-e $e -m $m"
       
@@ -94,8 +94,8 @@ done
 # Grounding
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded
 
-for e in 50000  ; do
-  for m in 1000  ; do
+for e in 50000; do
+  for m in 1000; do
     cat $path_targets_txt | while read ref; do            
       path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.tsv.gz
             
@@ -142,6 +142,9 @@ done
 Plot:
 
 ```shell
+#PAR1/2/3
+# https://link.springer.com/article/10.1007/s10142-013-0323-6/figures/1
+
 for e in 50000  ; do
   for m in 1000  ; do
     for refn in 1 10; do
@@ -166,7 +169,7 @@ for e in 50000  ; do
       /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
         /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.n1.nref${refn}.pdf \
         /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chrSEX.e$e.m$m.grounded.pq_touching.reliable.n1.nref${refn}.merged.pdf
-      #rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.n1.nref${refn}.pdf
+      rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.n1.nref${refn}.pdf
     done
   done
 done
@@ -222,30 +225,29 @@ for refpattern in HG002; do
   done
 done
 
-#PAR1/2/3
-# https://link.springer.com/article/10.1007/s10142-013-0323-6/figures/1
+
 ```
 
 
-## Variant calling
-
-Call variants in a haploid setting:
-
-```shell
-path_input_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.gfa
-path_chm13_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.chm13.vcf.gz
-#path_grch38_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.grch38.vcf.gz
-path_hg002_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.hg002.vcf.gz
-sbatch -p workers -c 48 --job-name vgchm13 --wrap '\time -v vg deconstruct -P chm13 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_chm13_vcf_gz' && tabix '$path_chm13_vcf_gz
-#sbatch -p workers -c 48 --job-name vggrch38 --wrap '\time -v vg deconstruct -P grch38 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_grch38_vcf_gz' && tabix '$path_grch38_vcf_gz
-sbatch -p workers -c 48 --job-name vghg002 --wrap '\time -v vg deconstruct -P HG002 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_hg002_vcf_gz' && tabix '$path_hg002_vcf_gz
-
-
-
-
-
-# In the VCF there are variants with all samples having missing genotype!
-#num_samples=`bcftools query -l $PATH_VCF_GZ | wc -l`
-#num_miss_gen=$(echo $num_samples - 1 | bc)
-#--max-missing-count $num_miss_gen \
-```
+[//]: # (## Variant calling)
+[//]: # ()
+[//]: # (Call variants in a haploid setting:)
+[//]: # ()
+[//]: # (```shell)
+[//]: # (path_input_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.gfa)
+[//]: # (path_chm13_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.chm13.vcf.gz)
+[//]: # (#path_grch38_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.grch38.vcf.gz)
+[//]: # (path_hg002_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrS.pan+HG002chrXY.s100k.l300k.p98.n93/chrS.pan+HG002chrXY.fa.gz.73e7992.4030258.b8e2fe5.smooth.fix.hg002.vcf.gz)
+[//]: # (sbatch -p workers -c 48 --job-name vgchm13 --wrap '\time -v vg deconstruct -P chm13 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_chm13_vcf_gz' && tabix '$path_chm13_vcf_gz)
+[//]: # (#sbatch -p workers -c 48 --job-name vggrch38 --wrap '\time -v vg deconstruct -P grch38 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_grch38_vcf_gz' && tabix '$path_grch38_vcf_gz)
+[//]: # (sbatch -p workers -c 48 --job-name vghg002 --wrap '\time -v vg deconstruct -P HG002 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_hg002_vcf_gz' && tabix '$path_hg002_vcf_gz)
+[//]: # ()
+[//]: # ()
+[//]: # ()
+[//]: # ()
+[//]: # ()
+[//]: # (# In the VCF there are variants with all samples having missing genotype!)
+[//]: # (#num_samples=`bcftools query -l $PATH_VCF_GZ | wc -l`)
+[//]: # (#num_miss_gen=$&#40;echo $num_samples - 1 | bc&#41;)
+[//]: # (#--max-missing-count $num_miss_gen \)
+[//]: # (```)
