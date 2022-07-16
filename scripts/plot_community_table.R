@@ -27,14 +27,14 @@ xy <- merge(
 
 num_contigs <- sum(xy$value)
 
-xy$ratio <- xy$sequence.content.bp / total_sequence_content_bp
+#xy$ratio <- xy$sequence.content.bp / total_sequence_content_bp * 100
 
 p <- ggplot(
   xy,
   aes(
     x = variable,
     y = community.of,
-    fill = sequence.content.bp / total_sequence_content_bp
+    fill = sequence.content.bp / total_sequence_content_bp * 100.0
    #fill = value / num_contigs
   )
 ) +
