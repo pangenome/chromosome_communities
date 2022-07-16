@@ -88,7 +88,7 @@ for s in 50k; do
 done
 ```
 
-To evaluate chromosome communities, we build an "alignment graph" from our mappings using `paf2net` scripts delivered in
+To evaluate chromosome communities, we build a mapping graph from our mappings using the `paf2net` script delivered in
 `pggb` repository. In this graph, nodes are contigs and edges are mappings between them.
 
 ```shell
@@ -132,7 +132,7 @@ for s in 50k; do
 done
 ```
 
-Then we obtain the ``Leiden`` communities:
+Then we identify the communities by applying the ``Leiden`` algorithm:
 
 ```shell
 for s in 50k; do
@@ -212,44 +212,70 @@ n=93
 L=1000000
 PAF=HPRCy1v2genbank.self.s$s.l$l.p$p.n$n.h0001.l$L.paf
 
-python3 /lizardfs/guarracino/chromosome_communities/scripts/get_table_about_communities.py $PAF.edges.weights.txt.community.*.txt | cut -f 1-25,27 > $PAF.community.leiden.tsv
-cat $PAF.community.leiden.tsv | column -t
-
+# A look in the communities
 ls $PAF.edges.weights.txt.community.*.txt | while read f; do echo $f; cat $f | cut -f 2 -d '-' | cut -f 2 -d '#' | sort | uniq -c | sort -k 1nr | awk '$1 > 0' ; done
 
-# File for mapping contigs to communities
+# Compute community sizes
+rm $PAF.community2size.tsv
+ls $PAF.edges.weights.txt.community.*.txt | while read f; do 
+  n=$(echo $f | rev | cut -f 2 -d '.' | rev)
+  
+  join -1 1 -2 1 \
+    <( awk '{split($1, a, "-"); print(a[1], a[2])}' $f | sed 's/chm13#//g' | sed 's/grch38#//g' | sed 's/_pq//g' | sed 's/_p//g' | sed 's/_q//g' | sort -k 1,1) \
+    <( cut -f 1,2 /lizardfs/guarracino/chromosome_communities/assemblies/HPRCy1v2genbank.fa.gz.fai | sort -k 1,1 ) |\
+     awk -v OFS='\t' -v n=$n '{a[$2]+=$3}END { for (key in a) { print (n, key, a[key]) } }' >> $PAF.community2size.tsv
+done
+
+# Compute community composition, adding a column regarding their size
+python3 /lizardfs/guarracino/chromosome_communities/scripts/get_table_about_communities.py $PAF.edges.weights.txt.community.*.txt | cut -f 1-26,28 > $PAF.community.leiden.tsv
+cat $PAF.community.leiden.tsv | column -t
+
+# Plot the community composition
+# Total length of all contigs
+TOTAL_SEQUENCE_BP=$(awk -F'\t' 'BEGIN{LEN=0}{ LEN+=$2 }END{print LEN}' /lizardfs/guarracino/chromosome_communities/assemblies/HPRCy1v2genbank.fa.gz.fai)
+  
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_community_table.R \
+  $PAF.community.leiden.tsv \
+  $PAF.community2size.tsv \
+  $TOTAL_SEQUENCE_BP \
+  $PAF.community.leiden.composition.pdf
+
+
+# File for mapping contigs to communities (used later for creating files for gephi)
 ls $PAF.edges.weights.txt.community.*.txt | while read f; do
   n=$(echo $f | rev | cut -f 2 -d '.' | rev)
   cut -f 1 $f -d '-' | awk -v OFS='\t' -v n=$n '{print($1,n)}' >> $PAF.contig2community.tsv
 done
+```
 
+Info:
 
-# Total number of contigs
+```shell
+echo "Total number of contigs"
 cat /lizardfs/guarracino/chromosome_communities/assemblies/HPRCy1v2genbank.fa.gz.fai | wc -l
 
-# Total length of the contigs
-cat /lizardfs/guarracino/chromosome_communities/assemblies/HPRCy1v2genbank.fa.gz.fai | \
-  awk -F'\t' 'BEGIN{LEN=0}{ LEN+=$2 }END{print LEN}'
+echo "Total length of all contigs"
+awk -F'\t' 'BEGIN{LEN=0}{ LEN+=$2 }END{print LEN}' /lizardfs/guarracino/chromosome_communities/assemblies/HPRCy1v2genbank.fa.gz.fai
 
-# Mapped contigs
+echo "Mapped contigs"
+cut -f 1,6 HPRCy1v2genbank.self.s$s.l$l.p$p.n$n.h0001.paf | tr '\t' '\n' | sort | uniq | wc -l
+
+echo "Mapped filtered contigs ($L bps)"
 cut -f 1,6 $PAF | tr '\t' '\n' | sort | uniq | wc -l
 
-# Filtered contigs (1 Mbps)
-cut -f 1,6 HPRCy1v2genbank.self.s50k.l250k.p95.n93.h0001.l1000000.paf | tr '\t' '\n' | sort | uniq | wc -l
-16118
-
+echo "Mapped filtered sequence"
 cat \
   <( cut -f 1,2 $PAF | sort | uniq ) \
   <( cut -f 6,7 $PAF | sort | uniq ) | sort | uniq | \
   awk -F'\t' 'BEGIN{LEN=0}{ LEN+=$2 }END{print LEN}'
 
 
-# Contigs of the communities containing only not partitioned contigs
+# Contigs of the communities (manually selected) containing only not partitioned contigs
 grep -f <(cat \
   HPRCy1v2genbank.self.s50k.l250k.p95.n93.h0001.l1000000.paf.edges.weights.txt.community.28.txt \
   HPRCy1v2genbank.self.s50k.l250k.p95.n93.h0001.l1000000.paf.edges.weights.txt.community.29.txt \
-  HPRCy1v2genbank.self.s50k.l250k.p95.n93.h0001.l1000000.paf.edges.weights.txt.community.30.txt | cut -f 1 -d '-') \
-  /lizardfs/guarracino/chromosome_communities/assemblies/HPRCy1v2genbank.fa.gz.fai 
+  HPRCy1v2genbank.self.s50k.l250k.p95.n93.h0001.l1000000.paf.edges.weights.txt.community.30.txt | cut -f 1 -d '-'
+  ) /lizardfs/guarracino/chromosome_communities/assemblies/HPRCy1v2genbank.fa.gz.fai | cut -f 1,2
 ```
 
 [//]: # (```shell)
@@ -282,7 +308,7 @@ grep -f <(cat \
 [//]: # (    | sort -n | awk '{ c=$1 ; if &#40;c == p&#41; { x=x" "$2 } else { print x; x=$2 }; p = c; }')
 [//]: # (```)
 
-Obtain files for `gephi`:
+Generate files for `gephi`:
 
 ```shell
 cd /lizardfs/guarracino/chromosome_communities/mappings/HPRCy1v2genbank/
@@ -373,7 +399,7 @@ join -1 1 -2 2 \
 
 rm $PAF.contig2namedCommunity.tsv $PAF.nodes.tmp*.csv
 
-
+# Edges
 ( echo "Source,Target,Weight"; \
   paste -d ' ' $PAF.edges.list.txt $PAF.edges.weights.txt | tr ' ' ','
 ) > $PAF.edges.csv

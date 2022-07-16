@@ -1,31 +1,44 @@
 args <- commandArgs()
-path_community_table <- '/home/guarracino/Downloads/Pangenomics/chromosome_communities/paper/HPRCy1v2genbank.self.s20k.l100k.p98.n93.h0001.l1000000.paf.edges.weights.txt.community.leiden.tsv'
+path_community_table <- args[6]
+path_community_2_size <- args[7]
+total_sequence_content_bp <- as.numeric(args[8])
+path_output <- args[9]
 
 library(ggplot2)
+library(tidyverse)
 
 x <- read.table(path_community_table, header = T)
 
+# Respect and reverted the order in the file
 mylevels <- x$community.of
-x$community.of <- factor(x$community.of, levels=mylevels)
+x$community.of <- factor(x$community.of, levels=rev(mylevels))
 
-#x$community.of <- factor(x$community.of, levels=unique(x[order(as.integer(gsub("[^0-9]", "", x$community.of))),'community.of']))
+y <- read.table(path_community_2_size, header = F)
+colnames(y) <- c('num.community', 'variable', 'sequence.content.bp')
+y$variable <- as.character(y$variable)
+y[y$variable == 'unmapped',]$variable <- "not.partitioned"
 
-library(reshape2)
-co <- melt(x, id.vars = 'community.of')
+xy <- merge(
+  melt(x, id=c("num.community" ,"community.of")),
+  y,
+  by = c('num.community', 'variable')
+) 
 
-num_contigs <- sum(co$value)
+num_contigs <- sum(xy$value)
 
+xy$ratio <- xy$sequence.content.bp / total_sequence_content_bp
 
 p <- ggplot(
-  co,
+  xy,
   aes(
-    x = community.of,
-    y = variable,
-    fill = value / num_contigs
+    x = variable,
+    y = community.of,
+    fill = sequence.content.bp / total_sequence_content_bp
+   #fill = value / num_contigs
   )
 ) +
-  geom_tile() +
-  scale_fill_gradient(low = "white", high = "red") +
+  geom_tile() + 
+  scale_fill_gradient(low = "#FAFAFA", high = "black") +
   theme_bw() +
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -39,7 +52,26 @@ p <- ggplot(
     legend.position = "right",
     
     #axis.title.y=element_blank()
+    panel.grid.major = element_blank(), panel.grid.minor = element_blank()
   ) +
-  labs(x = "Community", y = 'Chromosome', fill = '% of contigs') + theme(aspect.ratio=1)
+  labs(x = "Partitioning", y = 'Community', fill = '% of sequence') + 
+  theme(aspect.ratio=1)
+ggsave(
+  plot = p,
+  path_output,
+  width = 25, height = 25, units = "cm", dpi = 300, bg = "transparent", limitsize = F)
 
-p
+p <- p +
+  #geom_text(aes(label=round(sequence.content.bp / total_sequence_content_bp, digits = 10)), size=2.5, color="red") + 
+  geom_text(aes(label=value), size=2.6, color="#E89020")
+
+ggsave(
+  plot = p,
+  paste0(path_output, '.with_counts.pdf'),
+  width = 25, height = 25, units = "cm", dpi = 300, bg = "transparent", limitsize = F)
+
+# OLD CODE
+#x$community.of <- factor(x$community.of, levels=unique(x[order(as.integer(gsub("[^0-9]", "", x$community.of))),'community.of']))
+#library(reshape2)
+#co <- melt(x%>% select(-num.community), id.vars = 'community.of')
+#num_contigs <- sum(co$value)
