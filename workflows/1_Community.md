@@ -119,7 +119,6 @@ for s in 50k; do
                     <(sort -k 2,2 $PAF.vertices.id2name.txt) \
                     <(sort -k 1,1 /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/pq_info/*.partitioning_with_pq.tsv) | cut -f 1,2,3 -d ' ' | \
                     awk '{print($1,$2"-"$3)}' > $PAF.vertices.id2name.chr.txt
-                    #<(sort -k 1,1 contig2chr.tsv) | cut -f 1,3 -d ' ' > $PAF.vertices.id2name.chr.txt
                     
                   ID2NAME=$PAF.vertices.id2name.chr.txt
                 fi
@@ -145,10 +144,7 @@ for s in 50k; do
     for p in 95; do  
       for n in 93; do
         for L in 1000000; do
-          #for prefix in HPRCy1v2genbank+chm13v2; do
-          #for prefix in HPRCy1v2genbank+refs; do
           for prefix in HPRCy1v2genbank; do
-          #for prefix in HPRCy1v2genbank+chm13v2 HPRCy1v2genbank; do
             for big_y in Y N; do
                 PAF=$prefix.self.s$s.l$l.p$p.n$n.h0001.l$L.paf
                 if [ $big_y == Y ]; then
@@ -304,7 +300,6 @@ PAF=HPRCy1v2genbank+chm13v2.self.s$s.l$l.p$p.n$n.h0001.big_w.l$L.paf
     <(sort -k 2,2 $PAF.vertices.id2name.txt) \
     <(cat \
       <(sort -k 1,1 /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/pq_info/*.partitioning_with_pq.tsv |\
-          #grep 'chr13\|chr14\|chr15\|chr21\|chr22' | sed 's/chm13#//' | sed 's/grch38#//') | \
           sed 's/chm13#//' | sed 's/grch38#//') \
       <(echo -e chm13#chr1"\t"chr1_pq) \
       <(echo -e chm13#chr2"\t"chr2_pq) \
