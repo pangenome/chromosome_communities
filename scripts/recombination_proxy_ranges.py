@@ -5,7 +5,7 @@ import sys
 
 path_grounded_tsv_gz = sys.argv[1]
 score_treshold = float(sys.argv[2])
-
+self_cov_threshold = float(sys.argv[3])
 
 refn = 1  # In this way, the grounded interval is always the same for all `n` target hits of each segment
 
@@ -30,6 +30,10 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
 
         jaccard = float(jaccard)
         if jaccard < score_treshold:
+            continue
+
+        self_coverage = float(self_coverage)
+        if 0 < self_cov_threshold < self_coverage:
             continue
 
         query_begin = int(query_begin)
