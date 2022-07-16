@@ -28,9 +28,8 @@ cd ..
 
 git clone --recursive https://github.com/pangenome/odgi.git
 cd odgi
-git checkout e2de6cbca0169b0720dca0c668743399305e92bd
+git checkout 454197fa29b772050c3135d5de47c816ce38e62c
 cmake -H. -Bbuild && cmake --build build -- -j 48
-mv bin/odgi bin/odgi-e2de6cbca0169b0720dca0c668743399305e92bd
 cd ..
 
 git clone --recursive https://github.com/pangenome/pggb.git
