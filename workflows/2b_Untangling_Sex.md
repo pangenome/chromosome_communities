@@ -159,7 +159,7 @@ for e in 50000  ; do
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
               0 2446333 \
-              90 0.01 \
+              90 0.4 \
               0 \
               1 $refn \
               $i \
@@ -170,7 +170,7 @@ for e in 50000  ; do
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
               153962988 154399815 \
-              90 0.01 \
+              90 0.4 \
               0 \
               1 $refn \
               $i \
@@ -181,7 +181,7 @@ for e in 50000  ; do
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
               87673198 91697350 \
-              90 0.01 \
+              90 0.4 \
               0 \
               1 $refn \
               $i \
@@ -191,7 +191,7 @@ for e in 50000  ; do
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
               0 154259566 \
-              200 0.01 \
+              200 0.4 \
               0 \
               1 $refn \
               $i \
@@ -202,7 +202,7 @@ for e in 50000  ; do
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
               0 2508348 \
-              90 0.01 \
+              90 0.4 \
               0 \
               1 $refn \
               $i \
@@ -213,7 +213,7 @@ for e in 50000  ; do
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
               62072794 62510029 \
-              90 0.01 \
+              90 0.4 \
               0 \
               1 $refn \
               $i \
@@ -224,7 +224,7 @@ for e in 50000  ; do
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
               2677073 59195619 \
-              90 0.01 \
+              90 0.4 \
               0 \
               1 $refn \
               $i \
@@ -235,7 +235,7 @@ for e in 50000  ; do
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
               6150825 6450875 \
-              90 0.01 \
+              90 0.4 \
               0 \
               1 $refn \
               $i \
@@ -245,7 +245,7 @@ for e in 50000  ; do
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
               0 62460029 \
-              80 0.01 \
+              80 0.4 \
               0 \
               1 $refn \
               $i \

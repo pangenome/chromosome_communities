@@ -27,13 +27,12 @@ x <- read.delim(path_untangle_grounded_tsv) %>%
 
 #x <- x[x$self.coverage <= 1,]
 
-colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
 if (length(unique(x$target)) == 2) {
   # Sex chromosomes
-  colors <- c("#9932CC", "#4B0082")
+  colors <- c("#E76BF3", "#00BFC4")
 } else {
   # Acrocentric chromosomes
-  colors <- c(colors, "#000000", "#000000", "#000000")
+  colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
   if (length(unique(x$target)) > 5) {
     # Mobin's annotations
     colors <- c(colors, "#000000", "#000000", "#000000")
