@@ -18,6 +18,7 @@ colnames(y) <- c('num.community', 'variable', 'sequence.content.bp')
 y$variable <- as.character(y$variable)
 y[y$variable == 'unmapped',]$variable <- "not.partitioned"
 
+library(reshape2)
 xy <- merge(
   melt(x, id=c("num.community" ,"community.of")),
   y,
@@ -72,6 +73,5 @@ ggsave(
 
 # OLD CODE
 #x$community.of <- factor(x$community.of, levels=unique(x[order(as.integer(gsub("[^0-9]", "", x$community.of))),'community.of']))
-#library(reshape2)
 #co <- melt(x%>% select(-num.community), id.vars = 'community.of')
 #num_contigs <- sum(co$value)
