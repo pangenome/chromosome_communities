@@ -157,7 +157,7 @@ for e in 50000  ; do
         Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
           $path_grounded_tsv_gz \
           0 155000000 \
-          91 \
+          90 0.7 \
           0 \
           1 $refn \
           $i \

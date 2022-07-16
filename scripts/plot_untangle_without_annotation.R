@@ -3,12 +3,13 @@ path_untangle_grounded_tsv <- args[6]
 x_min <- as.numeric(args[7])
 x_max <- as.numeric(args[8])
 width <- as.numeric(args[9])
-panel_spacing <- as.numeric(args[10])
-nth.best <- as.numeric(args[11])
-ref.nth.best <- as.numeric(args[12])
-num_chr <- args[13]
-path_query_to_consider <- args[14]
-path_output <- args[15]
+height_row <- as.numeric(args[10])
+panel_spacing <- as.numeric(args[11])
+nth.best <- as.numeric(args[12])
+ref.nth.best <- as.numeric(args[13])
+num_chr <- args[14]
+path_query_to_consider <- args[15]
+path_output <- args[16]
 
 
 library(ggplot2)
@@ -87,4 +88,4 @@ p <- ggplot(
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values = colors) +
   labs(x = "Position")
-ggsave(plot = p, path_output, width = width, height = (12+length(unique(xx$query))*nth.best), units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
+ggsave(plot = p, path_output, width = width, height = length(unique(xx$query))*nth.best, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
