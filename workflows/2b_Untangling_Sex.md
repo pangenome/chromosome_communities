@@ -139,7 +139,7 @@ done
 ```
 
 
-Plot:
+Plot (`[start-50kbps,end+50kbps]` for PARs/XTRs regions):
 
 ```shell
 #PAR1/2/3
