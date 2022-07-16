@@ -147,7 +147,7 @@ Plot:
 
 for e in 50000  ; do
   for m in 1000  ; do
-    for refn in 1 10; do
+    for refn in 1 ; do
       (echo X; echo Y) | while read i; do      
         echo "-e $e -m $m -refn $refn chr$i"
     
@@ -157,7 +157,7 @@ for e in 50000  ; do
         Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
           $path_grounded_tsv_gz \
           0 155000000 \
-          90 0.7 \
+          200 0.1 \
           0 \
           1 $refn \
           $i \
@@ -173,59 +173,6 @@ for e in 50000  ; do
     done
   done
 done
-
-for refpattern in HG002; do
-  path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle_sex/$refpattern.target_paths.txt
-
-  for e in 5000 50000 100000; do
-    for m in 500 1000 10000; do
-      for j in 0 0.8; do
-        j_str=$(echo $j | sed 's/\.//g')
-        (seq 1 5; seq 10 10 50) | while read n; do 
-          echo "-e $e -m $m -j $j -n $n"
-    
-          path_grounded_all_references_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$refpattern#chrSEX.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz
-          if [[ ! -s ${path_grounded_all_references_tsv_gz} ]]; then
-            # Merge single reference results
-            cat \
-              <(zcat /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$refpattern*.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz | head -n 1) \
-              <(zcat /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$refpattern*.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz | grep query -v) |\
-              pigz -c > x.tsv.gz
-            # Rename after to avoid getting itself with the previous '*' expansion
-            mv x.tsv.gz $path_grounded_all_references_tsv_gz
-          fi;
-
-          Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all.R $path_grounded_all_references_tsv_gz "-e $e -m $m -j $j -n $n" 0 155000000 120 800
-        done
-      done
-    done
-  done
-done
-
-mv /lizardfs/guarracino/chromosome_communities/untangle/grounded/*.pdf /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/
-
-# Merge
-for refpattern in HG002; do
-  path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/$refpattern.target_paths.txt
-  
-  for e in 5000 50000 100000; do
-    for m in 500 1000 10000; do
-      for j in 0 0.8; do
-        echo "-e $e -m $m -j $j"
-            
-        j_str=$(echo $j | sed 's/\.//g')
-        PDFs=$((seq 1 5; seq 10 10 50) | while read n; do \
-          echo /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.$refpattern#chrSEX.e$e.m$m.j${j_str}.n$n.grounded.tsv.gz.pdf
-        done | tr '\n' ' ')
-        #echo $PDFs
-
-        /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite $PDFs /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.$refpattern#chrSEX.e$e.m$m.j${j_str}.merged.grounded.tsv.gz.pdf
-      done
-    done
-  done
-done
-
-
 ```
 
 
