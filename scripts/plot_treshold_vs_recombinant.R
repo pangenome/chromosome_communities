@@ -10,12 +10,10 @@ x$SelfCovThreshold <- as.factor(x$SelfCovThreshold)
 x$SelfCovThreshold <- factor(x$SelfCovThreshold, levels = c("0", "1.5", "1"))
 options(scipen=10000) # Disable scientific notation on axes
 
-ggplot(x, aes(x=Threshold, y=Mbps)) + 
+ggplot(x, aes(x=Threshold, y=Mbps, color=SelfCovThreshold)) + 
   geom_line() + 
   theme_bw() + 
   facet_grid(~SelfCovThreshold) +
-  scale_x_continuous(breaks = round(seq(min(x$Threshold), max(x$Threshold), by = 0.005), 3)) +
+  scale_x_continuous(breaks = round(seq(min(x$Threshold), max(x$Threshold), by = 0.01), 3)) +
   scale_y_continuous(breaks = round(seq(0, max(x$Mbps), by = 0.5), 3)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
-  

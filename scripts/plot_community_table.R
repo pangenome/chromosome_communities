@@ -16,7 +16,7 @@ x$community.of <- factor(x$community.of, levels=rev(mylevels))
 y <- read.table(path_community_2_size, header = F)
 colnames(y) <- c('num.community', 'variable', 'sequence.content.bp')
 y$variable <- as.character(y$variable)
-y[y$variable == 'unmapped',]$variable <- "not.partitioned"
+y[y$variable == 'unmapped',]$variable <- "Not partitioned"
 
 library(reshape2)
 xy <- merge(
@@ -41,7 +41,7 @@ p <- ggplot(
   )
 ) +
   geom_tile() + 
-  scale_fill_gradient(low = "#FAFAFA", high = "black") +
+  scale_fill_gradient(low = "#FAFAFA", high = "red") +
   theme_bw() +
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -57,20 +57,19 @@ p <- ggplot(
     #axis.title.y=element_blank()
     panel.grid.major = element_blank(), panel.grid.minor = element_blank()
   ) +
-  labs(x = "Partitioning", y = 'Community', fill = '% of sequence') + 
+  labs(x = "Chromosome", y = 'Community', fill = '% of sequence') + 
   theme(aspect.ratio=1)
-ggsave(
-  plot = p,
-  path_output,
-  width = 25, height = 25, units = "cm", dpi = 300, bg = "transparent", limitsize = F)
+#ggsave(
+#  plot = p,
+#  path_output,
+#  width = 25, height = 25, units = "cm", dpi = 300, bg = "transparent", limitsize = F)
 
 p <- p +
   #geom_text(aes(label=round(sequence.content.bp / total_sequence_content_bp, digits = 10)), size=2.5, color="red") + 
-  geom_text(aes(label=value), size=2.6, color="#E89020")
-
+  geom_text(aes(label=value), size=2.6, color="black")
 ggsave(
   plot = p,
-  paste0(path_output, '.with_counts.pdf'),
+  paste0(path_output),
   width = 25, height = 25, units = "cm", dpi = 300, bg = "transparent", limitsize = F)
 
 # OLD CODE

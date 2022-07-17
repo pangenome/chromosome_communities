@@ -29,6 +29,7 @@ cat \
 samtools faidx chrSEX+refs.fa.gz
 ```
 
+
 ### Pangenome building
 
 Apply `pggb` on the chromosome-partitioned HPRC dataset:
@@ -41,6 +42,7 @@ RUN_PGGB=/home/guarracino/tools/pggb/pggb-a4a6668d9ece42c80ce69dc354f0cb59a84928
 num_of_haplotypes=$(cut -f 1,2 -d '#' /lizardfs/guarracino/chromosome_communities/assemblies/chrSEX+refs.fa.gz.fai | sort | uniq | wc -l)
 sbatch -p highmem -c 48 --job-name sexpggb --wrap "hostname; cd /scratch && $RUN_PGGB -i /lizardfs/guarracino/chromosome_communities/assemblies/chrSEX+refs.fa.gz -o chrSEX+refs.s50k.l250k.p98.n${num_of_haplotypes} -t 48 -s 50k -l 250k -p 98 -n ${num_of_haplotypes} -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrSEX+refs.s50k.l250k.p98.n${num_of_haplotypes} /lizardfs/guarracino/chromosome_communities/graphs";
 ```
+
 
 ### Untangling
 
@@ -58,6 +60,7 @@ prefix=$(basename $path_input_og .og)
 RUN_ODGI=/home/guarracino/tools/odgi/bin/odgi-454197fa29b772050c3135d5de47c816ce38e62c
 ```
 
+
 Untangle with respect to all sex chromosomes and emit the cut points:
 
 ```shell
@@ -73,6 +76,7 @@ for e in 50000; do
   done
 done
 ```
+
 
 Untangle with respect to a single sex chromosome, using always the same cut points:
 
@@ -94,6 +98,7 @@ for e in 50000; do
   done
 done
 ```
+
 
 Fix best hits (if there are multiple best hits, put as first the target-chromosome of origin of the contig):
 
@@ -283,10 +288,12 @@ for e in 50000; do
 done
 ```
 
-
+CONTINUE
 Remove unreliable regions:
 
 ```shell
+rm x.tsv # Cleaning
+
 for e in 50000; do
   for m in 1000; do
     cat $path_targets_txt | while read ref; do
@@ -335,19 +342,19 @@ Plot (`[start-500kbps,end+500kbps]` centered in the PARs/XTRs regions):
 #PAR1/2/3
 # https://link.springer.com/article/10.1007/s10142-013-0323-6/figures/1
 
-for e in 50000  ; do
-  for m in 1000  ; do
-    for refn in 1 ; do
+for e in 50000; do
+  for m in 1000; do
+    for refn in 1 10; do
       (echo X; echo Y) | while read i; do      
         echo "-e $e -m $m -refn $refn chr$i"
     
-        path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr$i.e$e.m$m.grounded.tsv.gz
-        PREFIX=$(basename $path_grounded_tsv_gz .tsv.gz);
+        path_grounded_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.reliable.tsv.gz
+        PREFIX=$(basename $path_grounded_reliable_tsv_gz .tsv.gz);
         
         if [[ $i == "X" ]]; then
             # chrX#PAR1:0-2394410
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
-              $path_grounded_tsv_gz \
+              $path_grounded_reliable_tsv_gz \
               0 2894410 \
               90 0.4 \
               0 \
@@ -358,7 +365,7 @@ for e in 50000  ; do
               
             # chrX#PAR2:153925834-154259566
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
-              $path_grounded_tsv_gz \
+              $path_grounded_reliable_tsv_gz \
               153425834 154259566 \
               90 0.4 \
               0 \
@@ -369,7 +376,7 @@ for e in 50000  ; do
               
             # chrX#PAR2:87642550-91570785
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
-              $path_grounded_tsv_gz \
+              $path_grounded_reliable_tsv_gz \
               87142550 92070785 \
               90 0.4 \
               0 \
@@ -380,7 +387,7 @@ for e in 50000  ; do
         
             # Full chromosome X
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
-              $path_grounded_tsv_gz \
+              $path_grounded_reliable_tsv_gz \
               0 154259566 \
               200 0.4 \
               0 \
@@ -391,7 +398,7 @@ for e in 50000  ; do
         else
             # chrY#PAR1:0-2458320
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
-              $path_grounded_tsv_gz \
+              $path_grounded_reliable_tsv_gz \
               0 2958320 \
               90 0.4 \
               0 \
@@ -402,7 +409,7 @@ for e in 50000  ; do
               
             # chrY#PAR2:62122809-62460029
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
-              $path_grounded_tsv_gz \
+              $path_grounded_reliable_tsv_gz \
               61622809 62460029 \
               90 0.4 \
               0 \
@@ -413,7 +420,7 @@ for e in 50000  ; do
               
             # chrY#XTR1:2727072-5914561
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
-              $path_grounded_tsv_gz \
+              $path_grounded_reliable_tsv_gz \
               2227072 6414561 \
               90 0.4 \
               0 \
@@ -424,7 +431,7 @@ for e in 50000  ; do
               
             # chrY#XTR2:6200973-6400875
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
-              $path_grounded_tsv_gz \
+              $path_grounded_reliable_tsv_gz \
               5700973 6900875 \
               90 0.4 \
               0 \
@@ -435,7 +442,7 @@ for e in 50000  ; do
             
             # Full chromosome Y
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
-              $path_grounded_tsv_gz \
+              $path_grounded_reliable_tsv_gz \
               0 62460029 \
               80 0.4 \
               0 \
@@ -456,12 +463,78 @@ for e in 50000  ; do
 done
 ```
 
-CONTINUE:
-plots 5hits
-COMPUTE SUPPORT?
-STATISTICS REMOVED REGIONS
-HISTOGRAM UNTANGLED SEGMENT LENGTH
-ESTIMATE REGIONS THAT CAN RECOMBINE
+Plot 2 hits: XXX
+
+Compute support: XXX
+
+```shell
+# Merge files for all sex chromosomes (used for computing the support and the histogram length)
+for e in 50000; do
+  for m in 1000 ; do
+    path_grounded_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.reliable.tsv.gz
+    if [[ ! -s ${path_grounded_reliable_ALL_tsv_gz} ]]; then
+      cat \
+        <(zcat /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.reliable.tsv.gz | grep 'self.coverage' -m 1) \
+        <(zcat /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.reliable.tsv.gz | grep 'self.coverage' -v ) |\
+        pigz -c -9 > $path_grounded_reliable_ALL_tsv_gz
+    fi;
+  done
+done
+
+xxxxxxxx
+```
+
+Statistics on removed regions: XXX
+
+Statistics on untangled segment lengths: XXX
+
+Estimate regions that can recombine using multi-hit untangled regions:
+
+```shell
+for e in 50000; do
+  for m in 1000; do
+    path_grounded_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.reliable.tsv.gz
+    PREFIX=$(basename $path_grounded_reliable_ALL_tsv_gz .tsv.gz)
+   
+    for sc in 0 1.5 1; do
+      for j in `seq 0.8 0.01 1.0`; do
+        j=$(echo $j | sed 's/\,/./g')
+        j_str=$(echo $j | sed 's/\.//g')
+        sc_str=$(echo $sc | sed 's/\.//g')
+        echo $e $m $sc $j
+          
+        path_recombinant_regions_bed=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/$PREFIX.recombinant_regions.sc${sc_str}.j${j_str}.bed
+        if [[ ! -s $path_recombinant_regions_bed ]]; then
+          python3 scripts/recombination_proxy_ranges.py $path_grounded_reliable_ALL_tsv_gz $j $sc > $path_recombinant_regions_bed
+        fi
+      done
+    done
+  done
+done
+
+# Collect values in a table
+for e in 50000; do
+  for m in 1000 ; do
+    path_grounded_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.reliable.tsv.gz
+    PREFIX=$(basename $path_grounded_reliable_ALL_tsv_gz .tsv.gz)
+    
+    rm $PREFIX.recombinant_regions.table.tsv
+    for sc in 0 1.5 1; do
+      for j in `seq 0.8 0.01 1.0`; do
+        j=$(echo $j | sed 's/\,/./g')
+        j_str=$(echo $j | sed 's/\.//g')
+        sc_str=$(echo $sc | sed 's/\.//g')
+        echo $e $m $sc $j
+          
+        path_recombinant_regions_bed=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/$PREFIX.recombinant_regions.sc${sc_str}.j${j_str}.bed
+        bedtools merge -i <(cut -f 4,5,6 $path_recombinant_regions_bed | sed '1d' | bedtools sort ) | \
+          awk -v sc=$sc -v j=$j -v OFS='\t' '{SUM+=$3-$2}END{print(sc,j,SUM)}' >> $PREFIX.recombinant_regions.table.tsv
+      done
+    done
+  done
+done
+
+```
 
 
 [//]: # (## Variant calling)
