@@ -345,8 +345,10 @@ Plot (`[start-500kbps,end+500kbps]` centered in the PARs/XTRs regions):
 for e in 50000; do
   for m in 1000; do
     for refn in 1 10; do
-      (echo X; echo Y) | while read i; do      
-        echo "-e $e -m $m -refn $refn chr$i"
+      (echo X; echo Y) | while read i; do     
+        ref=chm13#chr$i
+        
+        echo "-e $e -m $m -refn $refn $ref"
     
         path_grounded_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.reliable.tsv.gz
         PREFIX=$(basename $path_grounded_reliable_tsv_gz .tsv.gz);
@@ -360,7 +362,7 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR1.pdf
               
             # chrX#PAR2:153925834-154259566
@@ -371,7 +373,7 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR2.pdf
               
             # chrX#PAR2:87642550-91570785
@@ -382,7 +384,7 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.XTR.pdf
         
             # Full chromosome X
@@ -393,7 +395,7 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.pdf
         else
             # chrY#PAR1:0-2458320
@@ -404,7 +406,7 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR1.pdf
               
             # chrY#PAR2:62122809-62460029
@@ -415,7 +417,7 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR2.pdf
               
             # chrY#XTR1:2727072-5914561
@@ -426,7 +428,7 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.XTR1.pdf
               
             # chrY#XTR2:6200973-6400875
@@ -437,7 +439,7 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.XTR2.pdf
             
             # Full chromosome Y
@@ -448,7 +450,7 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.pdf
         fi
       done
@@ -481,7 +483,12 @@ for e in 50000; do
   done
 done
 
-xxxxxxxx
+#Take sex chromosome lengths
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx todo
+
+# Support
+# guix install r-ggridges
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx todo
 ```
 
 Statistics on removed regions: XXX
