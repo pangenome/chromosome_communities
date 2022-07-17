@@ -25,8 +25,11 @@ xy <- merge(
   by = c('num.community', 'variable')
 ) 
 
-num_contigs <- sum(xy$value)
+# Info grouped by community
+#xy %>% group_by(num.community) %>% summarise(num.contigs.comm = sum(value)) %>% View()
+#xy %>% group_by(num.community) %>% summarise(sequence.content.comm = sum(sequence.content.bp)) %>% View()
 
+#num_contigs <- sum(xy$value)
 #xy$ratio <- xy$sequence.content.bp / total_sequence_content_bp * 100
 
 p <- ggplot(
@@ -35,7 +38,6 @@ p <- ggplot(
     x = variable,
     y = community.of,
     fill = sequence.content.bp / total_sequence_content_bp * 100.0
-   #fill = value / num_contigs
   )
 ) +
   geom_tile() + 

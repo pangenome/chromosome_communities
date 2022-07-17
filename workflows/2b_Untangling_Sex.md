@@ -55,26 +55,30 @@ grep chm13 $path_fasta_fai | cut -f 1 > $path_targets_txt
 path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrSEX+refs.s50k.l250k.p98.n102/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.og
 prefix=$(basename $path_input_og .og)
 
-RUN_ODGI=/home/guarracino/tools/odgi/bin/odgi-e2de6cbca0169b0720dca0c668743399305e92bd
+RUN_ODGI=/home/guarracino/tools/odgi/bin/odgi-454197fa29b772050c3135d5de47c816ce38e62c
 ```
 
+Untangle with respect to all sex chromosomes and emit the cut points:
+
 ```shell
-# All references and emit cut points
 for e in 50000; do
-  for m in 1000 2000 5000; do
+  for m in 1000; do
     path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.bed.gz
     path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.cut_points.txt
     
     if [[ ! -s ${path_cut_points_txt} ]]; then
       echo "-e $e -m $m"
-      sbatch -p workers -c 16 --job-name sexuntangle --wrap "\time -v $RUN_ODGI untangle -t 16 -P -i $path_input_og -R $path_targets_txt -e $e -m $m --cut-points-output $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_bed_gz"
+      sbatch -p workers -c 48 --job-name sexuntangle --wrap "\time -v $RUN_ODGI untangle -t 48 -P -i $path_input_og -R $path_targets_txt -e $e -m $m --cut-points-output $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_bed_gz"
     fi;
   done
 done
-  
-# Single reference by using the same cut points
+```
+
+Untangle with respect to a single sex chromosome, using always the same cut points:
+
+```shell
 for e in 50000; do
-  for m in 1000 2000 5000; do
+  for m in 1000; do
     echo "-e $e -m $m"
       
     cat $path_targets_txt | while read ref; do
@@ -84,14 +88,152 @@ for e in 50000; do
       if [[ ! -s ${path_ref_bed_gz} ]]; then
         path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.cut_points.txt
         
-        sbatch -p workers -c 8 --job-name sexuntangle --wrap "\time -v $RUN_ODGI untangle -t 8 -P -i $path_input_og -r $ref -e $e -m $m --cut-points-input $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_ref_bed_gz"
+        sbatch -p workers -c 48 --job-name sexuntangle --wrap "\time -v $RUN_ODGI untangle -t 48 -P -i $path_input_og -r $ref -e $e -m $m --cut-points-input $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_ref_bed_gz"
       fi
     done
   done
 done
+```
+
+Fix best hits (if there are multiple best hits, put as first the target-chromosome of origin of the contig):
+
+```shell
+for e in 50000; do
+  for m in 1000 ; do
+    path_ref_fixed_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.fixed.bed.gz
+    if [[ ! -s ${path_ref_fixed_bed_gz} ]]; then
+      echo "-e $e -m $m"
+      
+      path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.bed.gz
+      python3 /lizardfs/guarracino/chromosome_communities/scripts/fix_best_hit.py \
+        $path_bed_gz \
+        <(cat \
+            <(cat assemblies/partitioning/*.partitions.tsv | sed 's/chr/chm13#chr/') \
+            <(echo -e HG002-bakeoff#PAT#SY_unloc_13"\t"chm13#chrY) \
+            <(echo -e HG002-bakeoff#PAT#SY_unloc_15"\t"chm13#chrY) \
+            <(echo -e HG002-bakeoff#PAT#SY_unloc_19"\t"chm13#chrY) \
+            <(echo -e HG002-bakeoff#PAT#SY_unloc_21"\t"chm13#chrY) \
+            <(echo -e HG002-bakeoff#PAT#SY_unloc_22"\t"chm13#chrY) \
+            <(echo -e HG002-bakeoff#PAT#SY_unloc_22"\t"chm13#chrY) \
+            <(echo -e HG002#1#JAHKSE010000383.1"\t"chm13#chrY) \
+            <(echo -e HG002#1#JAHKSE010000141.1"\t"chm13#chrY) \
+            <(echo -e HG002#1#JAHKSE010000378.1"\t"chm13#chrY) \
+            <(echo -e HG002#1#JAHKSE010000376.1"\t"chm13#chrY) \
+            <(echo -e HG002#1#JAHKSE010000341.1"\t"chm13#chrY) \
+            <(echo -e HG002#1#JAHKSE010000447.1"\t"chm13#chrY) \
+            <(echo -e HG005#1#JAHEPO010000097.1"\t"chm13#chrY) \
+            <(echo -e HG005#1#JAHEPO010000270.1"\t"chm13#chrY) \
+            <(echo -e HG00621#1#JAHBCD010000210.1"\t"chm13#chrY) \
+            <(echo -e HG005#1#JAHEPO010000116.1"\t"chm13#chrY) \
+            <(echo -e HG005#1#JAHEPO010000199.1"\t"chm13#chrX) \
+            <(echo -e HG00673#2#JAHBBY010000245.1"\t"chm13#chrX) \
+            <(echo -e HG005#2#JAHEPN010000186.1"\t"chm13#chrX) \
+            <(echo -e HG00733#1#JAHEPQ010000312.1"\t"chm13#chrX) \
+            <(echo -e HG01071#2#JAHBCE010000198.1"\t"chm13#chrX) \
+            <(echo -e HG01071#1#JAHBCF010000145.1"\t"chm13#chrX) \
+            <(echo -e HG01109#1#JAHEPA010000188.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000268.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000227.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000307.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000343.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000333.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000405.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000337.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000344.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000442.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000458.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000325.1"\t"chm13#chrY) \
+            <(echo -e HG01123#2#JAGYYY010000193.1"\t"chm13#chrX) \
+            <(echo -e HG01175#1#JAHAMA010000276.1"\t"chm13#chrX) \
+            <(echo -e HG01175#2#JAHALZ010000239.1"\t"chm13#chrX) \
+            <(echo -e HG01243#1#JAHEOY010000277.1"\t"chm13#chrY) \
+            <(echo -e HG01243#1#JAHEOY010000307.1"\t"chm13#chrY) \
+            <(echo -e HG01243#1#JAHEOY010000291.1"\t"chm13#chrY) \
+            <(echo -e HG01258#1#JAGYYV010000281.1"\t"chm13#chrY) \
+            <(echo -e HG01358#2#JAGYZA010000069.1"\t"chm13#chrX) \
+            <(echo -e HG01891#2#JAGYVN010000149.1"\t"chm13#chrX) \
+            <(echo -e HG01891#1#JAGYVO010000131.1"\t"chm13#chrX) \
+            <(echo -e HG01928#1#JAGYVQ010000246.1"\t"chm13#chrY) \
+            <(echo -e HG01952#1#JAHAME010000217.1"\t"chm13#chrY) \
+            <(echo -e HG02055#1#JAHEPK010000284.1"\t"chm13#chrY) \
+            <(echo -e HG02145#1#JAHKSG010000213.1"\t"chm13#chrY) \
+            <(echo -e HG02145#1#JAHKSG010000422.1"\t"chm13#chrY) \
+            <(echo -e HG02145#1#JAHKSG010000527.1"\t"chm13#chrY) \
+            <(echo -e HG02145#1#JAHKSG010000498.1"\t"chm13#chrY) \
+            <(echo -e HG02145#1#JAHKSG010000544.1"\t"chm13#chrY) \
+            <(echo -e HG02145#1#JAHKSG010000728.1"\t"chm13#chrY) \
+            <(echo -e HG02145#1#JAHKSG010000766.1"\t"chm13#chrY) \
+            <(echo -e HG02145#1#JAHKSG010000668.1"\t"chm13#chrY) \
+            <(echo -e HG02148#1#JAHAMG010000114.1"\t"chm13#chrX) \
+            <(echo -e HG02486#1#JAGYVM010000047.1"\t"chm13#chrY) \
+            <(echo -e HG02148#2#JAHAMF010000125.1"\t"chm13#chrX) \
+            <(echo -e HG02486#1#JAGYVM010000189.1"\t"chm13#chrY) \
+            <(echo -e HG02572#1#JAHAOW010000422.1"\t"chm13#chrY) \
+            <(echo -e HG02572#1#JAHAOW010000309.1"\t"chm13#chrY) \
+            <(echo -e HG02572#1#JAHAOW010000471.1"\t"chm13#chrY) \
+            <(echo -e HG02572#1#JAHAOW010000523.1"\t"chm13#chrY) \
+            <(echo -e HG02572#1#JAHAOW010000458.1"\t"chm13#chrY) \
+            <(echo -e HG02572#1#JAHAOW010000535.1"\t"chm13#chrY) \
+            <(echo -e HG02572#2#JAHAOV010000449.1"\t"chm13#chrY) \
+            <(echo -e HG02622#2#JAHAON010000142.1"\t"chm13#chrX) \
+            <(echo -e HG02717#1#JAHAOS010000199.1"\t"chm13#chrY) \
+            <(echo -e HG02886#2#JAHAOT010000422.1"\t"chm13#chrX) \
+            <(echo -e HG03098#1#JAHEPM010000129.1"\t"chm13#chrY) \
+            <(echo -e HG03098#1#JAHEPM010000235.1"\t"chm13#chrY) \
+            <(echo -e HG03098#1#JAHEPM010000398.1"\t"chm13#chrY) \
+            <(echo -e HG03098#1#JAHEPM010000264.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000175.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000301.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000359.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000353.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000402.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000380.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000404.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000442.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000397.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000407.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000414.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000466.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000510.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000522.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000516.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000418.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000548.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000476.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000591.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000542.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000554.1"\t"chm13#chrY) \
+            <(echo -e HG03516#2#JAGYYS010000236.1"\t"chm13#chrX) \
+            <(echo -e HG03579#1#JAGYVU010000286.1"\t"chm13#chrY) \
+            <(echo -e HG03579#1#JAGYVU010000293.1"\t"chm13#chrY) \
+            <(echo -e HG03579#1#JAGYVU010000236.1"\t"chm13#chrY) \
+            <(echo -e HG03579#1#JAGYVU010000411.1"\t"chm13#chrY) \
+            <(echo -e HG03579#1#JAGYVU010000348.1"\t"chm13#chrY) \
+            <(echo -e HG03579#1#JAGYVU010000340.1"\t"chm13#chrY) \
+            <(echo -e HG03579#1#JAGYVU010000420.1"\t"chm13#chrY) \
+            <(echo -e HG03540#2#JAGYVX010000220.1"\t"chm13#chrX) \
+            <(echo -e NA18906#2#JAHEON010000121.1"\t"chm13#chrX) \
+            <(echo -e NA19240#1#JAHEOM010000255.1"\t"chm13#chrX) \
+            <(echo -e NA21309#1#JAHEPC010000444.1"\t"chm13#chrX) \
+            <(echo -e NA20129#2#JAHEPD010000373.1"\t"chm13#chrX) \
+            <(echo -e NA21309#1#JAHEPC010000484.1"\t"chm13#chrX) \
+            <(echo -e NA21309#1#JAHEPC010000136.1"\t"chm13#chrX) \
+            <(echo -e HG002-bakeoff#PAT#scaffold_235"\t"chm13#chrY) \
+            <(echo -e chm13#chrX"\t"chm13#chrX) \
+            <(echo -e chm13#chrY"\t"chm13#chrY) \
+            <(echo -e grch38#chrX"\t"chm13#chrX) \
+            <(echo -e grch38#chrY"\t"chm13#chrY)) | tr ' ' '\t' | pigz -c -9 > $path_ref_fixed_bed_gz
+    fi;
+  done
+done
+
+# Fixed 13900 hits covering 21791399 bps on the queries.
+```
 
 
-# Grounding
+Grounding (applying filters) and annotation:
+
+```shell
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded
 
 for e in 50000; do
@@ -100,7 +242,7 @@ for e in 50000; do
       path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.tsv.gz
             
       if [[ ! -s ${path_grounded_tsv_gz} ]]; then
-        echo "-e $e -m $m $ref"
+        echo "-e $e -m $m $ref grounding"
 
         # Grounding
         ( echo query query.begin query.end target target.begin target.end jaccard strand self.coverage nth.best ref ref.begin ref.end ref.jaccard ref.nth.best | tr ' ' '\t'
@@ -108,8 +250,11 @@ for e in 50000; do
             <(zcat /lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.bed.gz | awk -v j=0 -v n=5 '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) \
             <(zcat /lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz | awk -v j=0 -v n=10 '{ if($7 >= j && $10 <= n) {print $1"_"$2, $0} }' | tr ' ' '\t' | sort -k 1,1) | \
           tr ' ' '\t' | grep -v '^#' | cut -f 2- | cut -f -10,14-17,20 | sort -k 1,3 -k 7,7nr -k 10,10n -k 14,14nr -k 15,15n ) | tr ' ' '\t' | pigz -c > x.tsv.gz
-                    
-        # Contigs overlapping (or close at least 100kbps to) a PAR
+
+
+        echo "-e $e -m $m $ref filtering&annotation"
+
+        # Contigs overlapping (or close at least 100kbps to) a PAR/XTR region
         ref_chr=$(echo $ref | sed 's/chm13#//')
         bedtools intersect \
           -a <(zcat x.tsv.gz | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
@@ -139,7 +284,52 @@ done
 ```
 
 
-Plot (`[start-50kbps,end+50kbps]` for PARs/XTRs regions):
+Remove unreliable regions:
+
+```shell
+for e in 50000; do
+  for m in 1000; do
+    cat $path_targets_txt | while read ref; do
+               path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.tsv.gz
+      path_grounded_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.reliable.tsv.gz
+
+      if [[ ! -s ${path_grounded_reliable_tsv_gz} ]]; then
+        echo "-e $e -m $m $ref"
+
+        # Skip verkko's and bakeoff's contigs because we don't have the unreliable regions for them
+        zcat $path_grounded_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT\|HG01978#MAT\|HG01978#PAT\|bakeoff' -v | cut -f 1 | sort | uniq | while read CONTIG; do
+          SAMPLE=$( echo $CONTIG | cut -f 1 -d '#')
+
+          path_unreliable_bed=/lizardfs/guarracino/HPRC/annotations/unreliable/$SAMPLE.hifi.flagger_final.simplified.unreliable_only.bed
+          if [[ -s $path_unreliable_bed ]]; then
+            #echo $CONTIG "--->" $SAMPLE
+            
+            zgrep "^$CONTIG" $path_grounded_tsv_gz | sort -k 2n | awk -v OFS='\t' '{print($1,$2,$3,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$11"_"$12"_"$13"_"$14"_"$15"_"$16)}' > x.bed
+            grep $CONTIG $path_unreliable_bed > y.bed
+            # -A: remove entire feature if any overlap
+            bedtools subtract -a x.bed -b y.bed -A |\
+              awk -v OFS='\t' '{split($4, a, "_"); print($1,$2,$3,a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13])}' >> x.tsv
+            rm x.bed y.bed
+          else
+            zgrep "^$CONTIG" $path_grounded_tsv_gz | sort -k 2n >> x.tsv
+          fi
+        done
+        
+        # Re-take verkko's and bakeoff's untangled regions
+        zcat $path_grounded_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT\|HG01978#MAT\|HG01978#PAT\|bakeoff' >> x.tsv
+        
+        cat \
+          <( zcat $path_grounded_tsv_gz | head -n 1 ) \
+          <( sort -k 1,3 -k 7,7nr -k 10,10n -k 14,14nr -k 15,15n x.tsv) | pigz -c -9 > $path_grounded_reliable_tsv_gz
+        rm x.tsv
+      fi;
+    done
+  done
+done
+```
+
+
+Plot (`[start-500kbps,end+500kbps]` centered in the PARs/XTRs regions):
 
 ```shell
 #PAR1/2/3
@@ -155,10 +345,10 @@ for e in 50000  ; do
         PREFIX=$(basename $path_grounded_tsv_gz .tsv.gz);
         
         if [[ $i == "X" ]]; then
-            # chrX#PAR1:0-2396333
+            # chrX#PAR1:0-2394410
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
-              0 2446333 \
+              0 2894410 \
               90 0.4 \
               0 \
               1 $refn \
@@ -166,10 +356,10 @@ for e in 50000  ; do
               <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR1.pdf
               
-            # chrX#PAR2:154012988-154349815
+            # chrX#PAR2:153925834-154259566
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
-              153962988 154399815 \
+              153425834 154259566 \
               90 0.4 \
               0 \
               1 $refn \
@@ -177,10 +367,10 @@ for e in 50000  ; do
               <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR2.pdf
               
-            # chrX#PAR2:87723198-91647350
+            # chrX#PAR2:87642550-91570785
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
-              87673198 91697350 \
+              87142550 92070785 \
               90 0.4 \
               0 \
               1 $refn \
@@ -188,6 +378,7 @@ for e in 50000  ; do
               <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.XTR.pdf
         
+            # Full chromosome X
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
               0 154259566 \
@@ -198,10 +389,10 @@ for e in 50000  ; do
               <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.pdf
         else
-            # chrY#PAR1:0-2458348
+            # chrY#PAR1:0-2458320
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
-              0 2508348 \
+              0 2958320 \
               90 0.4 \
               0 \
               1 $refn \
@@ -209,10 +400,10 @@ for e in 50000  ; do
               <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR1.pdf
               
-            # chrY#PAR2:62122794-62460029
+            # chrY#PAR2:62122809-62460029
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
-              62072794 62510029 \
+              61622809 62460029 \
               90 0.4 \
               0 \
               1 $refn \
@@ -220,10 +411,10 @@ for e in 50000  ; do
               <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR2.pdf
               
-            # chrY#XTR1:2727073-59145619
+            # chrY#XTR1:2727072-5914561
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
-              2677073 59195619 \
+              2227072 6414561 \
               90 0.4 \
               0 \
               1 $refn \
@@ -231,17 +422,18 @@ for e in 50000  ; do
               <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.XTR1.pdf
               
-            # chrY#XTR2:6200825-6400875
+            # chrY#XTR2:6200973-6400875
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
-              6150825 6450875 \
+              5700973 6900875 \
               90 0.4 \
               0 \
               1 $refn \
               $i \
               <(zcat $path_grounded_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.XTR2.pdf
-              
+            
+            # Full chromosome Y
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_tsv_gz \
               0 62460029 \
@@ -263,6 +455,13 @@ for e in 50000  ; do
   done
 done
 ```
+
+CONTINUE:
+plots 5hits
+COMPUTE SUPPORT?
+STATISTICS REMOVED REGIONS
+HISTOGRAM UNTANGLED SEGMENT LENGTH
+ESTIMATE REGIONS THAT CAN RECOMBINE
 
 
 [//]: # (## Variant calling)

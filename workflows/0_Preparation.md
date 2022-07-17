@@ -38,7 +38,7 @@ git checkout a4a6668d9ece42c80ce69dc354f0cb59a849286f
 sed 's,"$fmt" wfmash,"$fmt" ~/tools/wfmash/build/bin/wfmash-ad8aebae1be96847839778af534866bc9545adb9,g' pggb -i
 sed 's,"$fmt" seqwish,"$fmt" ~/tools/seqwish/bin/seqwish-706ef7e2640e38a75ae7435fb57f7a6c8e3ada2c,g' pggb -i
 sed 's,"$fmt" smoothxg,"$fmt" ~/tools/smoothxg/bin/smoothxg-b3f4578f37000922cdd193c2d183951f48f6e612,g' pggb -i
-sed 's,"$fmt" odgi,"$fmt" ~/tools/odgi/bin/odgi-e2de6cbca0169b0720dca0c668743399305e92bd,g' pggb -i
+sed 's,"$fmt" odgi,"$fmt" ~/tools/odgi/bin/odgi-454197fa29b772050c3135d5de47c816ce38e62c,g' pggb -i
 mv pggb pggb-a4a6668d9ece42c80ce69dc354f0cb59a849286f
 cd ..
 
@@ -285,7 +285,7 @@ done
 Put the CHM13 (v2.0) and GRCh38 references together:
 
 ```shell
-cd /lizardfs/guarracino/chromosome_communities/assemblies
+cd /lizardfs/guarracino/chromosome_communities/assemblies/
 
 cat \
   <( /home/guarracino/tools/fastix/target/release/fastix-331c1159ea16625ee79d1a82522e800c99206834 -p 'chm13#' <(zcat /lizardfs/erikg/human/chm13v2.0.fa.gz) ) \
