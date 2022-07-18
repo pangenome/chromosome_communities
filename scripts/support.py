@@ -22,7 +22,7 @@ query_to_consider_set = set()
 
 with open(path_query_to_consider_txt) as f:
     for line in f:
-        query = line.strip().split('\t')
+        query = line.strip().split('\t')[0]
         query_to_consider_set.add(query)
 
 # Read untangling information

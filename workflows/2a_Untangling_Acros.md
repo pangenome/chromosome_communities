@@ -1052,11 +1052,11 @@ done
 #Take acrocentric chromosome lengths
 grep '^chm13' /lizardfs/guarracino/chromosome_communities/assemblies/chrA.pan+HG002chrAprox.fa.gz.fai | cut -f 1,2 > chm13#ACRO.len.tsv
 
-# Support
+# Support, by considering only HiFi-only contigs anchored to the q-arms (so no HG002-HiFi-only) and HG002-verkko
 # guix install r-ggridges
 for e in 50000; do
   for m in 1000; do
-    for refn in 1 10; do
+    for refn in 1; do
       echo "-e $e -m $m -refn $refn"
 
       path_grounded_pq_touching_reliable_ALL_support_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.n1.nref${refn}.tsv.gz
@@ -1064,7 +1064,8 @@ for e in 50000; do
         path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
         python3 /lizardfs/guarracino/chromosome_communities/scripts/support.py \
           $path_grounded_pq_touching_reliable_ALL_tsv_gz \
-          chm13#ACRO.len.tsv 1 $refn | \
+          chm13#ACRO.len.tsv 1 $refn \
+          <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq )\
           pigz -c > $path_grounded_pq_touching_reliable_ALL_support_tsv_gz
       fi
     
