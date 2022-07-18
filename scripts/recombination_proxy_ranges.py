@@ -4,11 +4,19 @@ import gzip
 import sys
 
 path_grounded_tsv_gz = sys.argv[1]
-score_treshold = float(sys.argv[2])
+jaccard_treshold = float(sys.argv[2])
 self_cov_threshold = float(sys.argv[3])
+path_query_to_consider_txt = sys.argv[5]
 
 refn = 1  # In this way, the grounded interval is always the same for all `n` target hits of each segment
 
+# Read queries to consider
+query_to_consider_set = set()
+
+with open(path_query_to_consider_txt) as f:
+    for line in f:
+        query = line.strip().split('\t')[0]
+        query_to_consider_set.add(query)
 
 # Read untangling information
 ground_2_group_2_query_2_segment_2_hits_dict = {}
@@ -20,7 +28,7 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
     for line in f:
         query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target = line.strip().split('\t')
 
-        if '#chr' in query or 'HG002#1' in query or 'HG002#2' in query:
+        if query not in query_to_consider_set:
             continue
 
         nth_best = int(nth_best)
@@ -29,7 +37,7 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
             continue
 
         jaccard = float(jaccard)
-        if jaccard < score_treshold:
+        if jaccard < jaccard_treshold:
             continue
 
         self_coverage = float(self_coverage)

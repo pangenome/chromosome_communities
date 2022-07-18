@@ -52,6 +52,8 @@ with open(path_query_to_consider_txt) as f:
 # Read untangling information
 ground_2_group_2_query_2_pieces_dict = {}
 
+query_set = set()
+
 # query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target
 with gzip.open(path_grounded_tsv_gz, "rt") as f:
     f.readline()
@@ -66,6 +68,8 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
         ref_nth_best = int(ref_nth_best)
         if nth_best > n or ref_nth_best > refn:
             continue
+
+        query_set.add(query)
 
         ref_begin = int(ref_begin)
         ref_end = int(ref_end)
@@ -84,6 +88,7 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
 
 window_size = 50000
 
+num_query_computed = 0
 print('\t'.join(['ground.target', 'start.pos', 'end.pos', 'contig', 'shannon_div_index']))
 for ground_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_pieces_dict.items():
     print(ground_target, file=sys.stderr)
@@ -93,7 +98,7 @@ for ground_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_piece
         # print(ground_target, group, query_2_pieces_dict.keys())
 
         for query, pieces_list in query_2_pieces_dict.items():
-            print(ground_target, group, query, file=sys.stderr)
+            # print(ground_target, group, query, file=sys.stderr)
 
             # Fill (slowly!) targets over the ground target
             query_on_ref_list = [0] * ground_target_len
@@ -113,3 +118,6 @@ for ground_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_piece
                     shannon_div_index = -1
 
                 print('\t'.join([ground_target, str(start), str(end + 1), query, str(shannon_div_index)]))
+
+            num_query_computed += 1
+            print('Progress: {:3}%'.format(float(num_query_computed)/len(query_set)*100), file=sys.stderr)

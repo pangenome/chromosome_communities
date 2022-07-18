@@ -97,7 +97,7 @@ for ground_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_piece
         # print(ground_target, group, query_2_pieces_dict.keys())
 
         for query, pieces_list in query_2_pieces_dict.items():
-            #print(ground_target, group, query, file=sys.stderr)
+            # print(ground_target, group, query, file=sys.stderr)
 
             for start, end, target_int in pieces_list:
                 for pos in range(start, end):
@@ -105,7 +105,7 @@ for ground_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_piece
                     ground_target_list[pos][acros2index_dict[target_int]] += 1
 
             num_query_computed += 1
-            print('{:3}%'.format(float(num_query_computed)/len(query_set)*100, file=sys.stderr))
+            print('Progress: {:3}%'.format(float(num_query_computed)/len(query_set)*100), file=sys.stderr)
 
     for pos, counter_list in enumerate(ground_target_list):
         print('\t'.join([str(x) for x in [ground_target, pos, pos + 1] + counter_list]))
