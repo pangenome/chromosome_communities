@@ -1,6 +1,8 @@
 ### Entropy
 
-Compute the entropy for each contig and for each chromosome (by averaging each window across contigs):
+Compute the entropy for each contig and for each chromosome (by averaging each window across contigs) 
+by considering HiFi-only contigs anchored to the q-arms (so no HG002-HiFi-only) and HG002-verkko:
+
 
 ```shell
 path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.og
@@ -20,7 +22,9 @@ for e in 50000; do
         python3 /lizardfs/guarracino/chromosome_communities/scripts/entropy.by_contig.py \
           $path_grounded_pq_touching_reliable_ALL_tsv_gz \
           chm13#ACRO.len.tsv \
-          1 $refn > $path_entropy_by_contig_tsv
+          1 $refn \
+          <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq ) \
+          > $path_entropy_by_contig_tsv
       fi
 
       PREFIX=$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy.n1.nref${refn}

@@ -17,7 +17,7 @@ with open(path_target_length_txt) as f:
         ground, target_len = line.strip().split('\t')
         ground_2_len_dict[ground] = int(target_len)
 
-# Read query to consider
+# Read queries to consider
 query_to_consider_set = set()
 
 with open(path_query_to_consider_txt) as f:
@@ -27,6 +27,8 @@ with open(path_query_to_consider_txt) as f:
 
 # Read untangling information
 ground_2_group_2_query_2_pieces_dict = {}
+
+query_set = set()
 
 # query, query.begin, query.end, target, target.begin, target.end, jaccard, strand, self.coverage, nth.best, ref, ref.begin, ref.end, ref.jaccard, ref.nth.best, grounded.target
 with gzip.open(path_grounded_tsv_gz, "rt") as f:
@@ -42,6 +44,8 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
         ref_nth_best = int(ref_nth_best)
         if nth_best > n or ref_nth_best > refn:
             continue
+
+        query_set.add(query)
 
         ref_begin = int(ref_begin)
         ref_end = int(ref_end)
@@ -73,6 +77,7 @@ acros2index_dict = {
     22: 4
 }
 
+num_query_computed = 0
 print('\t'.join([
     'ground.target', 'start', 'end',
     'num.contigs.supporting.chr13',
@@ -92,12 +97,15 @@ for ground_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_piece
         # print(ground_target, group, query_2_pieces_dict.keys())
 
         for query, pieces_list in query_2_pieces_dict.items():
-            print(ground_target, group, query, file=sys.stderr)
+            #print(ground_target, group, query, file=sys.stderr)
 
             for start, end, target_int in pieces_list:
                 for pos in range(start, end):
                     # print(pos, ground_target_list[pos])
                     ground_target_list[pos][acros2index_dict[target_int]] += 1
+
+            num_query_computed += 1
+            print('{:3}%'.format(float(num_query_computed)/len(query_set)*100, file=sys.stderr))
 
     for pos, counter_list in enumerate(ground_target_list):
         print('\t'.join([str(x) for x in [ground_target, pos, pos + 1] + counter_list]))
