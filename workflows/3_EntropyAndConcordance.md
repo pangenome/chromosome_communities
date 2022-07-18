@@ -13,7 +13,7 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/
 #guix install r-dplyr
 for e in 50000; do
   for m in 1000; do
-    for refn in 1 10; do
+    for refn in 1; do
       echo "-e $e -m $m -refn $refn"
 
       path_entropy_by_contig_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy.by_contig.n1.nref${refn}.tsv

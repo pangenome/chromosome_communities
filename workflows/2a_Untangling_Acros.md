@@ -1039,13 +1039,10 @@ for e in 50000; do
     done
   done
 done
-```
-
-```shell
-
-
 
 # Collect values in grounded reference space
+awk -v OFS='\t' '{print($1,"0",$2)}' chm13#ACRO.len.tsv > chm13.bed
+
 for e in 50000; do
   for m in 1000; do
     path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
@@ -1053,7 +1050,9 @@ for e in 50000; do
     
     path_recombinant_regions_table_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.tsv
     path_recombinant_regions_table_sizes_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.sizes.tsv
+    path_recombinant_regions_table_with_counts_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.counts.tsv
     
+    rm rg.txt
     rm $path_recombinant_regions_table_tsv $path_recombinant_regions_table_sizes_tsv
     for sc in 0 1.5 1; do
       for j in `seq 0.8 0.01 1.0`; do
@@ -1063,16 +1062,35 @@ for e in 50000; do
         echo $e $m $sc $j
           
         path_recombinant_regions_bed=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.sc${sc_str}.j${j_str}.bed
+
         bedtools merge -i <(cut -f 4,5,6 $path_recombinant_regions_bed | sed '1d' | bedtools sort ) | \
           awk -v sc=$sc -v j=$j -v OFS='\t' '{print(sc,j,$1,$2,$3)}' >> $path_recombinant_regions_table_tsv
           
         bedtools merge -i <(cut -f 4,5,6 $path_recombinant_regions_bed | sed '1d' | bedtools sort ) | \
           awk -v sc=$sc -v j=$j -v OFS='\t' '{SUM+=$3-$2}END{print(sc,j,SUM)}' >> $path_recombinant_regions_table_sizes_tsv
+
+        # For each sample, merge intervals with respect to the grounded reference
+        sed '1d' $path_recombinant_regions_bed | cut -f 1 | sort | uniq | while read CONTIG; do
+          grep "^$CONTIG" $path_recombinant_regions_bed | cut -f 4,5,6 | bedtools sort | bedtools merge >> rg.txt
+        done
+        
+        # For each grounded reference position, count how many sample support it
+        # -d: Report the depth at each position in each A feature.
+        # The awk script is to get intervals where grounded reference and counts is constant.
+        bedtools coverage -a chm13.bed -b rg.txt -d | \
+          python3 /lizardfs/guarracino/chromosome_communities/scripts/compress_coverage_info.py | \
+          awk -v sc=$sc -v j=$j -v OFS='\t' '{print(sc,j,$1,$2,$3,$4)}' \
+          >> $path_recombinant_regions_table_with_counts_tsv
+        rm rg.txt
       done
     done
   done
 done
 
+rm chm13.bed
+```
+
+```shell
 # Plot
 for e in 50000; do
   for m in 1000 ; do
@@ -1385,40 +1403,39 @@ bedtools merge -i <(cut -f 4,5,6 x.bed | sed '1d' | bedtools sort ) | wc -l
 
 [//]: # (```)
 
-[//]: # ()
-[//]: # (## Variant calling &#40;not used&#41;)
 
-[//]: # ()
-[//]: # (Call variants in a haploid setting:)
+## Variant calling (not used)
 
-[//]: # ()
-[//]: # (```shell)
 
-[//]: # (# pq-contigs)
+Call variants in a haploid setting:
 
-[//]: # (path_input_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.gfa)
 
-[//]: # (path_chm13_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.vcf.gz)
+```shell
 
-[//]: # (sbatch -p highmem -c 48 --job-name vgchm13 --wrap '\time -v vg deconstruct -P chm13 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_chm13_vcf_gz' && tabix '$path_chm13_vcf_gz)
+# pq-contigs
 
-[//]: # ()
-[//]: # (# acro-contigs)
+path_input_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.gfa
 
-[//]: # (path_input_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.952ce3b.4030258.0e65f78.smooth.fix.gfa)
+path_chm13_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.vcf.gz
 
-[//]: # (path_input_sed_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.952ce3b.4030258.0e65f78.smooth.fix.sed.gfa)
+sbatch -p workers -c 48 --job-name vgchm13 --wrap '\time -v vg deconstruct -P chm13 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_chm13_vcf_gz' && tabix '$path_chm13_vcf_gz
 
-[//]: # (path_chm13_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.952ce3b.4030258.0e65f78.smooth.fix.sed.c1000.chm13.vcf.gz)
 
-[//]: # ()
-[//]: # (# sed replaces only the first instance on a line by default &#40;without the /g modifier&#41;)
+# acro-contigs
 
-[//]: # (# To have names like NA21309-1#1#JAHEPC010000450.1 and call haploid genotypes with -H)
+path_input_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.952ce3b.4030258.0e65f78.smooth.fix.gfa
 
-[//]: # (sed 's/#/-/' $path_input_gfa | sed 's/#/#1#/' > $path_input_sed_gfa)
+path_input_sed_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.952ce3b.4030258.0e65f78.smooth.fix.sed.gfa
 
-[//]: # ()
-[//]: # (sbatch -p headnode -c 48 --job-name vgchm13 --wrap '\time -v vg deconstruct -P chm13 -H "#" -e -a -c 1000 -t 48 '$path_input_sed_gfa' | bgzip -@ 48 -c > '$path_chm13_vcf_gz' && tabix '$path_chm13_vcf_gz)
+path_chm13_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.952ce3b.4030258.0e65f78.smooth.fix.sed.c1000.chm13.vcf.gz
 
-[//]: # (```)
+
+# sed replaces only the first instance on a line by default (without the /g modifier)
+
+# To have names like NA21309-1#1#JAHEPC010000450.1 and call haploid genotypes with -H
+
+sed 's/#/-/' $path_input_gfa | sed 's/#/#1#/' > $path_input_sed_gfa
+
+
+sbatch -p headnode -c 48 --job-name vgchm13 --wrap '\time -v vg deconstruct -P chm13 -H "#" -e -a -c 1000 -t 48 '$path_input_sed_gfa' | bgzip -@ 48 -c > '$path_chm13_vcf_gz' && tabix '$path_chm13_vcf_gz
+```
