@@ -3,9 +3,10 @@ path_recombinant_regions_table_tsv <- args[6]
 x_min <- as.numeric(args[7])
 x_max <- as.numeric(args[8])
 width <- as.numeric(args[9])
-num_chr <- as.numeric(args[10])
-path_annotation <- args[11]
-path_output <- args[12]
+height <- as.numeric(args[10])
+num_chr <- as.numeric(args[11])
+path_annotation <- args[12]
+path_output <- args[13]
 
 
 
@@ -101,7 +102,7 @@ p_with_annotation <- ggpubr::ggarrange(
   common.legend = T,
   nrow = 2
 )
-height=50
+
 ggsave(
   plot = p_with_annotation,
   path_output,

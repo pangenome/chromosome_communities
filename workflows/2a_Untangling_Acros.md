@@ -1066,6 +1066,35 @@ for e in 50000; do
   done
 done
 
+# Plot
+for e in 50000; do
+  for m in 1000 ; do
+    path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+    PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz)
+    
+    path_recombinant_regions_table_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.tsv
+    path_recombinant_regions_table_sizes_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.sizes.tsv
+    
+    (seq 13 15; seq 21 22) | while read i; do
+      echo "-e $e -m $m chr$i"
+        
+      Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_recombinant_regions_with_annotation.R \
+        $path_recombinant_regions_table_tsv \
+        0 25000000 \
+        90 50 \
+        $i \
+        /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+        /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.recombinant_regions.table.chr${i}.pdf
+    done
+    
+    # Merge chromosomes's PDF files
+    /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+      /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.recombinant_regions.table.chr*.pdf \
+      /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.recombinant_regions.table.chrACRO.merged.pdf
+    rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.recombinant_regions.table.chr*.pdf
+  done
+done
+
 
 # Unmerged query segments
 cat x.bed | wc -l
