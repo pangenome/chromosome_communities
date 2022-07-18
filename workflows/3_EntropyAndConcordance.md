@@ -63,7 +63,7 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordan
 # By haplotype
 for e in 50000; do
   for m in 1000; do
-    for refn in 1 10; do
+    for refn in 1; do
       echo "-e $e -m $m -refn $refn"
     
       path_concordance_by_haplotype_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.concordance.by_haplotype.n1.nref${refn}.tsv
@@ -114,7 +114,7 @@ done
 # By contig
 for e in 50000; do
   for m in 1000; do
-    for refn in 1 10; do
+    for refn in 1; do
       echo "-e $e -m $m -refn $refn"
 
       path_concordance_by_contig_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.concordance.by_contig.n1.nref${refn}.tsv
