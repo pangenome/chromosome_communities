@@ -952,7 +952,8 @@ for e in 50000; do
   done
 done
 ```
-TO UPDATE
+
+
 Statistics on removed regions (available only for HiFi-only samples):
 
 ```shell
@@ -970,7 +971,7 @@ for e in 50000; do
                path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.pq_touching.tsv.gz
       path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
 
-      zgrep '^chm13\|^grch38\|^HG002#MAT\|^HG002#PAT\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' -v | sed '1d' | cut -f 1 | sort | uniq | while read CONTIG; do
+      zgrep '^chm13\|^grch38\|^HG002#MAT\|^HG002#PAT\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' -v $path_grounded_pq_touching_tsv_gz | sed '1d' | cut -f 1 | sort | uniq | while read CONTIG; do
         UNTANGLED_SIZE=$( zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | awk -v n=$n -v refn=$refn '$10 == n && $15 == refn' | cut -f 1,2,3 | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}' )
         UNTANGLED_SIZE_RELIABLE=$( zgrep "^$CONTIG" $path_grounded_pq_touching_reliable_tsv_gz | awk -v n=$n -v refn=$refn '$10 == n && $15 == refn' | cut -f 1,2,3 | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}' )
         
@@ -987,8 +988,9 @@ done
   cat $path_grounded_pq_touching_reliable_stats_tsv | sed '1d' |\
     awk -v OFS='\t' -F'\t' 'BEGIN{UNTANGLED_SIZE=0; UNTANGLED_SIZE_RELIABLE=0}{ UNTANGLED_SIZE+=$7; UNTANGLED_SIZE_RELIABLE+=$8 }END{print UNTANGLED_SIZE,UNTANGLED_SIZE_RELIABLE,UNTANGLED_SIZE-UNTANGLED_SIZE_RELIABLE, UNTANGLED_SIZE_RELIABLE/UNTANGLED_SIZE}' )
 ```
-TO UPDATE
-Statistics on untangled segment lengths  by considering HiFi-only contigs anchored to the q-arms (so no HG002-HiFi-only) and HG002-verkko::
+
+
+Statistics on untangled segment lengths by considering HiFi-only contigs anchored to the q-arms (so no HG002-HiFi-only) and HG002-verkko:
 
 ```shell
 for e in 50000; do
@@ -1037,10 +1039,15 @@ for e in 50000; do
     done
   done
 done
+```
+
+```shell
+
+
 
 # Collect values in grounded reference space
 for e in 50000; do
-  for m in 1000 ; do
+  for m in 1000; do
     path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
     PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz)
     

@@ -120,4 +120,4 @@ for ground_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_piece
                 print('\t'.join([ground_target, str(start), str(end + 1), query, str(shannon_div_index)]))
 
             num_query_computed += 1
-            print('Progress: {:3}%'.format(float(num_query_computed)/len(query_set)*100), file=sys.stderr)
+            print('Progress: {:.2f}%'.format(float(num_query_computed)/len(query_set)*100), file=sys.stderr)

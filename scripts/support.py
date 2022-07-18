@@ -105,7 +105,7 @@ for ground_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_piece
                     ground_target_list[pos][acros2index_dict[target_int]] += 1
 
             num_query_computed += 1
-            print('Progress: {:3}%'.format(float(num_query_computed)/len(query_set)*100), file=sys.stderr)
+            print('Progress: {:.2f}%'.format(float(num_query_computed)/len(query_set)*100), file=sys.stderr)
 
     for pos, counter_list in enumerate(ground_target_list):
         print('\t'.join([str(x) for x in [ground_target, pos, pos + 1] + counter_list]))
