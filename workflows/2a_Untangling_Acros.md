@@ -883,13 +883,13 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.HG002.pdf
 ```
 
-CONTINUE:
+
 Compute support:
 
 ```shell
 # Merge files for all acrocentric chromosomes (used for computing the support and the histogram length)
 for e in 50000; do
-  for m in 1000 ; do
+  for m in 1000; do
     path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
     if [[ ! -s ${path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz} ]]; then
       cat \
@@ -906,7 +906,7 @@ grep '^chm13' /lizardfs/guarracino/chromosome_communities/assemblies/chrA.pan+HG
 # Support
 # guix install r-ggridges
 for e in 50000; do
-  for m in 1000 ; do
+  for m in 1000; do
     for refn in 1 10; do
       echo "-e $e -m $m -refn $refn"
 
@@ -992,7 +992,7 @@ Statistics on untangled segment lengths:
 
 ```shell
 for e in 50000; do
-  for m in 1000 ; do
+  for m in 1000; do
     path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
     PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz);
 
@@ -1002,7 +1002,7 @@ for e in 50000; do
       60 15 \
       $(echo "$e + 15000" | bc) \
       1 1 \
-      <(zgrep '^HG002#1\|^HG002#2' -v $path_grounded_pq_touching_reliable_ALL_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+      <(zgrep '^HG002#MAT\|^HG002#PAT\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' -v $path_grounded_pq_touching_reliable_ALL_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
       /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.n1.nref1.histogram.pdf
   done
 done
@@ -1014,6 +1014,7 @@ Estimate regions that can recombine using multi-hit untangled regions:
 ```shell
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/
 
+# Identify regions with multiple good enough hits
 for e in 50000; do
   for m in 1000; do
     path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
@@ -1028,20 +1029,25 @@ for e in 50000; do
           
         path_recombinant_regions_bed=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.sc${sc_str}.j${j_str}.bed
         if [[ ! -s $path_recombinant_regions_bed ]]; then
-          python3 scripts/recombination_proxy_ranges.py $path_grounded_pq_touching_reliable_ALL_tsv_gz $j $sc > $path_recombinant_regions_bed
+          python3 scripts/recombination_proxy_ranges.py \
+            <(zgrep '^chm13#chr\|^grch38#chr' -v $path_grounded_pq_touching_reliable_ALL_tsv_gz | pigz -c) \
+            $j $sc > $path_recombinant_regions_bed
         fi
       done
     done
   done
 done
 
-# Collect values in a table
+# Collect values in grounded reference space
 for e in 50000; do
   for m in 1000 ; do
     path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
     PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz)
     
-    rm $PREFIX.recombinant_regions.table.tsv
+    path_recombinant_regions_table_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.tsv
+    path_recombinant_regions_table_sizes_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.sizes.tsv
+    
+    rm $path_recombinant_regions_table_tsv $path_recombinant_regions_table_sizes_tsv
     for sc in 0 1.5 1; do
       for j in `seq 0.8 0.01 1.0`; do
         j=$(echo $j | sed 's/\,/./g')
@@ -1050,44 +1056,15 @@ for e in 50000; do
         echo $e $m $sc $j
           
         path_recombinant_regions_bed=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.sc${sc_str}.j${j_str}.bed
-        
         bedtools merge -i <(cut -f 4,5,6 $path_recombinant_regions_bed | sed '1d' | bedtools sort ) | \
-          awk -v sc=$sc -v j=$j -v OFS='\t' '{SUM+=$3-$2}END{print(sc,j,SUM)}' >> $PREFIX.recombinant_regions.table.tsv
-      done
-    done
-  done
-done
-
-# For visualization with respect to the grounded reference space
-for e in 50000; do
-  for m in 1000 ; do
-    path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
-    PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz)
-    
-    rm $PREFIX.recombinant_regions.table.tsv
-    for sc in 0 1.5 1; do
-      for j in `seq 0.8 0.01 1.0`; do
-        j=$(echo $j | sed 's/\,/./g')
-        j_str=$(echo $j | sed 's/\.//g')
-        sc_str=$(echo $sc | sed 's/\.//g')
-        echo $e $m $sc $j
+          awk -v sc=$sc -v j=$j -v OFS='\t' '{print(sc,j,$1,$2,$3)}' >> $path_recombinant_regions_table_tsv
           
-        path_recombinant_regions_bed=$PREFIX.recombinant_regions.sc${sc_str}.j${j_str}.bed
         bedtools merge -i <(cut -f 4,5,6 $path_recombinant_regions_bed | sed '1d' | bedtools sort ) | \
-          awk -v sc=$sc -v j=$j -v OFS='\t' '{print(sc,j,$1,$2,$3)}' >> $PREFIX.recombinant_regions.table.tsv
+          awk -v sc=$sc -v j=$j -v OFS='\t' '{SUM+=$3-$2}END{print(sc,j,SUM)}' >> $path_recombinant_regions_table_sizes_tsv
       done
     done
   done
 done
-sc=1.5
-j=0.990
-j=$(echo $j | sed 's/\,/./g')
-j_str=$(echo $j | sed 's/\.//g')
-sc_str=$(echo $sc | sed 's/\.//g')
-path_recombinant_regions_bed=$PREFIX.recombinant_regions.${sc_str}.${j_str}.bed
-bedtools merge -i <(cut -f 4,5,6 $path_recombinant_regions_bed | sed '1d' | bedtools sort) | awk -v OFS='\t' '{print($0,$1)}' > x.tsv
-
-
 
 
 # Unmerged query segments

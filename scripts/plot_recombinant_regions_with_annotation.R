@@ -1,11 +1,20 @@
+args <- commandArgs()
+path_recombinant_regions_table_tsv <- args[6]
+x_min <- as.numeric(args[7])
+x_max <- as.numeric(args[8])
+width <- as.numeric(args[9])
+num_chr <- as.numeric(args[10])
+path_annotation <- args[11]
+path_output <- args[12]
+
+
+
 library(ggplot2)
 
-num_chr <- 13
-path_annotation <- paste0('/home/guarracino/git/chromosome_communities/data/annotation/hgt_genome_euro_chr', num_chr, '_0_25Mbp.png')
-path_output <- paste0('/home/guarracino/', num_chr, '.png')
+xx <- read.delim(path_recombinant_regions_table_tsv, header = F)
+colnames(xx) <- c('self.coverage.threshold', 'jaccard.threshold',  'grounded.target', 'ref.begin', 'ref.end')
 
-xx <- read.delim('/home/guarracino/git/chromosome_communities/x.tsv', header = F)
-colnames(xx) <- c('query', 'ref.begin', 'ref.end', 'grounded.target')
+xx$label <- paste0('sc', xx$self.coverage.threshold, '.j', xx$jaccard.threshold)
 
 # Apply filters
 chr <- paste0('chm13#chr', num_chr)
@@ -26,23 +35,23 @@ if (num_chr == 13) {
   colors <- c("#000000")
 }
 
-x_min = 0
-x_max = 25000000
+
 
 
 
 p <- ggplot(
   xx,
   aes(
-    x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin ,
-    y = ordered(query, levels = rev(unique(query))),
-    fill = grounded.target,
+    x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin,
+    y = label,
+    fill = grounded.target
     #alpha = jaccard
+    #y = ordered(query, levels = rev(unique(query))),
   )
 ) +
   geom_tile() +
   #ggtitle(paste(chr, title)) +
-  #facet_grid(query~grounded.target, scales = "free_y", space = "free", labeller = labeller(variable = labels)) +
+  facet_grid(label~grounded.target, scales = "free_y", space = "free", labeller = labeller(variable = labels)) +
   theme_bw() +
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -55,19 +64,18 @@ p <- ggplot(
     legend.text = element_text(size = 32),
     legend.position = "top",
     
-    #panel.spacing = unit(panel_spacing, "lines"),
+    panel.spacing = unit(0.0, "lines"),
     #panel.border = element_rect(color = "grey", fill = NA, size = 1), #element_blank(),
     
     strip.text.x = element_blank(),
     strip.text.y = element_blank(),
     axis.title.y = element_blank(),
     
-    plot.margin = unit(c(0,1.03,0,6.88), "cm"),
+    plot.margin = unit(c(0,1.03,0,7.34), "cm"),
   ) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values = colors) +
   labs(x = "Position", fill="Target")
-
 
 
 library(png)
@@ -88,14 +96,12 @@ library(ggpubr)
 p_with_annotation <- ggpubr::ggarrange(
   ggplotted_img, p,
   labels=c('', ''),
-  heights = c(3, 1),
+  heights = c(1, 7),
   legend = "right", # legend position,
   common.legend = T,
   nrow = 2
 )
-
-width = 90
-height = 10
+height=50
 ggsave(
   plot = p_with_annotation,
   path_output,
@@ -104,3 +110,4 @@ ggsave(
   dpi = 100, bg = "white",
   limitsize = FALSE
 )
+

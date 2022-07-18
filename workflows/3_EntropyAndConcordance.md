@@ -10,7 +10,7 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/
 
 #guix install r-dplyr
 for e in 50000; do
-  for m in 1000 2000; do
+  for m in 1000; do
     for refn in 1 10; do
       echo "-e $e -m $m -refn $refn"
 
@@ -62,7 +62,7 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordan
 
 # By haplotype
 for e in 50000; do
-  for m in 1000 2000; do
+  for m in 1000; do
     for refn in 1 10; do
       echo "-e $e -m $m -refn $refn"
     
@@ -107,14 +107,13 @@ for e in 50000; do
         -a <( cat $path_concordance_by_haplotype_tsv | sed '1d' | awk -v OFS='\t' '{print($1,$2,$3,$4"_"$5)}' ) \
         -b <( sed 's/^chr/chm13#chr/g' /lizardfs/guarracino/chromosome_communities/data/annotation/chm13.q_arms.approximate.acros.bed) |\
          awk -v OFS='\t' '{split($4,a,/_/); print($1,$2,$3,a[1],a[2])}') > $path_concordance_by_haplotype_tsv.q_arms.stats.tsv
-
     done
   done
 done
 
 # By contig
 for e in 50000; do
-  for m in 1000 2000; do
+  for m in 1000; do
     for refn in 1 10; do
       echo "-e $e -m $m -refn $refn"
 

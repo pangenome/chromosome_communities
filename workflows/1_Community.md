@@ -233,7 +233,6 @@ cat $PAF.community.leiden.tsv | column -t
 # Plot the community composition
 # Total length of all contigs
 TOTAL_SEQUENCE_BP=$(awk -F'\t' 'BEGIN{LEN=0}{ LEN+=$2 }END{print LEN}' /lizardfs/guarracino/chromosome_communities/assemblies/HPRCy1v2genbank.fa.gz.fai)
-  
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_community_table.R \
   $PAF.community.leiden.tsv \
   $PAF.community2size.tsv \
