@@ -1040,8 +1040,16 @@ for e in 50000; do
   done
 done
 
-# Collect values in grounded reference space
-awk -v OFS='\t' '{print($1,"0",$2)}' chm13#ACRO.len.tsv > chm13.bed
+# Collect values in grounded reference space (TO PUT IN A FILE AND RUN A JOB FOR IT)
+########################################################################################################################
+#!/bin/sh
+
+cd /scratch
+awk -v OFS='\t' '{print($1,"0",$2)}' /lizardfs/guarracino/chromosome_communities/chm13#ACRO.len.tsv > chm13.bed
+
+path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/chm13.target_paths.txt
+path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.og
+prefix=$(basename $path_input_og .og)
 
 for e in 50000; do
   for m in 1000; do
@@ -1088,6 +1096,7 @@ for e in 50000; do
 done
 
 rm chm13.bed
+########################################################################################################################
 ```
 
 ```shell
@@ -1133,274 +1142,152 @@ bedtools merge -i <(cut -f 4,5,6 x.bed | sed '1d' | bedtools sort ) | wc -l
 
 
 [//]: # (Merged plots &#40;not used&#41;:)
-
 [//]: # ()
 [//]: # (```shell)
-
 [//]: # (#for e in 50000 ; do)
-
 [//]: # (#  for m in 1000 ; do)
-
 [//]: # (#    echo "-e $e -m $m")
-
 [//]: # (#)
-
 [//]: # (#    path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.tsv.gz)
-
 [//]: # (#)
-
 [//]: # (#    Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_all2.R ${path_grounded_pq_touching_reliable_all_chromosomes_tsv_gz} "-e $e -m $m" 0 25000000 120 200 1 1)
-
 [//]: # (#  done)
-
 [//]: # (#done)
-
 [//]: # (#)
-
 [//]: # (#mv /lizardfs/guarracino/chromosome_communities/untangle/grounded/*.pdf /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/)
-
 [//]: # ()
 [//]: # (# Merge)
-
 [//]: # (#for e in 50000 ; do)
-
 [//]: # (#  for m in 1000 ; do)
-
 [//]: # (#    for j in 0.8 0.95; do)
-
 [//]: # (#      echo "-e $e -m $m -j $j")
-
 [//]: # (#        )
-
 [//]: # (#      j_str=$&#40;echo $j | sed 's/\.//g'&#41;)
-
 [//]: # (#      PDFs=$&#40;&#40;seq 1 5; seq 10 10 50&#41; | while read n; do \)
-
 [//]: # (#        echo /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.reliable.tsv.gz.pdf)
-
 [//]: # (#      done | tr '\n' ' '&#41;)
-
 [//]: # (#      #echo $PDFs)
-
 [//]: # (#        )
-
 [//]: # (#      # Too slow)
-
 [//]: # (#      #gs -sDEVICE=pdfwrite \)
-
 [//]: # (#      #  -dNOPAUSE -dBATCH -dSAFER \)
-
 [//]: # (#      #  -sOutputFile=/lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.grounded.pq_touching.tsv.gz.pdf \)
-
 [//]: # (#      #  $PDFs)
-
 [//]: # (#        )
-
 [//]: # (#      /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite $PDFs /lizardfs/guarracino/chromosome_communities/untangle/grounded/pdf/$prefix.untangle.chm13#chrACRO.e$e.m$m.j${j_str}.merged.grounded.pq_touching.reliable.tsv.gz.pdf)
-
 [//]: # (#    done)
-
 [//]: # (#  done)
-
 [//]: # (#done)
-
 [//]: # (```)
-
 [//]: # ()
 [//]: # (Single plots &#40;not used&#41;:)
-
 [//]: # ()
 [//]: # (```shell)
-
 [//]: # (#for e in 5000 50000 100000; do)
-
 [//]: # (#  for m in 500 1000 10000; do)
-
 [//]: # (#      for j in 0 0.8; do)
-
 [//]: # (#        j_str=$&#40;echo $j | sed 's/\.//g'&#41;)
-
 [//]: # (#        &#40;seq 1 5; seq 10 10 50&#41; | while read n; do )
-
 [//]: # (#            echo "-e $e -m $m -j $j -n $n")
-
 [//]: # (#    )
-
 [//]: # (#            grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.1kbps.pq_contigs.union.hg002prox.fa.gz.fai | cut -f 1 | while read ref; do)
-
 [//]: # (#              echo $ref)
-
 [//]: # (#              )
-
 [//]: # (#              path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz)
-
 [//]: # (#            )
-
 [//]: # (#              Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle.R ${path_grounded_pq_touching_tsv_gz} "$ref -e $e -m $m -j $j -n $n")
-
 [//]: # (#            done)
-
 [//]: # (#        done)
-
 [//]: # (#      done)
-
 [//]: # (#    done)
-
 [//]: # (#done)
-
 [//]: # (```)
-
 [//]: # ()
 [//]: # ()
 [//]: # (#### Plot Mobin's annotations &#40;not used&#41;)
-
 [//]: # ()
 [//]: # (Take only reliable blocks &#40;flagged with "Hh" or "Hc", https://github.com/human-pangenomics/hpp_production_workflows/blob/asset/coverage/README.md#components&#41;)
-
 [//]: # ()
 [//]: # (```shell)
-
 [//]: # (e=50000)
-
 [//]: # (m=1000)
-
 [//]: # (j=0.8)
-
 [//]: # (j_str=$&#40;echo $j | sed 's/\.//g'&#41;)
-
 [//]: # (n=1)
-
 [//]: # (ref=chm13#chr13)
-
 [//]: # ()
 [//]: # (# Brutal: remove untangled regions if they overlap with unreliable regions)
-
 [//]: # (touch xyz.tsv)
-
 [//]: # (cat $path_targets_txt | while read ref; do)
-
 [//]: # (    echo $ref)
-
 [//]: # (    path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz)
-
 [//]: # (    )
 [//]: # (    touch z.tsv)
-
 [//]: # (    zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT\|HG01978#MAT\|HG01978#PAT\|bakeoff' -v | cut -f 1 | sort | uniq | while read CONTIG; do)
-
 [//]: # (      SAMPLE=$&#40; echo $CONTIG | cut -f 1 -d '#'&#41;)
-
 [//]: # (    )
 [//]: # (      path_unreliable_bed=/lizardfs/erikg/HPRC/year1v2genbank/annotations/unreliable/$SAMPLE.hifi.flagger_final.bed)
-
 [//]: # (      if [[ -s $path_unreliable_bed ]]; then)
-
 [//]: # (        echo $CONTIG "--->" $SAMPLE)
-
 [//]: # (        )
 [//]: # (        zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n | awk -v OFS='\t' '{print&#40;$1,$2,$3,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$11"_"$12"_"$13&#41;}' > x.bed)
-
 [//]: # (        grep $CONTIG $path_unreliable_bed > y.bed)
-
 [//]: # (        # -A: remove entire feature if any overlap)
-
 [//]: # (        bedtools subtract -a x.bed -b y.bed -A |\)
-
 [//]: # (          awk -v OFS='\t' '{split&#40;$4, a, "_"&#41;; print&#40;$1,$2,$3,a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10]&#41;}' >> xyz.tsv)
-
 [//]: # (      else)
-
 [//]: # (        zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n >> xyz.tsv)
-
 [//]: # (      fi)
-
 [//]: # (    done)
-
 [//]: # (    )
 [//]: # (    zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT\|HG01978#MAT\|HG01978#PAT\|bakeoff' >> xyz.tsv)
-
 [//]: # (done)
-
 [//]: # ()
 [//]: # (path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz)
-
 [//]: # (cat \)
-
 [//]: # (  <&#40; zcat $path_grounded_pq_touching_tsv_gz | head -n 1 &#41; \)
-
 [//]: # (   xyz.tsv | pigz -c > xyz.tsv.gz)
-
 [//]: # (rm xyz.tsv)
-
 [//]: # ()
 [//]: # (Rscript scripts/plot_untangle_all.R xyz.tsv.gz "-e 50000 -m 1000 -j 0.8 -n 1" 0 25000000 360 200)
-
 [//]: # ()
 [//]: # ()
 [//]: # (# Plot additional tracks for the annotations)
-
 [//]: # (touch xyz.tsv)
-
 [//]: # (cat $path_targets_txt | while read ref; do)
-
 [//]: # (    echo $ref)
-
 [//]: # (    path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz)
-
 [//]: # (    )
 [//]: # (    touch z.tsv)
-
 [//]: # (    zcat $path_grounded_pq_touching_tsv_gz | sed '1d' | grep 'HG002#MAT\|HG002#PAT\|HG01978#MAT\|HG01978#PAT\|bakeoff' -v | cut -f 1 | sort | uniq | while read CONTIG; do)
-
 [//]: # (      SAMPLE=$&#40; echo $CONTIG | cut -f 1 -d '#'&#41;)
-
 [//]: # (    )
 [//]: # (      path_unreliable_bed=/lizardfs/erikg/HPRC/year1v2genbank/annotations/unreliable/$SAMPLE.hifi.flagger_final.bed)
-
 [//]: # (      if [[ -s $path_unreliable_bed ]]; then)
-
 [//]: # (        echo $CONTIG "--->" $SAMPLE)
-
 [//]: # (        )
 [//]: # (        zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n | awk -v OFS='\t' '{print&#40;$1,$2,$3,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$11"_"$12"_"$13&#41;}' > x.bed)
-
 [//]: # (        grep $CONTIG $path_unreliable_bed > y.bed)
-
 [//]: # (        )
 [//]: # (        # wao: write the original A and B entries plus the number of base pairs of overlap between the two features.)
-
 [//]: # (        bedtools intersect -a x.bed -b y.bed -wo >> z.tsv)
-
 [//]: # (      fi)
-
 [//]: # (    done)
-
 [//]: # (    )
 [//]: # (    cat \)
-
 [//]: # (      <&#40; zcat $path_grounded_pq_touching_tsv_gz | sed '1d' &#41; \)
-
 [//]: # (      <&#40; python3 scripts/get_annotation_track.py z.tsv &#41; | tr ' ' '\t' >> xyz.tsv)
-
 [//]: # ()
 [//]: # (    rm z.tsv)
-
 [//]: # (done)
-
 [//]: # ()
 [//]: # (path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.j${j_str}.n$n.grounded.pq_touching.tsv.gz)
-
 [//]: # (cat \)
-
 [//]: # (  <&#40; zcat $path_grounded_pq_touching_tsv_gz | head -n 1 &#41; \)
-
 [//]: # (   xyz.tsv | pigz -c > xyz.annot.tsv.gz)
-
 [//]: # (rm xyz.tsv)
-
 [//]: # ()
 [//]: # (Rscript scripts/plot_untangle_all.R xyz.annot.tsv.gz "-e 50000 -m 1000 -j 0.8 -n 1" 0 25000000 120 200)
-
 [//]: # (```)
 
 

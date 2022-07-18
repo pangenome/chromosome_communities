@@ -8,12 +8,13 @@ num_chr <- as.numeric(args[11])
 path_annotation <- args[12]
 path_output <- args[13]
 
-
-
 library(ggplot2)
 
 xx <- read.delim(path_recombinant_regions_table_tsv, header = F)
-colnames(xx) <- c('self.coverage.threshold', 'jaccard.threshold',  'grounded.target', 'ref.begin', 'ref.end')
+colnames(xx) <- c('self.coverage.threshold', 'jaccard.threshold',  'grounded.target', 'ref.begin', 'ref.end', 'num.contigs')
+
+# Remove ranges not supported by any contigs
+xx <- xx[xx$num.contigs > 0,]
 
 xx$label <- paste0('sc', xx$self.coverage.threshold, '.j', xx$jaccard.threshold)
 
@@ -45,8 +46,8 @@ p <- ggplot(
   aes(
     x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin,
     y = label,
-    fill = grounded.target
-    #alpha = jaccard
+    fill = grounded.target,
+    alpha = num.contigs
     #y = ordered(query, levels = rev(unique(query))),
   )
 ) +
@@ -76,6 +77,8 @@ p <- ggplot(
   ) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values = colors) +
+  #scale_alpha_continuous(limits = c(1,31), breaks = c(0,25,50,100)) +
+  scale_alpha_continuous(breaks = round(seq(1, max(xx$num.contigs), by = 5), 3)) +
   labs(x = "Position", fill="Target")
 
 
