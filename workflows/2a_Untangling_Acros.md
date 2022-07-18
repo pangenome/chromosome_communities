@@ -1053,7 +1053,7 @@ for e in 50000; do
     path_recombinant_regions_table_with_counts_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.counts.tsv
     
     rm rg.txt
-    rm $path_recombinant_regions_table_tsv $path_recombinant_regions_table_sizes_tsv
+    rm $path_recombinant_regions_table_tsv $path_recombinant_regions_table_sizes_tsv $path_recombinant_regions_table_with_counts_tsv
     for sc in 0 1.5 1; do
       for j in `seq 0.8 0.01 1.0`; do
         j=$(echo $j | sed 's/\,/./g')

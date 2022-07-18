@@ -105,6 +105,8 @@ x <- read.delim(path_untangle_grounded_tsv) %>%
 
 x$target <- as.character(x$target)
 
+chromosomes <- c(13, 14, 15, 21, 22)
+
 for(j in chromosomes) {
   x[x$target == paste0('chm13#chr', j),]$target = paste0('chr', j)
 }
@@ -115,8 +117,6 @@ for(j in chromosomes) {
 #x <- x[x$self.coverage <= 1,]
 
 colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
-
-chromosomes <- c(13, 14, 15, 21, 22)
 
 for (i in seq_along(chromosomes)){
   num_chr <- chromosomes[[i]]
