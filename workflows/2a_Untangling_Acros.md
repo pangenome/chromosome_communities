@@ -926,7 +926,7 @@ for e in 50000; do
       eid=$(echo $eid | sed 's/\,/./g')
       eid_str=$(echo $eid | sed 's/\.//g')
       for refn in 1; do
-        echo "-e $e -m $m -refn $refn"
+        echo "-e $e -m $m $eid -refn $refn"
 
         path_grounded_pq_touching_reliable_ALL_support_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.eid${eid_str}.n1.nref${refn}.tsv.gz
         if [[ ! -s  $path_grounded_pq_touching_reliable_ALL_support_tsv_gz ]]; then
@@ -934,6 +934,7 @@ for e in 50000; do
           python3 /lizardfs/guarracino/chromosome_communities/scripts/support.py \
             $path_grounded_pq_touching_reliable_ALL_tsv_gz \
             chm13#ACRO.len.tsv 1 $refn \
+            $eid \
             <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq ) | \
             pigz -c -9 > $path_grounded_pq_touching_reliable_ALL_support_tsv_gz
         fi
@@ -988,13 +989,13 @@ for e in 50000; do
       eid=$(echo $eid | sed 's/\,/./g')
       
       cat $path_targets_txt | while read ref; do
-        echo "-e $e -m $m $#eid $ref"
+        echo "-e $e -m $m $eid $ref"
                  path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.pq_touching.tsv.gz
         path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
 
         zgrep '^chm13\|^grch38\|^HG002#MAT\|^HG002#PAT\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' -v $path_grounded_pq_touching_tsv_gz | sed '1d' | cut -f 1 | sort | uniq | while read CONTIG; do
-          UNTANGLED_SIZE=$( zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | awk -v eid=$eid -v n=$n -v refn=$refn 'current_eid=exp((1.0 + log(2.0 * $XXX/(1.0+$XXX)))-1.0); current_eid >= eid && $10 == n && $15 == refn' | cut -f 1,2,3 | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}' )
-          UNTANGLED_SIZE_RELIABLE=$( zgrep "^$CONTIG" $path_grounded_pq_touching_reliable_tsv_gz | awk -v eid=$eid -v n=$n -v refn=$refn 'current_eid=exp((1.0 + log(2.0 * $XXX/(1.0+$XXX)))-1.0); current_eid >= eid && $10 == n && $15 == refn' | cut -f 1,2,3 | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}' )
+          UNTANGLED_SIZE=$( zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | awk -v eid=$eid -v n=$n -v refn=$refn 'current_eid=exp((1.0 + log(2.0 * $7/(1.0+$7)))-1.0); current_eid >= eid && $10 == n && $15 == refn' | cut -f 1,2,3 | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}' )
+          UNTANGLED_SIZE_RELIABLE=$( zgrep "^$CONTIG" $path_grounded_pq_touching_reliable_tsv_gz | awk -v eid=$eid -v n=$n -v refn=$refn 'current_eid=exp((1.0 + log(2.0 * $7/(1.0+$7)))-1.0); current_eid >= eid && $10 == n && $15 == refn' | cut -f 1,2,3 | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}' )
         
           FRACTION_REMOVED=$(echo "scale=4; 1 - $UNTANGLED_SIZE_RELIABLE/$UNTANGLED_SIZE" | bc)
       
