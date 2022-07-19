@@ -1,7 +1,8 @@
 args <- commandArgs()
 path_untangle_grounded_tsv <- args[6]
 dir_annotation <- args[7]
-path_output <- args[8]
+jaccard_threshold <- as.numeric(args[8])
+path_output <- args[9]
 
 x_min <- 0
 x_max <- 25000000
@@ -80,6 +81,8 @@ x <- read.delim(path_untangle_grounded_tsv) %>%
 #x$self.coverage[x$self.coverage == '.'] <- 1
 #x$self.coverage <- as.numeric(x$self.coverage)
 #x <- x[x$self.coverage <= 1,]
+
+x <- x[x$jaccard >= jaccard_threshold,]
 
 colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
 
@@ -204,15 +207,7 @@ p_figure <- ggpubr::ggarrange(
 
 ggsave(
   plot = p_figure,
-  file.path(path_output, 'Figure5.pdf'),
-  width = width*1, height = height*5 + 4*height/20, # There are 4 NULL plots that have height == height/20
-  units = "cm",
-  dpi = 100, bg = "white",
-  limitsize = FALSE
-)
-ggsave(
-  plot = p_figure,
-  file.path(path_output, 'Figure5.png'),
+  path_output,
   width = width*1, height = height*5 + 4*height/20, # There are 4 NULL plots that have height == height/20
   units = "cm",
   dpi = 100, bg = "white",
