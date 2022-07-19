@@ -7,7 +7,7 @@ library(ggplot2)
 #library(knitr)
 x <- read.delim(path_untangle_bed, sep = '\t', header = T, comment.char = "$")
 colnames(x)[1] <- 'query.name'
-colnames(x)[5] <- 'jaccard'
+colnames(x)[7] <- 'jaccard'
 
 #x$query.name <- gsub(":.*", "", x$query.name)
 #x$query.name <- gsub("#J.*", "", x$query.name)
