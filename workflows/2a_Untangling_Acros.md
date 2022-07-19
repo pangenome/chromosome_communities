@@ -1032,8 +1032,10 @@ for e in 50000; do
         path_recombinant_regions_bed=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.sc${sc_str}.j${j_str}.bed
         if [[ ! -s $path_recombinant_regions_bed ]]; then
           python3 scripts/recombination_proxy_ranges.py \
-            <(zgrep '^chm13#chr\|^grch38#chr' -v $path_grounded_pq_touching_reliable_ALL_tsv_gz | pigz -c) \
-            $j $sc > $path_recombinant_regions_bed
+            $path_grounded_pq_touching_reliable_ALL_tsv_gz \
+            $j $sc \
+            <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq ) \
+            > $path_recombinant_regions_bed
         fi
       done
     done

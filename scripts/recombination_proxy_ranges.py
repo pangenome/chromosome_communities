@@ -6,7 +6,7 @@ import sys
 path_grounded_tsv_gz = sys.argv[1]
 jaccard_treshold = float(sys.argv[2])
 self_cov_threshold = float(sys.argv[3])
-path_query_to_consider_txt = sys.argv[5]
+path_query_to_consider_txt = sys.argv[4]
 
 refn = 1  # In this way, the grounded interval is always the same for all `n` target hits of each segment
 
