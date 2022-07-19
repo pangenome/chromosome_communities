@@ -1,6 +1,7 @@
 args <- commandArgs()
 path_untangle_bed <- args[6]
-path_output <- args[7]
+estimated_identity_threshold <- as.numeric(args[7])
+path_output <- args[8]
 
 library(ggplot2)
 #library(knitr)
