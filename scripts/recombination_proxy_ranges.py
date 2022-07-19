@@ -48,7 +48,7 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
         query_end = int(query_end)
         ref_begin = int(ref_begin)
         ref_end = int(ref_end)
-        target_int = int(target.split('chm13#chr')[-1])
+        target = target.split('chm13#chr')[-1]
 
         # PATERNAL == 1, MATERNAL == 2
         group = 'PAT' if query.split('#')[1] in ['1', 'PAT'] else 'MAT'
@@ -62,7 +62,7 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
             ground_2_group_2_query_2_segment_2_hits_dict[grounded_target][group][query] = {}
         if (query_begin, query_end) not in ground_2_group_2_query_2_segment_2_hits_dict[grounded_target][group][query]:
             ground_2_group_2_query_2_segment_2_hits_dict[grounded_target][group][query][(query_begin, query_end)] = [(ref_begin, ref_end), set()]
-        ground_2_group_2_query_2_segment_2_hits_dict[grounded_target][group][query][(query_begin, query_end)][1].add((jaccard, target_int))
+        ground_2_group_2_query_2_segment_2_hits_dict[grounded_target][group][query][(query_begin, query_end)][1].add((jaccard, target))
 
 
 print('\t'.join(['query', 'query.start', 'query.end', 'ground', 'ground.start', 'ground.end', 'different.targets']))
@@ -72,7 +72,7 @@ for ground, group_2_query_2_segment_2_hits_dict in ground_2_group_2_query_2_segm
 
             for segment in sorted(segment_2_hits_dict.keys()):
                 (ref_begin, ref_end), hit_set = segment_2_hits_dict[segment]
-                target_set = set([target_int for (jaccard, target_int) in hit_set])
+                target_set = set([target for (jaccard, target) in hit_set])
 
                 if len(target_set) > 1:
                     query_begin, query_end = segment
