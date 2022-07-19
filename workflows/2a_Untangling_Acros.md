@@ -1021,6 +1021,9 @@ for e in 50000; do
   for m in 1000; do
     path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
     PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz)
+
+    zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq \
+      > /lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.query_to_consider.txt
    
     for sc in 0 1.5 1; do
       for j in `seq 0.8 0.01 1.0`; do
@@ -1031,10 +1034,10 @@ for e in 50000; do
           
         path_recombinant_regions_bed=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.sc${sc_str}.j${j_str}.bed
         if [[ ! -s $path_recombinant_regions_bed ]]; then
-          python3 scripts/recombination_proxy_ranges.py \
+          python3 /lizardfs/guarracino/chromosome_communities/scripts/recombination_proxy_ranges.py \
             $path_grounded_pq_touching_reliable_ALL_tsv_gz \
             $j $sc \
-            <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq ) \
+            /lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.query_to_consider.txt \
             > $path_recombinant_regions_bed
         fi
       done
