@@ -2,9 +2,10 @@
 
 import gzip
 import sys
+import math
 
 path_grounded_tsv_gz = sys.argv[1]
-jaccard_treshold = float(sys.argv[2])
+estimated_identity_threshold = float(sys.argv[2])
 self_cov_threshold = float(sys.argv[3])
 path_query_to_consider_txt = sys.argv[4]
 
@@ -37,7 +38,8 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
             continue
 
         jaccard = float(jaccard)
-        if jaccard < jaccard_treshold:
+        estimated_identity = math.exp((1.0 + math.log(2.0 * jaccard/(1.0+jaccard)))-1.0)
+        if estimated_identity < estimated_identity_threshold:
             continue
 
         self_coverage = float(self_coverage)
@@ -62,7 +64,7 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
             ground_2_group_2_query_2_segment_2_hits_dict[grounded_target][group][query] = {}
         if (query_begin, query_end) not in ground_2_group_2_query_2_segment_2_hits_dict[grounded_target][group][query]:
             ground_2_group_2_query_2_segment_2_hits_dict[grounded_target][group][query][(query_begin, query_end)] = [(ref_begin, ref_end), set()]
-        ground_2_group_2_query_2_segment_2_hits_dict[grounded_target][group][query][(query_begin, query_end)][1].add((jaccard, target))
+        ground_2_group_2_query_2_segment_2_hits_dict[grounded_target][group][query][(query_begin, query_end)][1].add((estimated_identity, target))
 
 
 print('\t'.join(['query', 'query.start', 'query.end', 'ground', 'ground.start', 'ground.end', 'different.targets']))
@@ -72,7 +74,7 @@ for ground, group_2_query_2_segment_2_hits_dict in ground_2_group_2_query_2_segm
 
             for segment in sorted(segment_2_hits_dict.keys()):
                 (ref_begin, ref_end), hit_set = segment_2_hits_dict[segment]
-                target_set = set([target for (jaccard, target) in hit_set])
+                target_set = set([target for (estimated_identity, target) in hit_set])
 
                 if len(target_set) > 1:
                     query_begin, query_end = segment

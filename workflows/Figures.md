@@ -29,6 +29,12 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/Fig5_Annotat
   /lizardfs/guarracino/chromosome_communities/data/annotation/ \
   0.95 \
   ~/Figure5.pdf
+
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/Fig5_Annotation_Untangle5hits.R \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/ \
+  0.9 \
+  ~/Figure5.e09.pdf
 ```
 
 ## Supplementary figures

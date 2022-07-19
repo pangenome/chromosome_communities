@@ -2,12 +2,14 @@
 
 import gzip
 import sys
+import math
 
 path_grounded_tsv_gz = sys.argv[1]
 path_target_length_txt = sys.argv[2]
 n = int(sys.argv[3])
 refn = int(sys.argv[4])
-path_query_to_consider_txt = sys.argv[5]
+estimated_identity_threshold = float(sys.argv[5])
+path_query_to_consider_txt = sys.argv[6]
 
 # Read chromosome lengths
 ground_2_len_dict = {}
@@ -43,6 +45,11 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
         nth_best = int(nth_best)
         ref_nth_best = int(ref_nth_best)
         if nth_best > n or ref_nth_best > refn:
+            continue
+
+        jaccard = float(jaccard)
+        estimated_identity = math.exp((1.0 + math.log(2.0 * jaccard/(1.0+jaccard)))-1.0)
+        if estimated_identity < estimated_identity_threshold:
             continue
 
         query_set.add(query)
