@@ -12,10 +12,16 @@ colnames(x)[1] <- 'query.name'
 
 x <- x[x$ref.start < 25000000 & x$ref.end <=25000000,]
 
-# Temporary fix
-x[x$query.name == 'chm13#chr13' & x$query.start == 0 & x$query.end == 4970529,]$inv = '+'
-x[x$query.name == 'chm13#chr13' & x$query.start == 0 & x$query.end == 4970529,]$ref.start = 0
-x[x$query.name == 'chm13#chr13' & x$query.start == 0 & x$query.end == 4970529,]$ref.end = 4970529
+# To avoid errors
+if (sum(x$jaccard > 1) > 0) {
+  x[x$jaccard > 1,]$jaccard <- 1
+}
+
+# From https://doi.org/10.1093/bioinformatics/btac244
+x$estimated_identity <- exp((1.0 + log(2.0 * x$jaccard/(1.0+x$jaccard)))-1.0)
+
+x <- x[x$estimated_identity >= estimated_identity_threshold,]
+
 
 #x_subset <- subset(x, query.name %in% c(
 #       "HG002#MAT#chr13.prox"
@@ -24,7 +30,7 @@ x[x$query.name == 'chm13#chr13' & x$query.start == 0 & x$query.end == 4970529,]$
 
 p <- ggplot(
   x, aes(x = query.start, xend = query.end, y = ref.start, yend = ref.end, color=ref.name)) +
-  geom_segment(size = 1.5) +
+  geom_segment(size = 1.2) +
   facet_grid(query.name ~ ref.name) +
   coord_fixed() +
   theme_bw() +

@@ -111,16 +111,18 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/SuppFig_Anno
 For each chromosome, length distribution of the untangled query segments.
 
 ```shell
-path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+
+e=50000
 
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_segment_histogram.R \
-  $path_grounded_pq_touching_reliable_tsv_gz \
+  $path_grounded_pq_touching_reliable_ALL_tsv_gz \
   0 25000000 \
   60 15 \
   $(echo "$e + 15000" | bc) \
   1 1 \
   0.9 \
-  <(zgrep '^HG002#1\|^HG002#2' -v $path_grounded_pq_touching_reliable_ALL_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+  <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq ) \
   ~/SuppFigure17.pdf
 ```
 
@@ -134,7 +136,7 @@ f=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1
 (zcat $f | head -n 1; \
 zcat $f | awk '$8 == "-" { x=$6; $6=$5; $5=x; } { print }' | awk '$10 == 1') | tr ' ' '\t' | pigz -c > for_dot_plot.bed.gz
 
-Rscript /lizardfs/guarracino/chromosome_communities/scripts/dot_plot_untangle.R \
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_dot_plots.R \
   for_dot_plot.bed.gz \
   ~
 ```
