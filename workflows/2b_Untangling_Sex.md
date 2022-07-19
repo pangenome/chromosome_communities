@@ -344,7 +344,7 @@ Plot (`[start-500kbps,end+500kbps]` centered in the PARs/XTRs regions):
 
 for e in 50000; do
   for m in 1000; do
-    for refn in 1 10; do
+    for refn in 1; do
       (echo X; echo Y) | while read i; do     
         ref=chm13#chr$i
         
@@ -455,11 +455,12 @@ for e in 50000; do
         fi
       done
       
-#      # Merge chromosomes's PDF files
-#      /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
-#        /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.n1.nref${refn}.pdf \
-#        /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chrSEX.e$e.m$m.grounded.pq_touching.reliable.n1.nref${refn}.merged.pdf
-#      rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.n1.nref${refn}.pdf
+      # Merge chromosomes's PDF files
+      /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+        /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.reliable.n1.nref${refn}.*pdf \
+        /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chrSEX.e$e.m$m.grounded.reliable.n1.nref${refn}.merged.pdf
+      rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.reliable.n1.nref${refn}.pdf
+      rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.reliable.n1.nref${refn}.*R*.pdf
     done
   done
 done

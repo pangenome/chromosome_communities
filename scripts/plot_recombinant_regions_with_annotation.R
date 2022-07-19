@@ -18,6 +18,13 @@ xx <- xx[xx$num.contigs > 0,]
 
 xx$label <- paste0('sc', xx$self.coverage.threshold, '.j', xx$jaccard.threshold)
 
+# Total size of each region
+#library(tidyverse)
+#xx$len <- xx$ref.end-xx$ref.begin
+#xx %>% 
+#  group_by(label) %>% 
+#  summarise(Total = sum(len)) %>% View()
+
 # Apply filters
 chr <- paste0('chm13#chr', num_chr)
 xx <- xx[xx$grounded.target == chr,]

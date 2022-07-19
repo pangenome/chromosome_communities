@@ -1097,23 +1097,20 @@ done
 
 rm chm13.bed
 ########################################################################################################################
-```
 
-```shell
 # Plot
 for e in 50000; do
   for m in 1000 ; do
     path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
     PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz)
     
-    path_recombinant_regions_table_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.tsv
-    path_recombinant_regions_table_sizes_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.sizes.tsv
+    path_recombinant_regions_table_with_counts_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.counts.tsv
     
     (seq 13 15; seq 21 22) | while read i; do
       echo "-e $e -m $m chr$i"
         
       Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_recombinant_regions_with_annotation.R \
-        $path_recombinant_regions_table_tsv \
+        $path_recombinant_regions_table_with_counts_tsv \
         0 25000000 \
         90 50 \
         $i \
@@ -1128,6 +1125,23 @@ for e in 50000; do
     rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.chr*.pdf
   done
 done
+
+for e in 50000; do
+  for m in 1000; do
+    path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+    PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz)
+    
+    path_recombinant_regions_table_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.tsv
+    path_recombinant_regions_table_sizes_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.sizes.tsv
+    path_recombinant_regions_table_with_counts_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.counts.tsv
+    
+    Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_threshold_vs_recombinant.R \
+      path_recombinant_regions_table_sizes_tsv \
+      /lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/threshold_vs_recombinant_regions.pdf
+  done
+done
+
+  
 
 
 # Unmerged query segments
@@ -1306,6 +1320,8 @@ path_input_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.p
 path_chm13_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.vcf.gz
 
 sbatch -p workers -c 48 --job-name vgchm13 --wrap '\time -v vg deconstruct -P chm13 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_chm13_vcf_gz' && tabix '$path_chm13_vcf_gz
+
+zcat chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.vcf.gz | awk -F '\t' '($0 ~ /^#/ || (length($4)==1 && length($5)==1))' | bgzip -c -@ 48 > chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.snv.vcf.gz
 
 
 # acro-contigs
