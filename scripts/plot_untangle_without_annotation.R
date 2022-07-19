@@ -8,8 +8,9 @@ panel_spacing <- as.numeric(args[11])
 nth.best <- as.numeric(args[12])
 ref.nth.best <- as.numeric(args[13])
 num_chr <- args[14]
-path_query_to_consider <- args[15]
-path_output <- args[16]
+estimated_identity_threshold <- as.numeric(args[15])
+path_query_to_consider <- args[16]
+path_output <- args[17]
 
 
 library(ggplot2)
@@ -26,6 +27,16 @@ x <- read.delim(path_untangle_grounded_tsv) %>%
 #x$self.coverage <- as.numeric(x$self.coverage)
 
 #x <- x[x$self.coverage <= 1,]
+
+# To avoid errors
+if (sum(x$jaccard > 1) > 0) {
+  x[x$jaccard > 1,]$jaccard <- 1
+}
+
+# From https://doi.org/10.1093/bioinformatics/btac244
+x$estimated_identity <- exp((1.0 + log(2.0 * x$jaccard/(1.0+x$jaccard)))-1.0)
+
+x <- x[x$estimated_identity >= estimated_identity_threshold,]
 
 if (length(unique(x$target)) == 2) {
   # Sex chromosomes
@@ -67,7 +78,7 @@ p <- ggplot(
     x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin ,
     y = ordered(query.hacked, levels = rev(unique(query.hacked))),
     fill = target,
-    alpha = jaccard
+    alpha = estimated_identity
   )
 ) +
   geom_tile() +

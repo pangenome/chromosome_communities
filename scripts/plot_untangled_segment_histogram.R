@@ -7,8 +7,9 @@ height <- as.numeric(args[10])
 max_len <- as.numeric(args[11])
 nth.best <- as.numeric(args[12])
 ref.nth.best <- as.numeric(args[13])
-path_query_to_consider <- args[14]
-path_output <- args[15]
+estimated_identity_threshold <- as.numeric(args[14])
+path_query_to_consider <- args[15]
+path_output <- args[16]
 
 
 library(ggplot2)
@@ -19,6 +20,16 @@ query_to_consider <- read.delim(path_query_to_consider, header = F)
 
 x <- read.delim(path_untangle_grounded_tsv) %>%
   filter(query %in% query_to_consider$V1)
+
+# To avoid errors
+if (sum(x$jaccard > 1) > 0) {
+  x[x$jaccard > 1,]$jaccard <- 1
+}
+
+# From https://doi.org/10.1093/bioinformatics/btac244
+x$estimated_identity <- exp((1.0 + log(2.0 * x$jaccard/(1.0+x$jaccard)))-1.0)
+
+x <- x[x$estimated_identity >= estimated_identity_threshold,]
 
 colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
 if (length(unique(x$target)) > 5) {

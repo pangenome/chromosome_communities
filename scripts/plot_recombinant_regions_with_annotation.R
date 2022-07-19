@@ -11,12 +11,12 @@ path_output <- args[13]
 library(ggplot2)
 
 xx <- read.delim(path_recombinant_regions_table_tsv, header = F)
-colnames(xx) <- c('self.coverage.threshold', 'jaccard.threshold',  'grounded.target', 'ref.begin', 'ref.end', 'num.contigs')
+colnames(xx) <- c('self.coverage.threshold', 'estimated.identity.threshold',  'grounded.target', 'ref.begin', 'ref.end', 'num.contigs')
 
 # Remove ranges not supported by any contigs
 xx <- xx[xx$num.contigs > 0,]
 
-xx$label <- paste0('sc', xx$self.coverage.threshold, '.j', xx$jaccard.threshold)
+xx$label <- paste0('sc', xx$self.coverage.threshold, '.eid', xx$estimated.identity.threshold)
 
 # Total size of each region
 #library(tidyverse)
