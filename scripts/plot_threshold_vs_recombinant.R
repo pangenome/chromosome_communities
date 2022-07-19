@@ -1,6 +1,6 @@
 args <- commandArgs()
 path_recombinant_regions_table_sizes_tsv <- args[6]
-path_output <- args[2]
+path_output <- args[7]
 
 
 library(ggplot2)

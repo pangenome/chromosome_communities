@@ -1136,7 +1136,7 @@ for e in 50000; do
     path_recombinant_regions_table_with_counts_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.counts.tsv
     
     Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_threshold_vs_recombinant.R \
-      path_recombinant_regions_table_sizes_tsv \
+      $path_recombinant_regions_table_sizes_tsv \
       /lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/threshold_vs_recombinant_regions.pdf
   done
 done
