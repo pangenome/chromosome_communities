@@ -47,5 +47,5 @@ p <- ggplot(
 
 ggsave(
     plot = p,
-    file.path(path_output, 'DotPlots.0_25Mbps.pdf'),
+    path_output,
     width = 70, height = 1400, units = "cm", dpi = 300, bg = "transparent", limitsize = F)

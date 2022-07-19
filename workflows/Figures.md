@@ -138,5 +138,5 @@ zcat $f | awk '$8 == "-" { x=$6; $6=$5; $5=x; } { print }' | awk '$10 == 1') | t
 
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_dot_plots.R \
   for_dot_plot.bed.gz \
-  ~
+  ~/SuppFigureXX.DotPlots.0_25Mbps.eid090.pdf
 ```
