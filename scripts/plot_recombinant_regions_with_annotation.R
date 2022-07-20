@@ -80,7 +80,7 @@ p <- ggplot(
     strip.text.y = element_blank(),
     axis.title.y = element_blank(),
     
-    plot.margin = unit(c(0,1.03,0,7.34), "cm"),
+    plot.margin = unit(c(0,1.03,0,6.7), "cm"),
   ) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values = colors) +
@@ -107,7 +107,7 @@ library(ggpubr)
 p_with_annotation <- ggpubr::ggarrange(
   ggplotted_img, p,
   labels=c('', ''),
-  heights = c(1, 7),
+  heights = c(1, 1.7),
   legend = "right", # legend position,
   common.legend = T,
   nrow = 2
