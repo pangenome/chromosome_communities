@@ -104,12 +104,12 @@ tot_num_queries = sum([len(index_dict) for index_dict in [query_2_index_dict for
 num_query_computed = 0
 for ground_target, query_2_segment_2_hits_dict in ground_2_query_2_segment_2_hits_dict.items():
     ground_target_len = ground_2_len_dict[ground_target]
-    num_queries_on_ground = len(ground_2_query_2_index_dict[grounded_target])
+    num_queries_on_ground = len(ground_2_query_2_index_dict[ground_target])
 
     match_orders_np = np.zeros((num_queries_on_ground, ground_target_len, n), dtype=np.uint8)
 
     for query, segment_2_hits_dict in query_2_segment_2_hits_dict.items():
-        query_index = ground_2_query_2_index_dict[grounded_target][query]
+        query_index = ground_2_query_2_index_dict[ground_target][query]
 
         for (query_begin, query_end), range_and_hits_list in sorted(segment_2_hits_dict.items(), key=lambda item: item[1][0]):
             (ref_begin, ref_end), hit_list = range_and_hits_list
