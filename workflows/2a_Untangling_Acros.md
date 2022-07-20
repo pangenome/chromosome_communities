@@ -1006,8 +1006,8 @@ done
 
 # Check total over the contigs
 (echo "untangle.space.bp untangle.space.reliable.bp untangle.space.unreliable.bp, fraction.untangle.space.reliable" ; \
-  cat $path_grounded_pq_touching_reliable_stats_tsv | sed '1d' |\
-    awk -v OFS='\t' -F'\t' 'BEGIN{UNTANGLED_SIZE=0; UNTANGLED_SIZE_RELIABLE=0}{ UNTANGLED_SIZE+=$7; UNTANGLED_SIZE_RELIABLE+=$8 }END{print UNTANGLED_SIZE,UNTANGLED_SIZE_RELIABLE,UNTANGLED_SIZE-UNTANGLED_SIZE_RELIABLE, UNTANGLED_SIZE_RELIABLE/UNTANGLED_SIZE}' )
+  awk '$2 == 50000 && $3 == 1000 && $4 == 0.900 && $5 == 1 && $6 == 1' $path_grounded_pq_touching_reliable_stats_tsv | sed '1d' | \
+    awk -v OFS='\t' -F'\t' 'BEGIN{UNTANGLED_SIZE=0; UNTANGLED_SIZE_RELIABLE=0}{ UNTANGLED_SIZE+=$8; UNTANGLED_SIZE_RELIABLE+=$9 }END{print UNTANGLED_SIZE,UNTANGLED_SIZE_RELIABLE,UNTANGLED_SIZE-UNTANGLED_SIZE_RELIABLE, UNTANGLED_SIZE_RELIABLE/UNTANGLED_SIZE}' )
 ```
 
 
