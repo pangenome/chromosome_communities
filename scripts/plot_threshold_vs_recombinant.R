@@ -11,7 +11,7 @@ colnames(x) <- c('Max. self coverage', 'Min. estimated identity', 'Mbps')
 
 # Replace 0 with Inf, make it a factor with the specified order
 x$`Max. self coverage` <- as.character(x$`Max. self coverage`)
-x[x$`Max. self coverage` == 0,]$`Max.self coverage` <- 'Inf'
+x[x$`Max. self coverage` == 0,]$`Max. self coverage` <- 'Inf'
 x$`Max. self coverage` <- factor(x$`Max. self coverage`, levels = c("Inf", "1.1"))
 options(scipen=10000) # Disable scientific notation on axes
 
