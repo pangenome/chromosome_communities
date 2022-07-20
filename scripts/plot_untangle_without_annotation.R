@@ -72,10 +72,14 @@ if (sum(xx$jaccard > 1) > 0) {
   xx[xx$jaccard > 1,]$jaccard <- 1
 }
 
+# Filter before to avoid plotting empty rows
+xx$x <- xx$ref.begin + (xx$ref.end - xx$ref.begin) / 2
+xx <- xx[xx$x >= x_min & xx$x <= x_max,]
+
 p <- ggplot(
   xx,
   aes(
-    x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin ,
+    x = x, width = ref.end - ref.begin ,
     y = ordered(query.hacked, levels = rev(unique(query.hacked))),
     fill = target,
     alpha = estimated_identity

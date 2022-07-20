@@ -14,7 +14,6 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/
 for e in 50000; do
   for m in 1000; do
     for eid in 0.900 0.950 0.975 0.995 1.000; do
-      eid=$(echo $eid | sed 's/\,/./g')
       eid_str=$(echo $eid | sed 's/\.//g')
       
       for refn in 1; do
@@ -74,7 +73,6 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordan
 for e in 50000; do
   for m in 1000; do
     for eid in 0.900 0.950 0.975 0.995 1.000; do
-      eid=$(echo $eid | sed 's/\,/./g')
       eid_str=$(echo $eid | sed 's/\.//g')
       
       for refn in 1; do
@@ -130,7 +128,6 @@ done
 for e in 50000; do
   for m in 1000; do
     for eid in 0.900 0.950 0.975 0.995 1.000; do
-      eid=$(echo $eid | sed 's/\,/./g')
       eid_str=$(echo $eid | sed 's/\.//g')
       
       for refn in 1; do

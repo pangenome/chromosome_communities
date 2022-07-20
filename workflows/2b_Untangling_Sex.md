@@ -353,6 +353,9 @@ for e in 50000; do
         path_grounded_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.reliable.tsv.gz
         PREFIX=$(basename $path_grounded_reliable_tsv_gz .tsv.gz);
         
+        zgrep '^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_reliable_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq \
+          > /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt
+        
         if [[ $i == "X" ]]; then
             # chrX#PAR1:0-2394410
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
@@ -362,7 +365,8 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              0.9 \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR1.pdf
               
             # chrX#PAR2:153925834-154259566
@@ -373,7 +377,8 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              0.9 \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR2.pdf
               
             # chrX#PAR2:87642550-91570785
@@ -384,7 +389,8 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              0.9 \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.XTR.pdf
         
             # Full chromosome X
@@ -395,7 +401,8 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              0.9 \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.pdf
         else
             # chrY#PAR1:0-2458320
@@ -406,7 +413,8 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              0.9 \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR1.pdf
               
             # chrY#PAR2:62122809-62460029
@@ -417,7 +425,8 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              0.9 \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR2.pdf
               
             # chrY#XTR1:2727072-5914561
@@ -428,7 +437,8 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              0.9 \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.XTR1.pdf
               
             # chrY#XTR2:6200973-6400875
@@ -439,7 +449,8 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              0.9 \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.XTR2.pdf
             
             # Full chromosome Y
@@ -450,12 +461,14 @@ for e in 50000; do
               0 \
               1 $refn \
               $i \
-              <(zcat $path_grounded_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+              0.9 \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.pdf
         fi
       done
       
       # Merge chromosomes's PDF files
+      rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chrSEX.e$e.m$m.grounded.reliable.n1.nref${refn}.merged.pdf
       /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
         /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.reliable.n1.nref${refn}.*pdf \
         /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chrSEX.e$e.m$m.grounded.reliable.n1.nref${refn}.merged.pdf
@@ -485,7 +498,8 @@ for e in 50000; do
 done
 
 #Take sex chromosome lengths
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx todo
+grep '^chm13' /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz.fai | grep 'chrX\|chrY' | cut -f 1,2 \
+  > /lizardfs/guarracino/chromosome_communities/chm13#SEX.len.tsv
 
 # Support
 # guix install r-ggridges
@@ -511,21 +525,20 @@ for e in 50000; do
     PREFIX=$(basename $path_grounded_reliable_ALL_tsv_gz .tsv.gz)
    
     zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq \
-      > /lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.query_to_consider.txt
+      > /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/$PREFIX.query_to_consider.txt
 
-    for sc in 0 1.5 1; do
-      for j in `seq 0.8 0.01 1.0`; do
-        j=$(echo $j | sed 's/\,/./g')
-        j_str=$(echo $j | sed 's/\.//g')
+    for sc in 0 1.1; do
+      for eid in 0.900 0.950 0.975 0.995 1.000; do
+        eid_str=$(echo $eid | sed 's/\.//g')
         sc_str=$(echo $sc | sed 's/\.//g')
-        echo $e $m $sc $j
+        echo $e $m $sc $eid
           
-        path_recombinant_regions_bed=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/$PREFIX.recombinant_regions.sc${sc_str}.j${j_str}.bed
+        path_recombinant_regions_bed=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/$PREFIX.recombinant_regions.sc${sc_str}.eid${eid_str}.bed
         if [[ ! -s $path_recombinant_regions_bed ]]; then
           python3 /lizardfs/guarracino/chromosome_communities/scripts/recombination_proxy_ranges.py \
             $path_grounded_reliable_ALL_tsv_gz \
-            $j $sc \
-            /lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/$PREFIX.query_to_consider.txt \
+            $eid $sc \
+            /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/$PREFIX.query_to_consider.txt \
             > $path_recombinant_regions_bed
         fi
       done
@@ -533,33 +546,64 @@ for e in 50000; do
   done
 done
 
-# Collect values in grounded reference space
+# Collect values in grounded reference space (TO PUT IN A FILE AND RUN A JOB FOR IT)
+########################################################################################################################
+#!/bin/sh
+
+cd /scratch
+awk -v OFS='\t' '{print($1,"0",$2)}' /lizardfs/guarracino/chromosome_communities/chm13#SEX.len.tsv > chm13.bed
+
+path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle_sex/chm13.SEX.target_paths.txt
+path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrSEX+refs.s50k.l250k.p98.n102/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.og
+prefix=$(basename $path_input_og .og)
+
 for e in 50000; do
-  for m in 1000 ; do
+  for m in 1000; do
     path_grounded_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.reliable.tsv.gz
     PREFIX=$(basename $path_grounded_reliable_ALL_tsv_gz .tsv.gz)
-    
+
     path_recombinant_regions_table_tsv=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.tsv
     path_recombinant_regions_table_sizes_tsv=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.sizes.tsv
+    path_recombinant_regions_table_with_counts_tsv=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/$PREFIX.recombinant_regions.table.counts.tsv
     
-    rm $path_recombinant_regions_table_tsv $path_recombinant_regions_table_sizes_tsv
-    for sc in 0 1.5 1; do
-      for j in `seq 0.8 0.01 1.0`; do
-        j=$(echo $j | sed 's/\,/./g')
-        j_str=$(echo $j | sed 's/\.//g')
+    rm rg.txt
+    rm $path_recombinant_regions_table_tsv $path_recombinant_regions_table_sizes_tsv $path_recombinant_regions_table_with_counts_tsv
+    for sc in 0 1.1; do
+      for eid in 0.900 0.950 0.975 0.995 1.000; do
+        eid_str=$(echo $eid | sed 's/\.//g')
         sc_str=$(echo $sc | sed 's/\.//g')
-        echo $e $m $sc $j
+        echo $e $m $sc $eid
           
-        path_recombinant_regions_bed=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/$PREFIX.recombinant_regions.sc${sc_str}.j${j_str}.bed
+        path_recombinant_regions_bed=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/$PREFIX.recombinant_regions.sc${sc_str}.eid${eid_str}.bed
+
         bedtools merge -i <(cut -f 4,5,6 $path_recombinant_regions_bed | sed '1d' | bedtools sort ) | \
-          awk -v sc=$sc -v j=$j -v OFS='\t' '{print(sc,j,$1,$2,$3)}' >> $path_recombinant_regions_table_tsv
+          awk -v sc=$sc -v eid=$eid -v OFS='\t' '{print(sc,eid,$1,$2,$3)}' >> $path_recombinant_regions_table_tsv
           
         bedtools merge -i <(cut -f 4,5,6 $path_recombinant_regions_bed | sed '1d' | bedtools sort ) | \
-          awk -v sc=$sc -v j=$j -v OFS='\t' '{SUM+=$3-$2}END{print(sc,j,SUM)}' >> $path_recombinant_regions_table_sizes_tsv
+          awk -v sc=$sc -v eid=$eid -v OFS='\t' '{SUM+=$3-$2}END{print(sc,eid,SUM)}' >> $path_recombinant_regions_table_sizes_tsv
+
+        # For each sample, merge intervals with respect to the grounded reference
+        sed '1d' $path_recombinant_regions_bed | cut -f 1 | sort | uniq | while read CONTIG; do
+          grep "^$CONTIG" $path_recombinant_regions_bed | cut -f 4,5,6 | bedtools sort | bedtools merge >> rg.txt
+        done
+        
+        # For each grounded reference position, count how many sample support it
+        # -d: Report the depth at each position in each A feature.
+        # The awk script is to get intervals where grounded reference and counts is constant.
+        bedtools coverage -a chm13.bed -b rg.txt -d | \
+          python3 /lizardfs/guarracino/chromosome_communities/scripts/compress_coverage_info.py | \
+          awk -v sc=$sc -v eid=$eid -v OFS='\t' '{print(sc,eid,$1,$2,$3,$4)}' \
+          >> $path_recombinant_regions_table_with_counts_tsv
+        rm rg.txt
       done
     done
   done
 done
+
+rm chm13.bed
+########################################################################################################################
+
+# Plots
 ```
 
 

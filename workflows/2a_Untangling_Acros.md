@@ -924,7 +924,6 @@ grep '^chm13' /lizardfs/guarracino/chromosome_communities/assemblies/chrA.pan+HG
 for e in 50000; do
   for m in 1000; do
     for eid in 0.900 0.950 0.975 0.995 1.000; do
-      eid=$(echo $eid | sed 's/\,/./g')
       eid_str=$(echo $eid | sed 's/\.//g')
       for refn in 1; do
         echo "-e $e -m $m $eid -refn $refn"
@@ -986,9 +985,7 @@ n=1
 refn=1    
 for e in 50000; do
   for m in 1000; do
-    for eid in 0.900 0.950 0.975 0.995 1.000; do
-      eid=$(echo $eid | sed 's/\,/./g')
-      
+    for eid in 0.900 0.950 0.975 0.995 1.000; do     
       cat $path_targets_txt | while read ref; do
         echo "-e $e -m $m $eid $ref"
                  path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.pq_touching.tsv.gz
@@ -1023,7 +1020,6 @@ for e in 50000; do
     PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz);
       
     for eid in 0.900 0.950 0.975 0.995 1.000; do
-      eid=$(echo $eid | sed 's/\,/./g')
       eid_str=$(echo $eid | sed 's/\.//g')
     
       Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_segment_histogram.R \
@@ -1041,7 +1037,7 @@ done
 ```
 
 
-Estimate regions that can recombine using multi-hit untangled regions: TO UPDATE AND REPEAT
+Estimate regions that can recombine using multi-hit untangled regions:
 
 ```shell
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle/grounded/recombinant_regions/
@@ -1057,7 +1053,6 @@ for e in 50000; do
    
     for sc in 0 1.1; do
       for eid in 0.900 0.950 0.975 0.995 1.000; do
-        eid=$(echo $eid | sed 's/\,/./g')
         eid_str=$(echo $eid | sed 's/\.//g')
         sc_str=$(echo $sc | sed 's/\.//g')
         echo $e $m $sc $eid
@@ -1099,7 +1094,6 @@ for e in 50000; do
     rm $path_recombinant_regions_table_tsv $path_recombinant_regions_table_sizes_tsv $path_recombinant_regions_table_with_counts_tsv
     for sc in 0 1.1; do
       for eid in 0.900 0.950 0.975 0.995 1.000; do
-        eid=$(echo $eid | sed 's/\,/./g')
         eid_str=$(echo $eid | sed 's/\.//g')
         sc_str=$(echo $sc | sed 's/\.//g')
         echo $e $m $sc $eid
@@ -1133,7 +1127,7 @@ done
 rm chm13.bed
 ########################################################################################################################
 
-# Plot
+# Plots
 for e in 50000; do
   for m in 1000; do
     path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
