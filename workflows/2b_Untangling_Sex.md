@@ -259,19 +259,21 @@ for e in 50000; do
 
         echo "-e $e -m $m $ref filtering&annotation"
 
-        # Contigs overlapping (or close at least 100kbps to) a PAR/XTR region
-        ref_chr=$(echo $ref | sed 's/chm13#//')
-        bedtools intersect \
-          -a <(zcat x.tsv.gz | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
-          -b <(grep $ref_chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed |\
-            bedtools sort |\
-            bedtools slop -b 100000 -g /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.sizes |\
-            awk -v OFS='\t' -v ref=$ref '{print(ref,$2,$3)}') | \
-          #awk '$3-$2+1>=100000' | \
-          cut -f 4 | \
-          #Remove references to avoid grepping everything later (with zgrep -f)
-          grep -v chr |\
-          sort | uniq > $ref.tmp.txt
+#        # Contigs overlapping (or close at least 100kbps to) a PARs/XTRs region
+#        ref_chr=$(echo $ref | sed 's/chm13#//')
+#        bedtools intersect \
+#          -a <(zcat x.tsv.gz | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
+#          -b <(grep $ref_chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed |\
+#            bedtools sort |\
+#            bedtools slop -b 100000 -g /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.sizes |\
+#            awk -v OFS='\t' -v ref=$ref '{print(ref,$2,$3)}') | \
+#          #awk '$3-$2+1>=100000' | \
+#          cut -f 4 | \
+#          #Remove references to avoid grepping everything later (with zgrep -f)
+#          grep -v chr |\
+#          sort | uniq > $ref.tmp.txt
+        # All contigs 
+        zcat x.tsv.gz | sed '1d' | cut -f 1 | grep -v chr | sort | uniq > $ref.tmp.txt
            
         # Add grounded.target column, re-add the references, and add annotation
         cat \
@@ -514,7 +516,7 @@ Statistics on untangled segment lengths: XXX
 
 CONTINUE
 Estimate regions that can recombine using multi-hit untangled regions:
-TO UPDATE WITH eid
+
 ```shell
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/
 
@@ -604,6 +606,24 @@ rm chm13.bed
 ########################################################################################################################
 
 # Plots
+# Use the average counts as self coverage for the putative recombinant regions
+f=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.ALL.e50000.m1000.grounded.reliable.recombinant_regions.table.counts.tsv
+max_count=$(cut -f 6 $f | sort -n | tail -n 1)
+echo -e "query\tquery.begin\tquery.end\ttarget\ttarget.begin\ttarget.end\tjaccard\tstrand\tself.coverage\tnth.best\tref\tref.begin\tref.end\tref.jaccard\tref.nth.best\tgrounded.target" > chrXY+recombinant.tsv
+for chr in chrX chrY; do
+  cat \
+    <( grep $chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed | sed 's/^/chm13#/g' | \
+        awk -v OFS='\t' -v ref=chm13#$chr -v max=$max_count '{print $1,".",".",ref,".",".","1","+",max,"1",ref,$2,$3,"1","1",ref}' ) \
+    <( grep $chr $f | \
+        awk '$1 == 0 && $2 == 0.9' | cut -f 3,4,5,6 | awk '$4 > 0' | bedtools sort | bedtools merge -o mean -c 4 -d 0 | \
+        awk -v OFS='\t' -v ref=chm13#$chr '{print $1,".",".",ref,".",".","1","+",$4,"1",ref,$2,$3,"1","1",ref}' ) | sort -r >> chrXY+recombinant.tsv
+done
+
+Rscript =/lizardfs/guarracino/chromosome_communities/scripts/plot_recombinant_regions_chrXY.R \
+  chrXY+recombinant.tsv \
+  90 xxx
+  X or Identify
+  chrXorY.recombinant.png
 ```
 
 

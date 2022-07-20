@@ -124,7 +124,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_segme
   1 1 \
   0.9 \
   <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq ) \
-  ~/SuppFigure17.pdf
+  ~/SuppFigure17.eid090.0_25Mbps.pdf
 ```
 
 

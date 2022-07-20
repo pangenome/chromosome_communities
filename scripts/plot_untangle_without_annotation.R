@@ -67,11 +67,6 @@ xx$query.hacked <- paste(xx$query, xx$nth.best, sep = "-")
 xx <- xx %>%
   arrange(query.hacked)
 
-# To avoid errors
-if (sum(xx$jaccard > 1) > 0) {
-  xx[xx$jaccard > 1,]$jaccard <- 1
-}
-
 # Filter before to avoid plotting empty rows
 xx$x <- xx$ref.begin + (xx$ref.end - xx$ref.begin) / 2
 xx <- xx[xx$x >= x_min & xx$x <= x_max,]

@@ -32,7 +32,6 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
         if query not in query_to_consider_set:
             continue
 
-        nth_best = int(nth_best)
         ref_nth_best = int(ref_nth_best)
         if ref_nth_best > refn:
             continue
