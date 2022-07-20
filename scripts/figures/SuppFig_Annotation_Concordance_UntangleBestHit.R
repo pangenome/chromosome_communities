@@ -1,8 +1,9 @@
 args <- commandArgs()
 path_concordance_by_haplotype_tsv <- args[6]
 path_untangle_grounded_tsv <- args[7]
-dir_annotation <- args[8]
-path_output <- args[9]
+estimated_identity_threshold <- as.numeric(args[8])
+dir_annotation <- args[9]
+path_output <- args[10]
 
 
 x_min <- 0
@@ -115,6 +116,16 @@ for(j in chromosomes) {
 #x$self.coverage[x$self.coverage == '.'] <- 1
 #x$self.coverage <- as.numeric(x$self.coverage)
 #x <- x[x$self.coverage <= 1,]
+
+# To avoid errors
+if (sum(x$jaccard > 1) > 0) {
+  x[x$jaccard > 1,]$jaccard <- 1
+}
+
+# From https://doi.org/10.1093/bioinformatics/btac244
+x$estimated_identity <- exp((1.0 + log(2.0 * x$jaccard/(1.0+x$jaccard)))-1.0)
+
+x <- x[x$estimated_identity >= estimated_identity_threshold,]
 
 colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
 

@@ -100,8 +100,9 @@ For each chromosome:
 
 ```shell
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/SuppFig_Annotation_Concordance_UntangleBestHit.R \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.concordance.by_haplotype.n1.nref1.tsv \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.concordance.by_haplotype.eid0900.n1.nref1.tsv \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz \
+  0.9 \
   /lizardfs/guarracino/chromosome_communities/data/annotation/ \
   ~
 ```

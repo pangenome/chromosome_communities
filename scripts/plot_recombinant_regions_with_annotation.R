@@ -45,9 +45,6 @@ if (num_chr == 13) {
 }
 
 
-
-
-
 p <- ggplot(
   xx,
   aes(
