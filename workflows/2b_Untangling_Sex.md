@@ -258,9 +258,9 @@ for e in 50000; do
 
 
         echo "-e $e -m $m $ref filtering&annotation"
-
+        ref_chr=$(echo $ref | sed 's/chm13#//')
+        
 #        # Contigs overlapping (or close at least 100kbps to) a PARs/XTRs region
-#        ref_chr=$(echo $ref | sed 's/chm13#//')
 #        bedtools intersect \
 #          -a <(zcat x.tsv.gz | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
 #          -b <(grep $ref_chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed |\

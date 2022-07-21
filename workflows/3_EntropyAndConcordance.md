@@ -71,6 +71,28 @@ prefix=$(basename $path_input_og .og)
 
 n=5
 
+for e in 50000; do
+  for m in 1000; do
+    for eid in 0.900; do
+      eid_str=$(echo $eid | sed 's/\.//g')
+      
+      echo "-e $e -m $m $eid"
+
+      path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.tsv
+      if [[ ! -s ${path_entropy_match_order_tsv} ]]; then
+        path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+        python3 /lizardfs/guarracino/chromosome_communities/scripts/entropy_match_orders.py \
+          $path_grounded_pq_touching_reliable_ALL_tsv_gz \
+          /lizardfs/guarracino/chromosome_communities/chm13#ACRO.len.tsv \
+          $n \
+          $eid \
+          <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq ) \
+          > $path_entropy_match_order_tsv
+      fi
+    done
+  done
+done
+
 #guix install r-dplyr
 for e in 50000; do
   for m in 1000; do
@@ -80,16 +102,22 @@ for e in 50000; do
       echo "-e $e -m $m $eid"
 
       path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.tsv
-      #if [[ ! -s ${path_entropy_match_order_tsv} ]]; then
-        path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
-        python3 /lizardfs/guarracino/chromosome_communities/scripts/entropy_match_orders.py \
-          $path_grounded_pq_touching_reliable_ALL_tsv_gz \
-          /lizardfs/guarracino/chromosome_communities/chm13#ACRO.len.tsv \
-          $n \
-          $eid \
-          <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq ) \
-          > $path_entropy_match_order_tsv
-      #fi
+      PREFIX=$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}
+      (seq 13 15; seq 21 22) | while read i; do
+        Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_match_order_with_annotation.R \
+          $path_entropy_match_order_tsv \
+          0 25000000 \
+          90 \
+          $i \
+          /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
+          /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr${i}.pdf
+      done
+      
+      # Merge chromosomes's PDF files
+      /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+        /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.pdf \
+        /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.merged.pdf
+      rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.pdf
     done
   done
 done
@@ -199,5 +227,4 @@ for e in 50000; do
     done
   done
 done
-
 ```
