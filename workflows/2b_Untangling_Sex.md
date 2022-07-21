@@ -607,6 +607,7 @@ rm chm13.bed
 
 # Plots
 # Use the average counts as self coverage for the putative recombinant regions
+cd /lizardfs/guarracino/chromosome_communities/
 f=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.ALL.e50000.m1000.grounded.reliable.recombinant_regions.table.counts.tsv
 max_count=$(cut -f 6 $f | sort -n | tail -n 1)
 echo -e "query\tquery.begin\tquery.end\ttarget\ttarget.begin\ttarget.end\tjaccard\tstrand\tself.coverage\tnth.best\tref\tref.begin\tref.end\tref.jaccard\tref.nth.best\tgrounded.target" > chrXY+recombinant.tsv
@@ -619,11 +620,22 @@ for chr in chrX chrY; do
         awk -v OFS='\t' -v ref=chm13#$chr '{print $1,".",".",ref,".",".","1","+",$4,"1",ref,$2,$3,"1","1",ref}' ) | sort -r >> chrXY+recombinant.tsv
 done
 
-Rscript =/lizardfs/guarracino/chromosome_communities/scripts/plot_recombinant_regions_chrXY.R \
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_recombinant_regions_chrXY.R \
   chrXY+recombinant.tsv \
-  90 xxx
-  X or Identify
-  chrXorY.recombinant.png
+  90 10 \
+  "X" \
+  /lizardfs/guarracino/chromosome_communities/chrX.recombinant_regions.eid0900.pdf
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_recombinant_regions_chrXY.R \
+  chrXY+recombinant.tsv \
+  90 12 \
+  "Y" \
+  /lizardfs/guarracino/chromosome_communities/chrX.recombinant_regions.eid0900.pdf
+  
+# Merge chromosomes's PDF files
+/gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+  /lizardfs/guarracino/chromosome_communities/chrX.recombinant_regions.eid0900.pdf /lizardfs/guarracino/chromosome_communities/chrY.recombinant_regions.eid0900.pdf \
+  /lizardfs/guarracino/chromosome_communities/chrXY.recombinant_regions.eid0900.pdf
+rm /lizardfs/guarracino/chromosome_communities/chrX.recombinant_regions.eid0900.pdf /lizardfs/guarracino/chromosome_communities/chrY.recombinant_regions.eid0900.pdf
 ```
 
 

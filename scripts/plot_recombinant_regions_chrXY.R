@@ -8,20 +8,11 @@ estimated_identity_threshold <- as.numeric(args[15])
 path_query_to_consider <- args[16]
 path_output <- args[17]
 
-path_chrXY_plus_recombinant='/home/guarracino/chrXY+recombinant.tsv'
-width <- 90
-
-height <- 10
-num_chr = 'X'
-path_output = 'chrX.recombinant.png'
-height <- 12.5
-num_chr = 'Y'
-path_output = 'chrY.recombinant.png'
 
 library(ggplot2)
 library(ggforce)
 library(tidyverse)
-
+library(scales) # for pretty_breaks()
 
 x <- read.delim(path_chrXY_plus_recombinant)
 
@@ -57,7 +48,8 @@ p <- ggplot(
   geom_tile() +
   #ggtitle(paste(chr, title)) +
  # facet_grid(~grounded.target, scales = "free_y", space = "free", labeller = labeller(variable = labels)) +
-  theme_bw() + scale_alpha(range=c(0.05,1), limits=c(0,max(xx$self.coverage))) +
+  theme_bw() + 
+  scale_alpha(range=c(0.05,max(xx$self.coverage)/100.0), limits=c(0,max(xx$self.coverage)), breaks=seq(min(xx$self.coverage), 100, 20)) +
   theme(
     plot.title = element_text(hjust = 0.5),
     
