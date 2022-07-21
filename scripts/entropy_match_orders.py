@@ -30,6 +30,7 @@ path_target_length_txt = sys.argv[2]
 n = int(sys.argv[3])  # TODO: if n == 0, detect automatically the max n and use it
 estimated_identity_threshold = float(sys.argv[4])
 path_query_to_consider_txt = sys.argv[5]
+path_ground_target_to_consider_txt = sys.argv[6]
 
 refn = 1  # In this way, the grounded interval is always the same for all `n` target hits of each segment
 
@@ -41,6 +42,7 @@ with open(path_target_length_txt) as f:
         ground, target_len = line.strip().split('\t')
         ground_2_len_dict[ground] = int(target_len)
 
+
 # Read queries to consider
 query_to_consider_set = set()
 
@@ -48,6 +50,15 @@ with open(path_query_to_consider_txt) as f:
     for line in f:
         query = line.strip().split('\t')[0]
         query_to_consider_set.add(query)
+
+# Read ground targets to consider
+ground_target_to_consider_set = set()
+
+with open(path_ground_target_to_consider_txt) as f:
+    for line in f:
+        query = line.strip().split('\t')[0]
+        ground_target_to_consider_set.add(query)
+
 
 # Read untangling information
 ground_2_query_2_segment_2_hits_dict = {}
@@ -60,6 +71,9 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
 
     for line in f:
         query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target = line.strip().split('\t')
+
+        if grounded_target not in ground_target_to_consider_set:
+            continue
 
         if query not in query_to_consider_set:
             continue
@@ -108,6 +122,8 @@ for ground_target, query_2_segment_2_hits_dict in ground_2_query_2_segment_2_hit
 
     match_orders_np = np.zeros((num_queries_on_ground, ground_target_len, n), dtype=np.uint8)
 
+    print('{} - query preparation: {:.2f}%'.format(ground_target, float(num_query_computed)/tot_num_queries*100), file=sys.stderr)
+
     for query, segment_2_hits_dict in query_2_segment_2_hits_dict.items():
         query_index = ground_2_query_2_index_dict[ground_target][query]
 
@@ -123,7 +139,7 @@ for ground_target, query_2_segment_2_hits_dict in ground_2_query_2_segment_2_hit
                 match_orders_np[query_index][pos] = target_sorted_np
 
         num_query_computed += 1
-        print('Query preparation: {:.2f}%'.format(float(num_query_computed)/tot_num_queries*100), file=sys.stderr)
+        print('{} - query preparation: {:.2f}%'.format(ground_target, float(num_query_computed)/tot_num_queries*100), file=sys.stderr)
 
     num_queries = match_orders_np.shape[0]
 
@@ -134,7 +150,7 @@ for ground_target, query_2_segment_2_hits_dict in ground_2_query_2_segment_2_hit
 
     for pos in range(ground_target_len):
         if pos % 1000000 == 0:
-            print('Deduplication {}: {:.2f}%'.format(ground_target, float(pos)/ground_target_len*100), file=sys.stderr)
+            print('{} - deduplication: {:.2f}%'.format(ground_target, float(pos)/ground_target_len*100), file=sys.stderr)
 
         match_order_list = ['_'.join([str(x) for x in match_orders_np[i][pos]]) for i in range(num_queries) if sum(match_orders_np[i][pos]) > 0]
         if len(match_order_list) > 0:

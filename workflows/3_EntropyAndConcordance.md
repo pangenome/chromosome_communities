@@ -81,13 +81,22 @@ for e in 50000; do
       path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.tsv
       if [[ ! -s ${path_entropy_match_order_tsv} ]]; then
         path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
-        python3 /lizardfs/guarracino/chromosome_communities/scripts/entropy_match_orders.py \
-          $path_grounded_pq_touching_reliable_ALL_tsv_gz \
-          /lizardfs/guarracino/chromosome_communities/chm13#ACRO.len.tsv \
-          $n \
-          $eid \
-          <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq ) \
-          > $path_entropy_match_order_tsv
+  
+        (seq 13 15; seq 21 22) | while read i; do
+          ref=chm13#chr${i}
+          path_entropy_match_order_chr_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.$ref.tsv
+          if [[ ! -s ${path_entropy_match_order_chr_tsv} ]]; then
+            python3 /lizardfs/guarracino/chromosome_communities/scripts/entropy_match_orders.py \
+              $path_grounded_pq_touching_reliable_ALL_tsv_gz \
+              /lizardfs/guarracino/chromosome_communities/chm13#ACRO.len.tsv \
+              $n \
+              $eid \
+              <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq ) \
+              <( echo $ref ) \
+              > $path_entropy_match_order_chr_tsv
+          fi
+        done
+
       fi
     done
   done
