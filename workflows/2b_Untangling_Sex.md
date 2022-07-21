@@ -629,13 +629,24 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_recombinant_reg
   chrXY+recombinant.tsv \
   90 12 \
   "Y" \
-  /lizardfs/guarracino/chromosome_communities/chrX.recombinant_regions.eid0900.pdf
-  
+  /lizardfs/guarracino/chromosome_communities/chrY.recombinant_regions.eid0900.pdf
 # Merge chromosomes's PDF files
 /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
   /lizardfs/guarracino/chromosome_communities/chrX.recombinant_regions.eid0900.pdf /lizardfs/guarracino/chromosome_communities/chrY.recombinant_regions.eid0900.pdf \
   /lizardfs/guarracino/chromosome_communities/chrXY.recombinant_regions.eid0900.pdf
 rm /lizardfs/guarracino/chromosome_communities/chrX.recombinant_regions.eid0900.pdf /lizardfs/guarracino/chromosome_communities/chrY.recombinant_regions.eid0900.pdf
+
+
+
+f=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/recombinant_regions/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.ALL.e50000.m1000.grounded.reliable.recombinant_regions.table.counts.tsv
+awk '$1 == 0 && $2 == 0.9 && $6 > 0' $f | cut -f 3,4,5,6 | awk '$4 > 0' | bedtools sort | bedtools merge | awk -v OFS='\t' '{SUM+=$3-$2}END{print(SUM)}'
+awk '$1 == 0 && $2 == 0.9 && $6 > 0' $f | cut -f 3,4,5,6 | awk '$4 > 0' | bedtools sort | bedtools merge | grep chrX | awk -v OFS='\t' '{SUM+=$3-$2}END{print(SUM)}'
+awk '$1 == 0 && $2 == 0.9 && $6 > 0' $f | cut -f 3,4,5,6 | awk '$4 > 0' | bedtools sort | bedtools merge | grep chrY | awk -v OFS='\t' '{SUM+=$3-$2}END{print(SUM)}'
+
+awk '$1 == 0 && $2 == 0.9 && $6 > 19' $f | cut -f 3,4,5,6 | awk '$4 > 0' | bedtools sort | bedtools merge | awk -v OFS='\t' '{SUM+=$3-$2}END{print(SUM)}'
+awk '$1 == 0 && $2 == 0.9 && $6 > 19' $f | cut -f 3,4,5,6 | awk '$4 > 0' | bedtools sort | bedtools merge | grep chrX | awk -v OFS='\t' '{SUM+=$3-$2}END{print(SUM)}'
+awk '$1 == 0 && $2 == 0.9 && $6 > 19' $f | cut -f 3,4,5,6 | awk '$4 > 0' | bedtools sort | bedtools merge | grep chrY | awk -v OFS='\t' '{SUM+=$3-$2}END{print(SUM)}'
+
 ```
 
 

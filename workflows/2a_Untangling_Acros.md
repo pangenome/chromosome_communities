@@ -826,8 +826,12 @@ done
 
 # Check total over the contigs
 (echo "untangle.space.bp untangle.space.reliable.bp untangle.space.unreliable.bp, fraction.untangle.space.reliable" ; \
-  awk '$2 == 50000 && $3 == 1000 && $4 == 0.900 && $5 == 1 && $6 == 1' $path_grounded_pq_touching_reliable_stats_tsv | sed '1d' | \
+  awk '$2 == 50000 && $3 == 1000 && $4 == 0.900 && $5 == 1 && $6 == 1' $path_grounded_pq_touching_reliable_stats_tsv | \
     awk -v OFS='\t' -F'\t' 'BEGIN{UNTANGLED_SIZE=0; UNTANGLED_SIZE_RELIABLE=0}{ UNTANGLED_SIZE+=$8; UNTANGLED_SIZE_RELIABLE+=$9 }END{print UNTANGLED_SIZE,UNTANGLED_SIZE_RELIABLE,UNTANGLED_SIZE-UNTANGLED_SIZE_RELIABLE, UNTANGLED_SIZE_RELIABLE/UNTANGLED_SIZE}' )
+
+(head -n 1  $path_grounded_pq_touching_reliable_stats_tsv; \
+  awk '$2 == 50000 && $3 == 1000 && $4 == 0.900 && $5 == 1 && $6 == 1' $path_grounded_pq_touching_reliable_stats_tsv) | \
+  cut -f 7,8,9,10 > SuppTable2.eid0900.tsv
 ```
 
 
@@ -1004,7 +1008,7 @@ bedtools merge -i <(cut -f 4,5,6 x.bed | sed '1d' | bedtools sort ) | wc -l
 ```
 
 
-How many pq-contigs appear to cross the rDNA array?
+How many pq-contigs appear to cross the rDNA array (touches both sides)?
 
 ```shell
 n=1
@@ -1019,16 +1023,22 @@ for e in 50000; do
       
       echo "-e $e -m $m $eid"
       
-      bedtools intersect \
-        -a <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' -v $path_grounded_pq_touching_reliable_ALL_tsv_gz | sed '1d' | \
-                awk -v eid=$eid -v n=$n -v refn=$refn 'current_eid=exp((1.0 + log(2.0 * $7/(1.0+$7)))-1.0); current_eid >= eid && $10 == n && $15 == refn' | \
-                awk -v OFS='\t' '{print($11,$12,$13,$1)}' | bedtools sort ) \
-        -b <( zgrep rDNA /lizardfs/guarracino/chromosome_communities/data/chm13.CentromeresAndTelomeres.CenSatAnnotation.txt.gz | \
-              awk -v OFS='\t' '{print("chm13#"$1,"0",$2)}' | bedtools sort ) \
-        > /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.${eid_str}.$rDNA_crossing_target_segments.tsv
-      
-      # Show target and contig
-      cut -f 1,4 /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.${eid_str}.$rDNA_crossing_target_segments.tsv | sort | uniq
+      comm -12 \
+        <( bedtools intersect \
+            -a <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' -v $path_grounded_pq_touching_reliable_ALL_tsv_gz | sed '1d' | \
+                    awk -v eid=$eid -v n=$n -v refn=$refn 'current_eid=exp((1.0 + log(2.0 * $7/(1.0+$7)))-1.0); current_eid >= eid && $10 == n && $15 == refn' | \
+                    awk -v OFS='\t' '{print($11,$12,$13,$1)}' | bedtools sort ) \
+            -b <( zgrep rDNA /lizardfs/guarracino/chromosome_communities/data/chm13.CentromeresAndTelomeres.CenSatAnnotation.txt.gz | \
+                  awk -v OFS='\t' '{print("chm13#"$1,"0",$2)}' | bedtools sort ) | cut -f 4 | sort | uniq)  \
+        <( bedtools intersect \
+            -a <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' -v $path_grounded_pq_touching_reliable_ALL_tsv_gz | sed '1d' | \
+                    awk -v eid=$eid -v n=$n -v refn=$refn 'current_eid=exp((1.0 + log(2.0 * $7/(1.0+$7)))-1.0); current_eid >= eid && $10 == n && $15 == refn' | \
+                    awk -v OFS='\t' '{print($11,$12,$13,$1)}' | bedtools sort ) \
+            -b <( bedtools complement \
+                    -i <( zgrep rDNA /lizardfs/guarracino/chromosome_communities/data/chm13.CentromeresAndTelomeres.CenSatAnnotation.txt.gz | \
+                              awk -v OFS='\t' '{print("chm13#"$1,"0",$2)}' | bedtools sort ) \
+                    -g <( grep 'chr13\|chr14\|chr15\|chr21\|chr22' /lizardfs/erikg/HPRC/year1v2genbank/assemblies/chm13.fa.fai | cut -f 1,2 | sort ) ) | cut -f 4 | sort | uniq ) | \
+        sort | uniq > /lizardfs/guarracino/chromosome_communities/untangle/grounded/$PREFIX.eid${eid_str}.rDNA_crossing_contigs.tsv
     done
   done
 done
