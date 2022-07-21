@@ -403,15 +403,11 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/untangle
 path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/chm13.target_paths.txt
 grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.fa.gz.fai | cut -f 1 > $path_targets_txt
 
+# Graph
+path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.og
+prefix=$(basename $path_input_og .og)
 
 RUN_ODGI=/home/guarracino/tools/odgi/bin/odgi-454197fa29b772050c3135d5de47c816ce38e62c
-
-# Chosen
-path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.og
-# path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs_s5k.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n202/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.c1ae0e1.04f1c29.bb6e2ba.smooth.final.og
-# path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs_s5k.1kbps.hg002prox.hg002hifi.s25k.p90.n300/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.e536dda.04f1c29.7af1fa9.smooth.final.og
-
-prefix=$(basename $path_input_og .og)
 ```
 
 
@@ -427,28 +423,6 @@ for e in 50000; do
       echo "-e $e -m $m"
       sbatch -p workers -c 48 --job-name acrountangle --wrap "\time -v $RUN_ODGI untangle -t 48 -P -i $path_input_og -R $path_targets_txt -e $e -m $m --cut-points-output $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_bed_gz"
     fi;
-  done
-done
-```
-
-
-Untangle with respect to a single acrocentric chromosome, using always the same cut points:
-
-```shell
-for e in 50000; do
-  for m in 1000; do
-    echo "-e $e -m $m"
-      
-    cat $path_targets_txt | while read ref; do
-      echo $ref
-      
-      path_ref_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz
-      if [[ ! -s ${path_ref_bed_gz} ]]; then
-        path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.j0.n100.cut_points.txt
-        
-        sbatch -p workers -c 48 --job-name acrountangle --wrap "\time -v $RUN_ODGI untangle -t 48 -P -i $path_input_og -r $ref -e $e -m $m --cut-points-input $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_ref_bed_gz"
-      fi;
-    done
   done
 done
 ```
@@ -494,6 +468,28 @@ for e in 50000; do
 done
 
 # Fixed 7661 hits covering 11171215 bps on the queries.
+```
+
+
+Untangle with respect to a single acrocentric chromosome, using always the same cut points:
+
+```shell
+for e in 50000; do
+  for m in 1000; do
+    echo "-e $e -m $m"
+      
+    cat $path_targets_txt | while read ref; do
+      echo $ref
+      
+      path_ref_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz
+      if [[ ! -s ${path_ref_bed_gz} ]]; then
+        path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle/$prefix.untangle.chm13#ACRO.e$e.m$m.j0.n100.cut_points.txt
+        
+        sbatch -p workers -c 48 --job-name acrountangle --wrap "\time -v $RUN_ODGI untangle -t 48 -P -i $path_input_og -r $ref -e $e -m $m --cut-points-input $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_ref_bed_gz"
+      fi;
+    done
+  done
+done
 ```
 
 

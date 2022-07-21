@@ -78,28 +78,6 @@ done
 ```
 
 
-Untangle with respect to a single sex chromosome, using always the same cut points:
-
-```shell
-for e in 50000; do
-  for m in 1000; do
-    echo "-e $e -m $m"
-      
-    cat $path_targets_txt | while read ref; do
-      echo $ref
-      
-      path_ref_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz
-      if [[ ! -s ${path_ref_bed_gz} ]]; then
-        path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.cut_points.txt
-        
-        sbatch -p workers -c 48 --job-name sexuntangle --wrap "\time -v $RUN_ODGI untangle -t 48 -P -i $path_input_og -r $ref -e $e -m $m --cut-points-input $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_ref_bed_gz"
-      fi
-    done
-  done
-done
-```
-
-
 Fix best hits (if there are multiple best hits, put as first the target-chromosome of origin of the contig):
 
 ```shell
@@ -233,6 +211,28 @@ for e in 50000; do
 done
 
 # Fixed 13900 hits covering 21791399 bps on the queries.
+```
+
+
+Untangle with respect to a single sex chromosome, using always the same cut points:
+
+```shell
+for e in 50000; do
+  for m in 1000; do
+    echo "-e $e -m $m"
+      
+    cat $path_targets_txt | while read ref; do
+      echo $ref
+      
+      path_ref_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.$ref.e$e.m$m.j0.n100.bed.gz
+      if [[ ! -s ${path_ref_bed_gz} ]]; then
+        path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.cut_points.txt
+        
+        sbatch -p workers -c 48 --job-name sexuntangle --wrap "\time -v $RUN_ODGI untangle -t 48 -P -i $path_input_og -r $ref -e $e -m $m --cut-points-input $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_ref_bed_gz"
+      fi
+    done
+  done
+done
 ```
 
 

@@ -11,13 +11,6 @@ library(ggplot2)
 library(ggforce)
 library(scales) # for pretty_breaks()
 
-path_entropy_tsv = '/home/guarracino/prova_entropia.tsv'
-x_min <- 0
-x_max <- 25000000
-width <- 90
-num_chr <- 13
-path_annotation <- '/home/guarracino/git/chromosome_communities/data/annotation/hgt_genome_euro_chr13_0_25Mbp.png'
-path_output <- '/home/guarracino/entropy.png'
 
 x <- read.delim(path_entropy_tsv)
 
