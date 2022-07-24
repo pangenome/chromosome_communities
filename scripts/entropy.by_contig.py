@@ -80,7 +80,7 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
 
         ref_begin = int(ref_begin)
         ref_end = int(ref_end)
-        target_int = int(target.split('chm13#chr')[-1])
+        target = target.split('chm13#chr')[-1]
 
         # PATERNAL == 1, MATERNAL == 2
         group = 'PATERNAL' if query.split('#')[1] in ['1', 'PAT'] else 'MATERNAL'
@@ -91,7 +91,7 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
             ground_2_group_2_query_2_pieces_dict[grounded_target][group] = {}
         if query not in ground_2_group_2_query_2_pieces_dict[grounded_target][group]:
             ground_2_group_2_query_2_pieces_dict[grounded_target][group][query] = []
-        ground_2_group_2_query_2_pieces_dict[grounded_target][group][query].append((ref_begin, ref_end, target_int))
+        ground_2_group_2_query_2_pieces_dict[grounded_target][group][query].append((ref_begin, ref_end, target))
 
 
 num_query_computed = 0
@@ -108,9 +108,9 @@ for ground_target, group_2_query_2_pieces_dict in ground_2_group_2_query_2_piece
 
             # Fill (slowly!) targets over the ground target
             query_on_ref_list = [0] * ground_target_len
-            for start, stop, target_int in pieces_list:
+            for start, stop, target in pieces_list:
                 for pos in range(start, stop):
-                    query_on_ref_list[pos] = target_int
+                    query_on_ref_list[pos] = target
 
             # Compute entropy for each window
             for start in range(0, len(query_on_ref_list), window_size):
