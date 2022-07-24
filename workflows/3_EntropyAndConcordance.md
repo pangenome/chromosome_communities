@@ -25,6 +25,7 @@ for e in 50000; do
           python3 /lizardfs/guarracino/chromosome_communities/scripts/entropy.by_contig.py \
             $path_grounded_pq_touching_reliable_ALL_tsv_gz \
             /lizardfs/guarracino/chromosome_communities/chm13#ACRO.len.tsv \
+            50000 \
             1 $refn \
             $eid \
             <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq ) \
