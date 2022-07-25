@@ -1,9 +1,13 @@
 #!/usr/bin/env python
+
 import collections
 import gzip
 import sys
 import math
-import numpy as np
+
+
+# Shannon Diversity Index
+# http://en.wikipedia.org/wiki/Shannon_index
 
 def sdi(data):
     """ Given a hash { 'species': count } , returns the SDI
@@ -30,7 +34,6 @@ path_target_length_txt = sys.argv[2]
 n = int(sys.argv[3])  # TODO: if n == 0, detect automatically the max n and use it
 estimated_identity_threshold = float(sys.argv[4])
 path_query_to_consider_txt = sys.argv[5]
-path_ground_target_to_consider_txt = sys.argv[6]
 
 refn = 1  # In this way, the grounded interval is always the same for all `n` target hits of each segment
 
@@ -51,14 +54,6 @@ with open(path_query_to_consider_txt) as f:
         query = line.strip().split('\t')[0]
         query_to_consider_set.add(query)
 
-# Read ground targets to consider
-ground_target_to_consider_set = set()
-
-with open(path_ground_target_to_consider_txt) as f:
-    for line in f:
-        query = line.strip().split('\t')[0]
-        ground_target_to_consider_set.add(query)
-
 
 # Read untangling information
 ground_2_segment_2_query_2_hits_dict = {}
@@ -69,9 +64,6 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
 
     for line in f:
         query, query_begin, query_end, target, target_begin, target_end, jaccard, strand, self_coverage, nth_best, ref, ref_begin, ref_end, ref_jaccard, ref_nth_best, grounded_target = line.strip().split('\t')
-
-        if grounded_target not in ground_target_to_consider_set:
-            continue
 
         if query not in query_to_consider_set:
             continue

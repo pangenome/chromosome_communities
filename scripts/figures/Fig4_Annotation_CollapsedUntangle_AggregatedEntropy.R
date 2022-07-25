@@ -167,15 +167,7 @@ p_figure <- ggpubr::ggarrange(
 
 ggsave(
   plot = p_figure,
-  file.path(path_output, 'Figure4.pdf'),
-  width = width, height = height*5 + 4*height/20, # There are 4 NULL plots that have height == height/20
-  units = "cm",
-  dpi = 100, bg = "white",
-  limitsize = FALSE
-)
-ggsave(
-  plot = p_figure,
-  file.path(path_output, 'Figure4.png'),
+  path_output,
   width = width, height = height*5 + 4*height/20, # There are 4 NULL plots that have height == height/20
   units = "cm",
   dpi = 100, bg = "white",
