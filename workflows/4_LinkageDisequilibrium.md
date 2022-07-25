@@ -39,6 +39,6 @@ paste -d'\n' chrNames.txt acrocentrics.txt | while read f1 && read f2 ; do plink
 #### 3. Plot
 
 ```
-Rscript ld_plot.R 'ld/*' acrocentrics_ld.pdf
+Rscript plot_ld.R 'ld/*' acrocentrics_ld.pdf
 
 ```
