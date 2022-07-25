@@ -16,18 +16,10 @@ x <- read.delim(path_entropy_tsv)
 
 x[x$shannon_div_index == -1, ]$shannon_div_index <- NA
 
-if (num_chr == 13) {
-  colors <- c("#F8766D")
-} else if (num_chr == 14) {
-  colors <- c("#A3A500")
-} else if (num_chr == 15) {
-  colors <- c("#00BF7D")
-} else if (num_chr == 21) {
-  colors <- c("#00B0F6")
-} else if (num_chr == 22) {
-  colors <- c("#E76BF4")
-}else {
-  colors <- c("#000000")
+colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
+if (length(unique(x$target)) > 5) {
+  # Mobin's annotations
+  colors <- c(colors, "#000000", "#000000", "#000000")
 }
 
 library(dplyr)

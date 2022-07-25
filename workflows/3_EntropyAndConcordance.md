@@ -128,6 +128,7 @@ Compute the entropy for each reference position for all samples untangling in th
 by considering HiFi-only contigs anchored to the q-arms (so no HG002-HiFi-only) and HG002-verkko:
 
 ```shell
+path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/chm13.target_paths.txt
 path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.og
 prefix=$(basename $path_input_og .og)
 
@@ -136,30 +137,27 @@ n=5
 
 for e in 50000; do
   for m in 1000; do
-    for eid in 0.900; do
+    path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+    PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz)
+      
+    zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq \
+      > /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.query_to_consider.txt
+    
+    for eid in 0.900 0.950 0.975 0.995 1.000; do
       eid_str=$(echo $eid | sed 's/\.//g')
       
       echo "-e $e -m $m $eid"
 
-      path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
-      PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_tsv_gz .tsv.gz)
-
-      zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq \
-        > /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.query_to_consider.txt
-
-      (seq 13 15; seq 21 22) | while read i; do
-        ref=chm13#chr${i}
-        path_entropy_match_order_chr_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.$ref.tsv
-        if [[ ! -s ${path_entropy_match_order_chr_tsv} ]]; then
-          python3 /lizardfs/guarracino/chromosome_communities/scripts/entropy_match_orders.fast.py \
-            $path_grounded_pq_touching_reliable_ALL_tsv_gz \
-            /lizardfs/guarracino/chromosome_communities/chm13#ACRO.len.tsv \
-            $n $eid \
-            /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.query_to_consider.txt \
-            <( echo $ref ) \
-            > $path_entropy_match_order_chr_tsv
-        fi
-      done
+      path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.tsv
+      #if [[ ! -s ${path_entropy_match_order_tsv} ]]; then
+        python3 /lizardfs/guarracino/chromosome_communities/scripts/entropy_match_orders.py \
+          $path_grounded_pq_touching_reliable_ALL_tsv_gz \
+          /lizardfs/guarracino/chromosome_communities/chm13#ACRO.len.tsv \
+          $n $eid \
+          /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.query_to_consider.txt \
+          $path_targets_txt \
+          > $path_entropy_match_order_tsv
+      #fi
     done
   done
 done
@@ -171,7 +169,7 @@ Plots:
 #guix install r-dplyr
 for e in 50000; do
   for m in 1000; do
-    for eid in 0.900; do
+    for eid in 0.900 0.950 0.975 0.995 1.000; do
       eid_str=$(echo $eid | sed 's/\.//g')
       
       echo "-e $e -m $m $eid"
@@ -179,11 +177,11 @@ for e in 50000; do
       (seq 13 15; seq 21 22) | while read i; do
         ref=chm13#chr${i}
         
-        path_entropy_match_order_chr_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.$ref.tsv
+        path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.tsv
         PREFIX=$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}
         
         Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_match_order_with_annotation.R \
-          $path_entropy_match_order_chr_tsv \
+          $path_entropy_match_order_tsv \
           0 25000000 \
           90 \
           $i \
