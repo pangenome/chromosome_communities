@@ -196,7 +196,7 @@ p_with_annotation <- ggpubr::ggarrange(
 ggsave(
   plot = p_with_annotation,
   path_output,
-  width = width, height = 11,
+  width = width, height = 12,
   units = "cm",
   dpi = 100, bg = "white",
   limitsize = FALSE

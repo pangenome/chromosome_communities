@@ -81,20 +81,17 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BE
   90 \
   'X' \
   /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
-  ~/X.pdf
+  ~/SuppFigure8.pdf
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BED_annotation.R \
   $path_entropy_by_contig_tsv \
   0 63000000 \
   90 \
   'Y' \
   /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
-  ~/Y.pdf 
-
-/gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite ~/X.pdf ~/Y.pdf ~/SuppFigure8.pdf
-rm ~/X.pdf ~/Y.pdf
+  ~/SuppFigure9.pdf
 ```
 
-## Figure 9, 10, 11, 12, 13
+## Figure 10, 11, 12, 13, 14
 
 For each chromosome:
 - top: annotation bars;
