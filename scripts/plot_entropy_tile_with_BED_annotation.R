@@ -5,7 +5,7 @@ x_max <- as.numeric(args[8])
 width <- as.numeric(args[9])
 num_chr <- args[10]
 path_annotation_bed <- args[11]
-prefix_output <- args[12]
+path_output <- args[12]
 
 
 library(ggplot2)
