@@ -479,6 +479,52 @@ for e in 50000; do
     done
   done
 done
+
+
+
+for e in 50000; do
+  for m in 1000; do
+    for refn in 1; do
+      (echo X; echo Y) | while read i; do     
+        ref=chm13#chr$i
+        
+        echo "-e $e -m $m -refn $refn $ref"
+    
+        path_grounded_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.reliable.tsv.gz
+        PREFIX=$(basename $path_grounded_reliable_tsv_gz .tsv.gz);
+        
+        zgrep '^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_reliable_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq \
+          > /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt
+        
+        if [[ $i == "X" ]]; then        
+            # Full chromosome X
+            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
+              $path_grounded_reliable_tsv_gz \
+              0 154259566 \
+              200 0.4 \
+              0 \
+              2 $refn \
+              $i \
+              0.9 \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n2.nref${refn}.pdf
+        else           
+            # Full chromosome Y
+            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
+              $path_grounded_reliable_tsv_gz \
+              0 62460029 \
+              80 0.4 \
+              0 \
+              2 $refn \
+              $i \
+              0.9 \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n2.nref${refn}.pdf
+        fi
+      done
+    done
+  done
+done
 ```
 CONTINUE
 Plot 2 hits: XXX
