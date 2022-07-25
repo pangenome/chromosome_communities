@@ -102,22 +102,20 @@ for e in 50000; do
             if [[ $i == "Y" ]]; then
               xmax=63000000
             fi
-            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_tile_with_BED_annotation.R \
+            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BED_annotation.R \
               $path_entropy_by_contig_tsv \
               0 $xmax \
               90 \
-              'X' \
+              $i \
               /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
-              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr${i}
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr${i}.pdf
           done
           
           # Merge chromosomes's PDF files
           /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
-            /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chrX.pdf \
-            /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chrY.pdf \
+            /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr*.pdf \
             /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.merged.pdf
-          rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chrX.pdf \
-             /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chrY.pdf
+          rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr*.pdf
         done
       done
     done
@@ -269,7 +267,7 @@ Plots:
 #guix install r-dplyr
 for e in 50000; do
   for m in 1000; do
-    for eid in 0.900 0.950 0.975 0.995 1.000; do
+    for eid in 0.900; do
       eid_str=$(echo $eid | sed 's/\.//g')
 
       path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$prefix.untangle.chm13#chrSEX.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.tsv
@@ -294,11 +292,9 @@ for e in 50000; do
       
       # Merge chromosomes's PDF files
       /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
-        /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chrX.pdf \
-        /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chrY.pdf \
+        /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr*.pdf \
         /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.merged.pdf
-      rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chrX.pdf \
-         /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chrY.pdf
+      rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr*.pdf
     done
   done
 done

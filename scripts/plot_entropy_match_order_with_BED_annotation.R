@@ -3,7 +3,7 @@ path_entropy_tsv <- args[6]
 x_min <- as.numeric(args[7])
 x_max <- as.numeric(args[8])
 width <- as.numeric(args[9])
-num_chr <- as.numeric(args[10])
+num_chr <- args[10]
 path_annotation_bed <- args[11]
 path_output <- args[12]
 
