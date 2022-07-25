@@ -33,7 +33,7 @@ chr <- paste0('chm13#chr', num_chr)
 xx <- x[x$ground.target == chr,]
 
 
-p <- ggplot(x, aes(x=start, y=shannon_div_index, color=ground.target)) +
+p <- ggplot(xx, aes(x=start, y=shannon_div_index, color=ground.target)) +
   geom_step(aes(alpha=num.queries)) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0, 0, 0)) +
   scale_y_continuous(limits = c(0, max(2, max(xx$shannon_div_index))), breaks=pretty_breaks(n=6)) +
