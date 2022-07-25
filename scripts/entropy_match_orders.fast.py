@@ -108,11 +108,11 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
                 pass  # Same query-segment: continue to fill the information
             else:
                 # Different query-segment, grounded to the same target-segment.
-                if ref_jaccard > r_jaccard:
+                ###if ref_jaccard > r_jaccard:
                     # The current query-segment has a better grounding jaccard, so replace the old one
                     ground_2_segment_2_query_2_hits_dict[grounded_target][(ref_begin, ref_end)][query] = (ref_jaccard, query_begin, query_end, list())
-                else:
-                    continue  # The current query-segment has not a better grounding
+                ###else:
+                ###    continue  # The current query-segment has not a better grounding
 
         ground_2_segment_2_query_2_hits_dict[grounded_target][(ref_begin, ref_end)][query][3].append((nth_best, target))
 
