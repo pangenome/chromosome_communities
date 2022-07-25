@@ -24,6 +24,7 @@ p arm
 ```
 cat data/annotation/chm13.p_arms.approximate.acros.bed | cut -f 1 > chrNames.txt
 cat data/annotation/chm13.p_arms.approximate.acros.bed | cut -f 1 | sed 's/chm13#//g' > acrocentrics.txt
+sed -i 's/^/chm13#/g' chrARCO_25-Jul-22_PPRRs.bed
 mkdir ld
 
 paste -d'\n' chrNames.txt acrocentrics.txt | while read f1 && read f2 ; do plink --vcf chrACRO+refs.vcf.gz --allow-extra-chr  --chr-set -5 --chr $f1 --r2  --extract 'range' data/annotation/chm13.p_arms.approximate.acros.bed --ld-window-kb 10  --ld-window-r2 0 --out ld/$f2.pArm
