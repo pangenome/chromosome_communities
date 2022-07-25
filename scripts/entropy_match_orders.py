@@ -61,9 +61,7 @@ with open(path_ground_target_to_consider_txt) as f:
 
 
 # Read untangling information
-ground_2_query_2_segment_2_hits_dict = {}
-
-ground_2_query_2_index_dict = dict()
+ground_2_segment_2_query_2_hits_dict = {}
 
 # query, query.begin, query.end, target, target.begin, target.end, jaccard, strand, self.coverage, nth.best, ref, ref.begin, ref.end, ref.jaccard, ref.nth.best, grounded.target
 with gzip.open(path_grounded_tsv_gz, "rt") as f:
@@ -88,94 +86,96 @@ with gzip.open(path_grounded_tsv_gz, "rt") as f:
         if estimated_identity < estimated_identity_threshold:
             continue
 
-        if grounded_target not in ground_2_query_2_index_dict:
-            ground_2_query_2_index_dict[grounded_target] = {}
-        if query not in ground_2_query_2_index_dict[grounded_target]:
-            ground_2_query_2_index_dict[grounded_target][query] = len(ground_2_query_2_index_dict[grounded_target])
-
         nth_best = int(nth_best)
         ref_begin = int(ref_begin)
         ref_end = int(ref_end)
-        target_int = int(target.split('chm13#chr')[-1])
+        target = target.split('chm13#chr')[-1]
 
         # PATERNAL == 1, MATERNAL == 2
         group = 'PAT' if query.split('#')[1] in ['1', 'PAT'] else 'MAT'
 
-        if grounded_target not in ground_2_query_2_segment_2_hits_dict:
-            ground_2_query_2_segment_2_hits_dict[grounded_target] = {}
-        if query not in ground_2_query_2_segment_2_hits_dict[grounded_target]:
-            # `set` to avoid counting multiple times segment with self.coverage > 1
-            ground_2_query_2_segment_2_hits_dict[grounded_target][query] = {}
-        if (query_begin, query_end) not in ground_2_query_2_segment_2_hits_dict[grounded_target][query]:
-            ground_2_query_2_segment_2_hits_dict[grounded_target][query][(query_begin, query_end)] = [(ref_begin, ref_end), list()]
-        ground_2_query_2_segment_2_hits_dict[grounded_target][query][(query_begin, query_end)][1].append((nth_best, target_int))
+        if grounded_target not in ground_2_segment_2_query_2_hits_dict:
+            ground_2_segment_2_query_2_hits_dict[grounded_target] = {}
+        if (ref_begin, ref_end) not in ground_2_segment_2_query_2_hits_dict[grounded_target]:
+            ground_2_segment_2_query_2_hits_dict[grounded_target][(ref_begin, ref_end)] = {}
+        if query not in ground_2_segment_2_query_2_hits_dict[grounded_target][(ref_begin, ref_end)]:
+            ground_2_segment_2_query_2_hits_dict[grounded_target][(ref_begin, ref_end)][query] = (ref_jaccard, query_begin, query_end, list())
+        else:
+            # The query is already present, check if the query-segment is the same
+            r_jaccard, q_begin, q_end, _ = ground_2_segment_2_query_2_hits_dict[grounded_target][(ref_begin, ref_end)][query]
+
+            if query_begin == q_begin and query_end == q_end:
+                pass  # Same query-segment: continue to fill the information
+            else:
+                # Different query-segment, grounded to the same target-segment.
+                if ref_jaccard > r_jaccard:
+                    # The current query-segment has a better grounding jaccard, so replace the old one
+                    ground_2_segment_2_query_2_hits_dict[grounded_target][(ref_begin, ref_end)][query] = (ref_jaccard, query_begin, query_end, list())
+                else:
+                    continue  # The current query-segment has not a better grounding
+
+        ground_2_segment_2_query_2_hits_dict[grounded_target][(ref_begin, ref_end)][query][3].append((nth_best, target))
+
+# for ground_target, segment_2_query_2_hits_dict in ground_2_segment_2_query_2_hits_dict.items():
+#     for segment, query_2_hits_dict in sorted(segment_2_query_2_hits_dict.items(), key=lambda key: key):
+#         print(ground_target, segment, len(query_2_hits_dict), query_2_hits_dict)
+#         # for query, hits in query_2_hits_dict.items():
+#         #     print(query, hits)
 
 
 print('\t'.join(['ground.target', 'start', 'end', 'shannon_div_index', 'num.queries']))
 
-tot_num_queries = sum([len(index_dict) for index_dict in [query_2_index_dict for query_2_index_dict in ground_2_query_2_index_dict.values()]])
-
-num_query_computed = 0
-for ground_target, query_2_segment_2_hits_dict in ground_2_query_2_segment_2_hits_dict.items():
-    ground_target_len = ground_2_len_dict[ground_target]
-    num_queries_on_ground = len(ground_2_query_2_index_dict[ground_target])
-
-    match_orders_np = np.zeros((num_queries_on_ground, ground_target_len, n), dtype=np.uint8)
-
-    print('{} - query preparation: {:.2f}%'.format(ground_target, float(num_query_computed)/tot_num_queries*100), file=sys.stderr)
-
-    for query, segment_2_hits_dict in query_2_segment_2_hits_dict.items():
-        query_index = ground_2_query_2_index_dict[ground_target][query]
-
-        for (query_begin, query_end), range_and_hits_list in sorted(segment_2_hits_dict.items(), key=lambda item: item[1][0]):
-            (ref_begin, ref_end), hit_list = range_and_hits_list
-            hit_sorted_list = sorted(hit_list, key=lambda x: x[0])
-
-            # To get numpy array of the same size (n)
-            hit_sorted_filled_list = hit_sorted_list + [(0, 0)] * (n - len(hit_sorted_list))
-            target_sorted_np = np.array([target for n, target in hit_sorted_filled_list], dtype=np.uint8)
-
-            for pos in range(ref_begin, ref_end):
-                match_orders_np[query_index][pos] = target_sorted_np
-
-        num_query_computed += 1
-        print('{} - query preparation: {:.2f}%'.format(ground_target, float(num_query_computed)/tot_num_queries*100), file=sys.stderr)
-
-    num_queries = match_orders_np.shape[0]
-
+for ground_target, segment_2_query_2_hits_dict in ground_2_segment_2_query_2_hits_dict.items():
     last_start = None
     last_end = None
     last_sdi = None
     last_count = None
+    last_end_emitted = 0
 
-    for pos in range(ground_target_len):
-        if pos % 1000000 == 0:
-            print('{} - deduplication: {:.2f}%'.format(ground_target, float(pos)/ground_target_len*100), file=sys.stderr)
+    for (ref_begin, ref_end), query_2_hits_dict in sorted(segment_2_query_2_hits_dict.items(), key=lambda key: key):
+        # print(ground_target, (ref_begin, ref_end), len(query_2_hits_dict))
 
-        match_order_list = ['_'.join([str(x) for x in match_orders_np[i][pos]]) for i in range(num_queries) if sum(match_orders_np[i][pos]) > 0]
-        if len(match_order_list) > 0:
-            current_sdi = sdi(collections.Counter(match_order_list))
-        else:
-            current_sdi = -1
+        match_order_list = []
+        for query, (_, _, _, hit_list) in query_2_hits_dict.items():
+            sorted_hit_list = sorted(hit_list, key=lambda x: x[0])
+            # print(query, sorted_hit_list)
+            match_order_list.append('_'.join([target for nth_best, target in sorted_hit_list]))
 
+        current_sdi = sdi(collections.Counter(match_order_list))
         current_count = len(match_order_list)
 
+        # Deduplicate and emit
         if last_start is None:
             # It is the first info
-            last_start = pos
-            last_end = pos + 1
-        elif last_sdi != current_sdi or last_count != current_count:
-            # Something changed, so print the last line
+            last_start = ref_begin
+            last_end = ref_end
+        elif last_end != ref_begin or last_sdi != current_sdi or last_count != current_count:
+            # There is a hole, or something changed, so print the last line
+
+            if last_end_emitted != last_start:
+                # Fill ranges with missing information
+                print('\t'.join([str(x) for x in [ground_target, last_end_emitted, last_start, -1, 0]]))
+
             print('\t'.join([str(x) for x in [ground_target, last_start, last_end, last_sdi, last_count]]))
 
-            last_start = pos
-            last_end = pos + 1
+            last_end_emitted = last_end
+            last_start = ref_begin
+            last_end = ref_end
         else:
             # Nothing changed, so update the end
-            last_end = pos + 1
+            last_end = ref_end
 
         last_sdi = current_sdi
         last_count = current_count
 
+    if last_end_emitted != last_start:
+        # Fill ranges with missing information
+        print('\t'.join([str(x) for x in [ground_target, last_end_emitted, last_start, -1, 0]]))
+
     print('\t'.join([str(x) for x in [ground_target, last_start, last_end, last_sdi, last_count]]))
-    print('Deduplication {}: {:.2f}%'.format(ground_target, 100), file=sys.stderr)
+
+    last_end_emitted = last_end
+
+    if last_end != ground_2_len_dict[ground_target]:
+        # Fill ranges with missing information
+        print('\t'.join([str(x) for x in [ground_target, last_end_emitted, ground_2_len_dict[ground_target], -1, 0]]))

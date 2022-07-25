@@ -80,7 +80,7 @@ for e in 50000; do
         echo "-e $e -m $m $eid -refn $refn"
 
         path_entropy_by_contig_tsv=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.reliable.entropy.by_contig.eid${eid_str}.n1.nref${refn}.tsv
-        #if [[ ! -s ${path_entropy_by_contig_tsv} ]]; then
+        if [[ ! -s ${path_entropy_by_contig_tsv} ]]; then
           path_grounded_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.reliable.tsv.gz
           python3 /lizardfs/guarracino/chromosome_communities/scripts/entropy.by_contig.py \
             $path_grounded_reliable_ALL_tsv_gz \
@@ -90,7 +90,7 @@ for e in 50000; do
             $eid \
             <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq ) \
             > $path_entropy_by_contig_tsv
-        #fi
+        fi
     
     #todo
 #        PREFIX=$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy.eid${eid_str}.n1.nref${refn}
@@ -151,7 +151,13 @@ for e in 50000; do
         ref=chm13#chr${i}
         path_entropy_match_order_chr_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.$ref.tsv
         if [[ ! -s ${path_entropy_match_order_chr_tsv} ]]; then
-          sbatch -p workers -c 48 --wrap "cd /scratch; echo $ref > current_ref.txt; python3 /lizardfs/guarracino/chromosome_communities/scripts/entropy_match_orders.py $path_grounded_pq_touching_reliable_ALL_tsv_gz /lizardfs/guarracino/chromosome_communities/chm13#ACRO.len.tsv $n $eid /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.query_to_consider.txt current_ref.txt > $path_entropy_match_order_chr_tsv; rm current_ref.txt"
+          python3 /lizardfs/guarracino/chromosome_communities/scripts/entropy_match_orders.fast.py \
+            $path_grounded_pq_touching_reliable_ALL_tsv_gz \
+            /lizardfs/guarracino/chromosome_communities/chm13#ACRO.len.tsv \
+            $n $eid \
+            /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.query_to_consider.txt \
+            <( echo $ref ) \
+            > $path_entropy_match_order_chr_tsv
         fi
       done
     done
