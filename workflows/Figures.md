@@ -12,15 +12,15 @@ For each chromosome:
 ```shell
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/Fig4_Annotation_CollapsedUntangle_AggregatedEntropy.R \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.support.dedup.eid0900.n1.nref1.tsv.gz \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy.by_contig.eid0900.w100000.n1.nref1.tsv \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy.by_contig.eid0900.w50000.n1.nref1.tsv \
   /lizardfs/guarracino/chromosome_communities/data/annotation/ \
   ~/Figure4.pdf
   
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/Fig4_Annotation_CollapsedUntangle_AggregatedEntropy.R \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.support.dedup.eid0900.n1.nref1.tsv.gz \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy.by_contig.eid0900.w50000.n1.nref1.tsv \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy.by_contig.eid0900.w100000.n1.nref1.tsv \
   /lizardfs/guarracino/chromosome_communities/data/annotation/ \
-  ~/Figure4.w50k.pdf
+  ~/Figure4.w100k.pdf
 ```
 
 ### Figure 5
@@ -68,24 +68,30 @@ n=2
 done
 ```
 
-## Figure 9, 10, 11, 12, 13
+## Figure 8, 9
 
-For each chromosome:
-- top: annotation bars;
-- middle: concordance by haplotype;
-- bottom: best untangled hit for HG002 contigs.
+Average entropy across chrX and Y:
 
 ```shell
-Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/SuppFig_Annotation_Concordance_UntangleBestHit.R \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.concordance.by_haplotype.eid0900.n1.nref1.tsv \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz \
-  0.9 \
-  /lizardfs/guarracino/chromosome_communities/data/annotation/ \
-  ~
+path_entropy_by_contig_tsv=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.reliable.entropy.by_contig.eid0900.w50000.n1.nref1.tsv
+
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BED_annotation.R \
+  $path_entropy_by_contig_tsv \
+  0 155000000 \
+  90 \
+  'X' \
+  /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
+  ~/SuppFigure8.pdf
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BED_annotation.R \
+  $path_entropy_by_contig_tsv \
+  0 63000000 \
+  90 \
+  'Y' \
+  /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
+  ~/SuppFigure9.pdf
 ```
 
-
-## Figure 8, 9, 10, 11, 12
+## Figure 10, 11, 12, 13, 14
 
 For each chromosome:
 - top: annotation bars;
@@ -94,7 +100,7 @@ For each chromosome:
 ```shell
 path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 
-n=8
+n=10
 (seq 13 15; seq 21 22) | while read i; do
     echo "chr$i"
     
@@ -114,7 +120,25 @@ n=8
 done
 ```
 
-## Figure 17
+
+## Figure 15, 16, 17, 18, 19
+
+For each chromosome:
+- top: annotation bars;
+- middle: concordance by haplotype;
+- bottom: best untangled hit for HG002 contigs.
+
+```shell
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/SuppFig_Annotation_Concordance_UntangleBestHit.R \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/concordance/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.concordance.by_haplotype.eid0900.n1.nref1.tsv \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz \
+  0.9 \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/ \
+  ~
+```
+
+
+## Figure XXX
 
 For each chromosome, length distribution of the untangled query segments.
 

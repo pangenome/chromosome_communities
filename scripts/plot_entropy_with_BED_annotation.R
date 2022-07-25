@@ -3,14 +3,10 @@ path_entropy_tsv <- args[6]
 x_min <- as.numeric(args[7])
 x_max <- as.numeric(args[8])
 width <- as.numeric(args[9])
-height_bar <- as.numeric(args[10])
-num_chr <- as.numeric(args[11])
-prefix_output <- args[12]
+num_chr <- args[10]
+path_annotation_bed <- args[11]
+path_output <- args[12]
 
-path_entropy_tsv<-'/home/guarracino/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.reliable.entropy.by_contig.eid0900.w50000.n1.nref1.tsv.gz'
-num_chr = 'Y'
-x_min=0
-x_max=2894410
 
 library(ggplot2)
 library(ggforce)
@@ -82,49 +78,46 @@ if (FALSE) {
 }
 
 
-
-
 # Aggregate entropy by chromosome (averaging the SDI across contigs for each window)
-p <- ggplot(yy[!is.na(yy$average_sdi),],
-            aes(
-              x = start.pos + (end.pos - start.pos) / 2,
-              width = end.pos - start.pos,
-              y = ground.target, alpha=average_sdi,
-              fill = ground.target
-            )
-) +
-  geom_tile() +
-  #ggtitle(title) +
-  facet_col(~ground.target, scales = "free_y", space = "free", labeller = labeller(variable = labels)) +
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    
-    text = element_text(size = 32),
-    axis.text.x = element_text(size = 18),
-    axis.text.y = element_text(size = 18),
-    
-    legend.title = element_text(size = 32),
-    legend.text = element_text(size = 32),
-    legend.position = "top",
-    
-    plot.margin = margin(0, 0.2, 0, 3.07, "cm")
-    
-    #axis.title.y=element_blank()
+if(FALSE) {
+  p <- ggplot(yy[!is.na(yy$average_sdi),],
+              aes(
+                x = start.pos + (end.pos - start.pos) / 2,
+                width = end.pos - start.pos,
+                y = ground.target, alpha=average_sdi,
+                fill = ground.target
+              )
   ) +
-  labs(alpha="Average SDI", fill="Target") +
-  scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
-  scale_fill_manual(values=colors) +
-  labs(x ="Position", y = '')
-#p
-
-
+    geom_tile() +
+    #ggtitle(title) +
+    facet_col(~ground.target, scales = "free_y", space = "free", labeller = labeller(variable = labels)) +
+    theme(
+      plot.title = element_text(hjust = 0.5),
+      
+      text = element_text(size = 32),
+      axis.text.x = element_text(size = 18),
+      axis.text.y = element_text(size = 18),
+      
+      legend.title = element_text(size = 32),
+      legend.text = element_text(size = 32),
+      legend.position = "top",
+      
+      plot.margin = margin(0, 0.2, 0, 3.07, "cm")
+      
+      #axis.title.y=element_blank()
+    ) +
+    labs(alpha="Average SDI", fill="Target") +
+    scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
+    scale_fill_manual(values=colors) +
+    labs(x ="Position", y = '')
+  #p
+}
 
 library(scales) # for pretty_breaks()
 p <- ggplot(yy, aes(x=start.pos, y=average_sdi, color=ground.target)) +
   geom_step() +
-  #scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0, 0, 0)) +
+  scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0, 0, 0)) +
   scale_y_continuous(limits = c(0, max(2, max(y$average_sdi))), breaks=pretty_breaks()) +
-  facet_wrap(~ground.target, scales = "free", ncol=1, labeller = labeller(variable = labels)) +
   theme_bw() +
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -139,22 +132,71 @@ p <- ggplot(yy, aes(x=start.pos, y=average_sdi, color=ground.target)) +
     
     strip.text.x = element_blank(),
     strip.text.y = element_blank(),
-    plot.margin = unit(c(0,0.4,0,6.3), "cm")
+    plot.margin = unit(c(0,0,0,0.5), "cm")
   ) + labs(
-    x = paste(chr, 'position'),
-    y = paste('')
+    x = paste('Position'),
+    y = paste('Entropy\n'),
+    color = 'Target'
   ) +
   scale_color_manual(values=colors) +
   guides(colour = guide_legend(override.aes = list(size=10)))
-#p
 
 
+a <- read.delim(path_annotation_bed, header = F)
+colnames(a) <- c('Target', 'ref.begin', 'ref.end')
+a <- a[grepl(paste0('chr', num_chr), a$Target),]
+a$ground.target <- chr
 
+p_ann <- ggplot(
+  a,
+  aes(
+    x = ref.begin + (ref.end - ref.begin) / 2,
+    width = ref.end - ref.begin ,
+    y = ordered(Target, levels = rev(unique(Target))),
+    fill = ground.target
+  )
+) +
+  geom_tile() +
+  theme_bw() +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    
+    text = element_text(size = 32),
+    axis.text.x = element_text(size = 18),
+    axis.text.y = element_text(size = 18),
+    
+    legend.title = element_text(size = 20),
+    legend.text = element_text(size = 20),
+    legend.position = "top",
+    
+    #panel.spacing = unit(panel_spacing, "lines"),
+    #panel.border = element_rect(color = "grey", fill = NA, size = 1), #element_blank(),
+    
+    strip.text.x = element_blank(),
+    strip.text.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    plot.margin = unit(c(0.5,0,0.5,0.5), "cm")
+  ) +
+  scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
+  scale_fill_manual(values=colors) +
+  labs(x = "Position", fill = "Target")
+
+
+library(ggpubr)
+p_with_annotation <- ggpubr::ggarrange(
+  p_ann, p,
+  labels=c('', ''),
+  heights = c(0.5, 1),
+  legend = "right", # legend position,
+  common.legend = T,
+  nrow = 2
+)
 
 ggsave(
   plot = p_with_annotation,
-  paste0(prefix_output, '.by_chromosome.pdf'),
-  width = width, height = (6+max(7, length(unique(yy$ground.target)))) * height_bar,
+  path_output,
+  width = width, height = 12,
   units = "cm",
   dpi = 100, bg = "white",
   limitsize = FALSE
