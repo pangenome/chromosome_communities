@@ -22,18 +22,20 @@ tabix -p vcf chrACRO+refs.vcf.gz
 
 p arm
 ```
+cat data/annotation/chm13.p_arms.approximate.acros.bed | cut -f 1 > chrNames.txt
+cat data/annotation/chm13.p_arms.approximate.acros.bed | cut -f 1 | sed 's/chm13#//g' > acrocentrics.txt
 mkdir ld
 
-paste -d'\n' chrNames.txt acrocentrics.txt | while read f1 && read f2 ; do plink --vcf chrACRO+refs.vcf.gz --allow-extra-chr  --chr-set -5 --chr $f1 --r2  --extract 'range' chm13.pArm.bed --ld-window-kb 10  --ld-window-r2 0 --out ld/$f2.pArm
+paste -d'\n' chrNames.txt acrocentrics.txt | while read f1 && read f2 ; do plink --vcf chrACRO+refs.vcf.gz --allow-extra-chr  --chr-set -5 --chr $f1 --r2  --extract 'range' data/annotation/chm13.p_arms.approximate.acros.bed --ld-window-kb 10  --ld-window-r2 0 --out ld/$f2.pArm
 ```
 q arm
 ```
-paste -d'\n' chrNames.txt acrocentrics.txt | while read f1 && read f2 ; do plink --vcf chrACRO+refs.vcf.gz --allow-extra-chr  --chr-set -5 --chr $f1 --r2  --extract 'range' chm13.qArm.bed --ld-window-kb 10  --ld-window-r2 0 --out ld/$f2.qArm
+paste -d'\n' chrNames.txt acrocentrics.txt | while read f1 && read f2 ; do plink --vcf chrACRO+refs.vcf.gz --allow-extra-chr  --chr-set -5 --chr $f1 --r2  --extract 'range' data/annotation/chm13.q_arms.approximate.acros.bed --ld-window-kb 10  --ld-window-r2 0 --out ld/$f2.qArm
 ```
 
 putative recombinant
 ```
-paste -d'\n' chrNames.txt acrocentrics.txt | while read f1 && read f2 ; do plink --vcf chrACRO+refs.vcf.gz --allow-extra-chr  --chr-set -5 --chr $f1 --r2  --extract 'range' recombinantRegions.bed --ld-window-kb 10  --ld-window-r2 0 --out ld/$f2.recombinant
+paste -d'\n' chrNames.txt acrocentrics.txt | while read f1 && read f2 ; do plink --vcf chrACRO+refs.vcf.gz --allow-extra-chr  --chr-set -5 --chr $f1 --r2  --extract 'range' chrARCO_25-Jul-22_PPRRs.bed --ld-window-kb 10  --ld-window-r2 0 --out ld/$f2.recombinant
 ```
 
 #### 3. Plot
