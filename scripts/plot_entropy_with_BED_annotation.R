@@ -152,7 +152,8 @@ p_ann <- ggplot(
   aes(
     x = ref.begin + (ref.end - ref.begin) / 2,
     width = ref.end - ref.begin ,
-    y = ordered(Target, levels = rev(unique(Target)))
+    y = ordered(Target, levels = rev(unique(Target))),
+    fill = Target
   )
 ) +
   geom_tile() +
@@ -178,6 +179,7 @@ p_ann <- ggplot(
     plot.margin = unit(c(0,0,0.5,0.5), "cm")
   ) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
+  scale_fill_manual(values=colors) +
   labs(x = "Position")
 
 
