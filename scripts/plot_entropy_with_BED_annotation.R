@@ -146,6 +146,7 @@ p <- ggplot(yy, aes(x=start.pos, y=average_sdi, color=ground.target)) +
 a <- read.delim(path_annotation_bed, header = F)
 colnames(a) <- c('Target', 'ref.begin', 'ref.end')
 a <- a[grepl(paste0('chr', num_chr), a$Target),]
+a$ground.target <- chr
 
 p_ann <- ggplot(
   a,
@@ -153,7 +154,7 @@ p_ann <- ggplot(
     x = ref.begin + (ref.end - ref.begin) / 2,
     width = ref.end - ref.begin ,
     y = ordered(Target, levels = rev(unique(Target))),
-    fill = Target
+    fill = ground.target
   )
 ) +
   geom_tile() +
