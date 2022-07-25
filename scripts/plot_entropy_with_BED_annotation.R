@@ -135,9 +135,8 @@ p <- ggplot(yy, aes(x=start.pos, y=average_sdi, color=ground.target)) +
     plot.margin = unit(c(0,0,0,0.5), "cm")
   ) + labs(
     x = paste('Position'),
-    y = paste('1st hit entropy\n'),
-    color = 'Target',
-    alpha = '# contigs'
+    y = paste('Entropy\n'),
+    color = 'Target'
   ) +
   scale_color_manual(values=colors) +
   guides(colour = guide_legend(override.aes = list(size=10)))
