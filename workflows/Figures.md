@@ -12,15 +12,15 @@ For each chromosome:
 ```shell
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/Fig4_Annotation_CollapsedUntangle_AggregatedEntropy.R \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.support.dedup.eid0900.n1.nref1.tsv.gz \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy.by_contig.eid0900.w100000.n1.nref1.tsv \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy.by_contig.eid0900.w50000.n1.nref1.tsv \
   /lizardfs/guarracino/chromosome_communities/data/annotation/ \
   ~/Figure4.pdf
   
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/Fig4_Annotation_CollapsedUntangle_AggregatedEntropy.R \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.support.dedup.eid0900.n1.nref1.tsv.gz \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy.by_contig.eid0900.w50000.n1.nref1.tsv \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy.by_contig.eid0900.w100000.n1.nref1.tsv \
   /lizardfs/guarracino/chromosome_communities/data/annotation/ \
-  ~/Figure4.w50k.pdf
+  ~/Figure4.w100k.pdf
 ```
 
 ### Figure 5
@@ -66,6 +66,32 @@ n=2
       
     n=$((n+1))
 done
+```
+
+## Figure 8
+
+Average entropy across chrX and Y:
+
+```shell
+path_entropy_by_contig_tsv=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.reliable.entropy.by_contig.eid0900.w50000.n1.nref1.tsv
+
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BED_annotation.R \
+  $path_entropy_by_contig_tsv \
+  0 155000000 \
+  90 \
+  'X' \
+  /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
+  ~/X.pdf
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BED_annotation.R \
+  $path_entropy_by_contig_tsv \
+  0 63000000 \
+  90 \
+  'Y' \
+  /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
+  ~/Y.pdf 
+
+/gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite ~/X.pdf ~/Y.pdf ~/SuppFigure8.pdf
+rm ~/X.pdf ~/Y.pdf
 ```
 
 ## Figure 9, 10, 11, 12, 13

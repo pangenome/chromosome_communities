@@ -176,7 +176,7 @@ p_ann <- ggplot(
     strip.text.y = element_blank(),
     axis.title.y = element_blank(),
     axis.title.x = element_blank(),
-    plot.margin = unit(c(0,0,0.5,0.5), "cm")
+    plot.margin = unit(c(0.5,0,0.5,0.5), "cm")
   ) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values=colors) +
@@ -196,7 +196,7 @@ p_with_annotation <- ggpubr::ggarrange(
 ggsave(
   plot = p_with_annotation,
   path_output,
-  width = width, height = 10,
+  width = width, height = 11,
   units = "cm",
   dpi = 100, bg = "white",
   limitsize = FALSE
