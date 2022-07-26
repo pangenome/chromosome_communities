@@ -7,7 +7,7 @@ height_bar <- as.numeric(args[10])
 panel_spacing <- as.numeric(args[11])
 nth.best <- as.numeric(args[12])
 ref.nth.best <- as.numeric(args[13])
-num_chr <- as.numeric(args[14])
+num_chr <- args[14]
 estimated_identity_threshold <- as.numeric(args[15])
 path_query_to_consider <- args[16]
 path_annotation <- args[17]
