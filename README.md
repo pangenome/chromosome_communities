@@ -8,7 +8,7 @@
 
 - Pangenome graph untangling:
   - [Acrocentric community](workflows/2a_Untangling_Acros.md)
-  - [Sex community](workflows/2a_Untangling_Sex.md)
+  - [Sex community](workflows/2b_Untangling_Sex.md)
 
 - [Entropy and concordance computation](workflows/3_EntropyAndConcordance.md)
 
