@@ -1363,40 +1363,28 @@ done
 [//]: # (```)
 
 
-## Variant calling (not used)
-
+## Variant calling
 
 Call variants in a haploid setting:
 
-
 ```shell
-
-# pq-contigs
-
 path_input_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.gfa
-
 path_chm13_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.vcf.gz
 
 sbatch -p workers -c 48 --job-name vgchm13 --wrap '\time -v vg deconstruct -P chm13 -H '?' -e -a -t 48 '$path_input_gfa' | bgzip -@ 48 -c > '$path_chm13_vcf_gz' && tabix '$path_chm13_vcf_gz
 
+# Take SNVs
 zcat chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.vcf.gz | awk -F '\t' '($0 ~ /^#/ || (length($4)==1 && length($5)==1))' | bgzip -c -@ 48 > chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.snv.vcf.gz
 
 
-# acro-contigs
-
-path_input_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.952ce3b.4030258.0e65f78.smooth.fix.gfa
-
-path_input_sed_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.952ce3b.4030258.0e65f78.smooth.fix.sed.gfa
-
-path_chm13_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.952ce3b.4030258.0e65f78.smooth.fix.sed.c1000.chm13.vcf.gz
-
-
-# sed replaces only the first instance on a line by default (without the /g modifier)
-
-# To have names like NA21309-1#1#JAHEPC010000450.1 and call haploid genotypes with -H
-
-sed 's/#/-/' $path_input_gfa | sed 's/#/#1#/' > $path_input_sed_gfa
-
+## acro-contigs
+#path_input_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.952ce3b.4030258.0e65f78.smooth.fix.gfa
+#path_input_sed_gfa=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.952ce3b.4030258.0e65f78.smooth.fix.sed.gfa
+#path_chm13_vcf_gz=/lizardfs/guarracino/chromosome_communities/graphs/chrA.pan+HG002chrAprox.s100k.l300k.p98.n100/chrA.pan+HG002chrAprox.fa.gz.952ce3b.4030258.0e65f78.smooth.fix.sed.c1000.chm13.vcf.gz
+#
+## sed replaces only the first instance on a line by default (without the /g modifier)
+## To have names like NA21309-1#1#JAHEPC010000450.1 and call haploid genotypes with -H
+#sed 's/#/-/' $path_input_gfa | sed 's/#/#1#/' > $path_input_sed_gfa
 
 sbatch -p headnode -c 48 --job-name vgchm13 --wrap '\time -v vg deconstruct -P chm13 -H "#" -e -a -c 1000 -t 48 '$path_input_sed_gfa' | bgzip -@ 48 -c > '$path_chm13_vcf_gz' && tabix '$path_chm13_vcf_gz
 ```
