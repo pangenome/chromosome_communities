@@ -70,7 +70,7 @@ p <- ggplot(xx, aes(x=start, y=shannon_div_index, color=ground.target)) +
   ) +
   scale_color_manual(values=colors) +
   guides(colour = guide_legend(override.aes = list(size=10)))
-p
+#p
 
 
 a <- read.delim(path_annotation_bed, header = F)
@@ -120,7 +120,7 @@ p_with_annotation <- ggpubr::ggarrange(
   common.legend = T,
   nrow = 2
 )
-width=90
+
 ggsave(
   plot = p_with_annotation,
   path_output,
@@ -129,4 +129,3 @@ ggsave(
   dpi = 100, bg = "white",
   limitsize = FALSE
 )
-

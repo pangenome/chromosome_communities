@@ -8,9 +8,10 @@ panel_spacing <- as.numeric(args[11])
 nth.best <- as.numeric(args[12])
 ref.nth.best <- as.numeric(args[13])
 num_chr <- as.numeric(args[14])
-path_query_to_consider <- args[15]
-path_annotation <- args[16]
-path_output <- args[17]
+estimated_identity_threshold <- as.numeric(args[15])
+path_query_to_consider <- args[16]
+path_annotation <- args[17]
+path_output <- args[18]
 
 
 library(ggplot2)
@@ -21,6 +22,11 @@ query_to_consider <- read.delim(path_query_to_consider, header = F)
 
 x <- read.delim(path_untangle_grounded_tsv) %>%
   filter(query %in% query_to_consider$V1)
+
+# From https://doi.org/10.1093/bioinformatics/btac244
+x$estimated_identity <- exp((1.0 + log(2.0 * x$jaccard/(1.0+x$jaccard)))-1.0)
+
+x <- x[x$estimated_identity >= estimated_identity_threshold,]
 
 # To have it as numeric column
 #x$self.coverage[x$self.coverage == '.'] <- 1
@@ -119,7 +125,7 @@ library(ggpubr)
 p_with_annotation <- ggpubr::ggarrange(
   ggplotted_img, p,
   labels=c('', ''),
-  heights = c(height_bar*1.5, height_bar*length(unique(xx$query))*nth.best),
+  heights = c(1.5, length(unique(xx$query))*nth.best),
   legend = "right", # legend position,
   common.legend = T,
   nrow = 2
@@ -128,7 +134,7 @@ p_with_annotation <- ggpubr::ggarrange(
 ggsave(
   plot = p_with_annotation,
   path_output,
-  width = width, height = (280+length(unique(xx$query))*nth.best) * height_bar,
+  width = width, height = length(unique(xx$query))*nth.best * height_bar,
   units = "cm",
   dpi = 100, bg = "white",
   limitsize = FALSE

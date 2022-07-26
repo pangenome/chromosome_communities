@@ -68,7 +68,7 @@ p <- ggplot(xx, aes(x=start, y=shannon_div_index, color=ground.target)) +
   ) +
   scale_color_manual(values=colors) +
   guides(colour = guide_legend(override.aes = list(size=10)))
-p
+#p
 
 
 library(png)
