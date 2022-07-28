@@ -1413,9 +1413,14 @@ sbatch -p headnode -c 48 --job-name vgchm13 --wrap "\time -v vg deconstruct -P c
 # Take SNVs
 zcat chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.vcf.gz | awk -F '\t' '($0 ~ /^#/ || (length($4)==1 && length($5)==1))' | bgzip -c -@ 48 > chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.snv.vcf.gz
 
+# Take SNPs and normalize
+f=chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid
+vcftools --gzvcf $f.vcf.gz --remove-indels --recode --recode-INFO-all --stdout |\
+  bcftools norm -f /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz -c s -m - \
+  > $f.snv.norm.vcf
 # Remove HG002-HiFi contigs
-vcfsamplenames chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.snv.vcf | grep -v HG002#1 | grep -v HG002#2 >keep.samples
-vcfkeepsamples chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.snv.vcf $(cat keep.samples) | vcffixup - | pigz >chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.no_HG002-hifi.snv.vcf.gz
+vcfsamplenames $f.snv.norm.vcf | grep -v HG002#1 | grep -v HG002#2 > keep.samples
+vcfkeepsamples $f.snv.norm.vcf $(cat keep.samples) | vcffixup - | bgzip -c -@ 48 > $f.snv.norm.no_HG002-hifi.vcf.gz
 
 
 ## acro-contigs

@@ -8,14 +8,14 @@ Download the files:
 mkdir -p /lizardfs/guarracino/chromosome_communities/linkage_disequilibrium
 cd /lizardfs/guarracino/chromosome_communities/linkage_disequilibrium
 
-wget http://hypervolu.me/~erik/chrcommunity/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.no_HG002-hifi.snv.vcf.gz
+wget http://hypervolu.me/~guarracino/chrcommunity/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.snv.norm.no_HG002-hifi.vcf.gz
 wget http://hypervolu.me/~guarracino/chrcommunity/chrARCO_25-Jul-22_PPRRs.bed
 ```
 
 Remove CONFLICT regions from the VCF file:
 
 ```shell
-zgrep -v "CONFLICT" chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.no_HG002-hifi.snv.vcf.gz | \
+zgrep -v "CONFLICT" chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.snv.norm.no_HG002-hifi.vcf.gz | \
     bgzip -c -@ 48 > chrACRO+refs.vcf.gz
 tabix -p vcf chrACRO+refs.vcf.gz
 ```
@@ -76,6 +76,6 @@ done
 
 #### Visualization
 
-```
+```shell
 Rscript ../scripts/plot_ld.R 'ld/*.ld' acrocentrics_ld.pdf
 ```
