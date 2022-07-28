@@ -11,11 +11,11 @@ if (length(args)==0) {
 new = data.frame()
 fileList=glob(args[1], engine = "r")
 for (f in fileList){
-myd<-read.table(f, header = T, comment = '')
-chromosome = strsplit(basename(f), ".", fixed = T) %>% sapply(extract2, 1)
-length = strsplit(basename(f), ".", fixed = T) %>% sapply(extract2, 2)
-all<-myd %>% mutate(chrom = paste(chromosome), type = paste(length))
-new <-rbind(new,all)
+  myd<-read.table(f, header = T, comment = '')
+  chromosome = strsplit(basename(f), ".", fixed = T) %>% sapply(extract2, 1)
+  length = strsplit(basename(f), ".", fixed = T) %>% sapply(extract2, 2)
+  all<-myd %>% mutate(chrom = paste(chromosome), type = paste(length))
+  new <-rbind(new,all)
 }
 
 # calculate D statistics in 20bp windows and plot
@@ -24,5 +24,30 @@ new <-rbind(new,all)
 # d_count = D count
 # type = Type
 # recombinant = PHR
-new %>% mutate (ranges=cut(BP_B-BP_A, seq(min(BP_B-BP_A), max(BP_B-BP_A), 20 ) ) ) %>% group_by(ranges, type, chrom ) %>% summarize( d_count= length (R2), d_stat=mean(R2), d_sd=sd(R2) , ci= 1.96*(d_sd/sqrt(d_count)), upper= d_stat+ci ,  lower= d_stat-ci ) %>% filter(!is.na(ranges)) %>% separate(ranges, into = c('start', 'end'), sep = "," ,remove = FALSE, convert = TRUE) %>% mutate(realStart = gsub("\\(", "", start)) %>% mutate(realEnd = gsub("\\]", "", end)) %>% select(-start, -end) %>% mutate(start = as.numeric(as.character(realStart)), end = as.numeric(as.character(realEnd))) %>% select(-realStart, -realEnd) %>% mutate(midpoint = (start+end)/2) %>% filter(midpoint < 1000) %>% ggplot(aes(ranges, d_stat, color = type, size = d_count)) + geom_point() + geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.2) + scale_x_discrete(guide = guide_axis(angle = 90)) + xlab("distances") + ylab("D statistics") + facet_wrap( .~ chrom, nrow = 5) + theme_bw() + theme(legend.text=element_text(size=14), axis.text.x=element_text(size=14), axis.text.y = element_text(size = 14) ,axis.title=element_text(size = 14), strip.text = element_text(size = 14)) + ylim(0,1) 
+new %>% 
+  mutate(ranges=cut(BP_B-BP_A, seq(min(BP_B-BP_A), max(BP_B-BP_A), 20 ) ) ) %>%
+  group_by(ranges, type, chrom ) %>%
+  summarize( d_count= length (R2), d_stat=mean(R2), d_sd=sd(R2) , ci= 1.96*(d_sd/sqrt(d_count)), upper= d_stat+ci ,  lower= d_stat-ci ) %>% 
+  filter(!is.na(ranges)) %>% 
+  separate(ranges, into = c('start', 'end'), sep = "," ,remove = FALSE, convert = TRUE) %>%
+  mutate(realStart = gsub("\\(", "", start)) %>% 
+  mutate(realEnd = gsub("\\]", "", end)) %>% 
+  select(-start, -end) %>% 
+  mutate(start = as.numeric(as.character(realStart)), end = as.numeric(as.character(realEnd))) %>% 
+  select(-realStart, -realEnd) %>% 
+  mutate(midpoint = (start+end)/2) %>% 
+  filter(midpoint < 1000) %>% 
+  ggplot(aes(ranges, d_stat, color = type, size = d_count)) + 
+    geom_point() + 
+    geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.2) + 
+    scale_x_discrete(guide = guide_axis(angle = 90)) + 
+    xlab("distances") + ylab("D statistics") + 
+    facet_wrap( .~ chrom, nrow = 5) + 
+    theme_bw() + 
+    theme(
+      legend.text=element_text(size=14),
+      axis.text.x=element_text(size=14),
+      axis.text.y = element_text(size = 14),
+      axis.title=element_text(size = 14), strip.text = element_text(size = 14)) +
+    ylim(0,1) 
 ggsave(args[2], width = 20, heigh = 20)

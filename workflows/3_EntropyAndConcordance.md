@@ -184,7 +184,7 @@ Plots:
 #guix install r-dplyr
 for e in 50000; do
   for m in 1000; do
-    for eid in 0.900 0.950 0.975 0.995 1.000; do
+    for eid in 0.900; do
       eid_str=$(echo $eid | sed 's/\.//g')
       
       path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.tsv
