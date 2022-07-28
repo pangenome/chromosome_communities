@@ -7,7 +7,11 @@ path_output <- args[9]
 library(ggplot2)
 library(tidyverse)
 
-x <- read.table(path_community_table, header = T)
+x <- read.table(path_community_table, header = T) %>%
+  rename(`Not partitioned` = not.partitioned)
+
+x$community.of <- gsub("not.partitioned_", "Not partitioned - ", x$community.of)
+x$community.of <- gsub("_", " - ", x$community.of)
 
 # Respect and reverted the order in the file
 mylevels <- x$community.of
@@ -17,13 +21,14 @@ y <- read.table(path_community_2_size, header = F)
 colnames(y) <- c('num.community', 'variable', 'sequence.content.bp')
 y$variable <- as.character(y$variable)
 y[y$variable == 'unmapped',]$variable <- "Not partitioned"
+y$variable <- as.factor(y$variable)
 
 library(reshape2)
 xy <- merge(
   melt(x, id=c("num.community" ,"community.of")),
   y,
   by = c('num.community', 'variable')
-) 
+)
 
 # Info grouped by community
 #xy %>% group_by(num.community) %>% summarise(num.contigs.comm = sum(value)) %>% View()
@@ -57,19 +62,15 @@ p <- ggplot(
     #axis.title.y=element_blank()
     panel.grid.major = element_blank(), panel.grid.minor = element_blank()
   ) +
-  labs(x = "Chromosome", y = 'Community', fill = '% of sequence') + 
+  labs(x = "Chromosome", y = 'Community', fill = '% seq') + 
   theme(aspect.ratio=1)
-#ggsave(
-#  plot = p,
-#  path_output,
-#  width = 25, height = 25, units = "cm", dpi = 300, bg = "transparent", limitsize = F)
-
 p <- p +
   #geom_text(aes(label=round(sequence.content.bp / total_sequence_content_bp, digits = 10)), size=2.5, color="red") + 
-  geom_text(aes(label=value), size=2.6, color="black")
+  geom_text(aes(label=value), size=2.9, color="black")
+
 ggsave(
   plot = p,
-  paste0(path_output),
+  path_output,
   width = 25, height = 25, units = "cm", dpi = 300, bg = "transparent", limitsize = F)
 
 # OLD CODE
