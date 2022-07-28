@@ -77,5 +77,5 @@ done
 #### Visualization
 
 ```
-Rscript ../scripts/plot_ld.R 'ld/*' acrocentrics_ld.pdf
+Rscript ../scripts/plot_ld.R 'ld/*.ld' acrocentrics_ld.pdf
 ```
