@@ -49,7 +49,7 @@ p <- ggplot(xx, aes(x=start, y=shannon_div_index, color=ground.target)) +
   theme(
     plot.title = element_text(hjust = 0.5),
     
-    text = element_text(size = 28),
+    text = element_text(size = 26),
     axis.text.x = element_text(size = 18),
     axis.text.y = element_text(size = 18),
     
