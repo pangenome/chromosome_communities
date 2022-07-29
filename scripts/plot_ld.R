@@ -41,7 +41,7 @@ new %>%
     geom_point() + 
     geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.2) + 
     scale_x_discrete(guide = guide_axis(angle = 90)) + 
-    xlab("distances") + ylab("D statistics") + 
+    xlab("Distances") + ylab("D statistics") +
     facet_wrap( .~ chrom, nrow = 5) + 
     theme_bw() + 
     theme(
