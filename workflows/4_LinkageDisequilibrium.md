@@ -9,7 +9,7 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/linkage_disequilibrium
 cd /lizardfs/guarracino/chromosome_communities/linkage_disequilibrium
 
 wget http://hypervolu.me/~guarracino/chrcommunity/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.snv.norm.no_HG002-hifi.vcf.gz
-wget http://hypervolu.me/~guarracino/chrcommunity/chrARCO_25-Jul-22_PPRRs.bed
+wget http://hypervolu.me/~guarracino/chrcommunity/chrACRO_29-Jul-22_PHRs.bed
 ```
 
 Remove CONFLICT regions from the VCF file:
@@ -27,7 +27,7 @@ Prepare files:
 ```shell
 cat ../data/annotation/chm13.p_arms.approximate.acros.bed | cut -f 1 > chrNames.txt
 cat ../data/annotation/chm13.p_arms.approximate.acros.bed | cut -f 1 | sed 's/chm13#//g' > acrocentrics.txt
-sed -i 's/^/chm13#/g' chrARCO_25-Jul-22_PPRRs.bed
+sed -i 's/^/chm13#/g' chrACRO_29-Jul-22_PHRs.bed
 mkdir ld
 ```
 
@@ -68,7 +68,7 @@ paste -d'\n' chrNames.txt acrocentrics.txt | while read f1 && read f2 ; do\
     --chr-set -5 \
     --chr $f1 \
     --r2 \
-    --extract 'range' chrARCO_25-Jul-22_PPRRs.bed \
+    --extract 'range' chrACRO_29-Jul-22_PHRs.bed \
     --ld-window-kb 10 --ld-window-r2 0 \
     --out ld/$f2.recombinant;
 done

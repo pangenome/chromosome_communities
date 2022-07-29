@@ -175,7 +175,7 @@ path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangl
       
 cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
   bedtools merge -i - -d 10000 -c 4,5 -o mean | \
-  awk '$3 - $2 > 30000' | sed 's/chm13#//' > chrARCO_25-Jul-22_PPRRs.bed
+  awk '$3 - $2 > 30000' | sed 's/chm13#//' > chrACRO_29-Jul-22_PHRs.bed # Supplementary Table
 ```
 
 Plots:
