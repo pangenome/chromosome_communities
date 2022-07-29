@@ -4,7 +4,7 @@ import collections
 import gzip
 import sys
 import math
-
+from itertools import groupby
 
 # Shannon Diversity Index
 # http://en.wikipedia.org/wiki/Shannon_index
@@ -129,9 +129,13 @@ for ground_target, segment_2_query_2_hits_dict in ground_2_segment_2_query_2_hit
 
         match_order_list = []
         for query, (_, _, _, hit_list) in query_2_hits_dict.items():
-            sorted_hit_list = sorted(hit_list, key=lambda x: x[0])
-            # print(query, sorted_hit_list)
-            match_order_list.append('_'.join([target for nth_best, target in sorted_hit_list]))
+            # print(query, sorted(hit_list, key=lambda x: x[0]))
+            sorted_target_hit_list = [target for nth_best, target in sorted(hit_list, key=lambda x: x[0])]
+
+            # Remove consecutive duplicates (to avoid entropy driven by hits like "21, 21_21, 21, 21_21, ..."
+            sorted_target_hit_list = [k for k, g in groupby(sorted_target_hit_list)]
+
+            match_order_list.append('_'.join(sorted_target_hit_list))
 
         current_sdi = sdi(collections.Counter(match_order_list))
         current_count = len(match_order_list)
