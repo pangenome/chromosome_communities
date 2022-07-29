@@ -59,7 +59,7 @@ p <- ggplot(xx, aes(x=start, y=shannon_div_index, color=ground.target)) +
     
     strip.text.x = element_blank(),
     strip.text.y = element_blank(),
-    plot.margin = unit(c(0,1.03,0,7.0), "cm")
+    plot.margin = unit(c(0,1.03,0,7.1), "cm")
   ) + labs(
     x = paste('Position'),
     y = paste('Order entropy\n'),
