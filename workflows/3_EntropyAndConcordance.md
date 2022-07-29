@@ -207,7 +207,7 @@ for e in 50000; do
       /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.pdf \
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.merged.pdf
-      rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.pdf
+      #rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.pdf
     done
   done
 done
@@ -294,7 +294,7 @@ for e in 50000; do
       /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
         /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr*.pdf \
         /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.merged.pdf
-      rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr*.pdf
+      #rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr*.pdf
     done
   done
 done

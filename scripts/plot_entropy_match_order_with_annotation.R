@@ -62,7 +62,7 @@ p <- ggplot(xx, aes(x=start, y=shannon_div_index, color=ground.target)) +
     plot.margin = unit(c(0,1.03,0,6.7), "cm")
   ) + labs(
     x = paste('Position'),
-    y = paste('Entropy2\n'),
+    y = paste('Order entropy\n'),
     color = 'Target',
     alpha = '# contigs'
   ) +
