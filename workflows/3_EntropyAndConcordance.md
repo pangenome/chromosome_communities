@@ -208,7 +208,24 @@ for e in 50000; do
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.pdf \
         /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.merged.pdf
       #rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.pdf
-    done
+    
+      (seq 13 15; seq 21 22) | while read i; do    
+        Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_match_order_with_BED_annotation.R \
+          $path_entropy_match_order_tsv \
+          0 25000000 \
+          90 \
+          $i \
+          chrACRO_29-Jul-22_PHRs.bed \
+          /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr${i}.PHRs.pdf
+      done
+        
+      # Merge chromosomes's PDF files
+      PREFIX=$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}
+      /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+        /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.PHRs.pdf \
+        /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.PHRs.merged.pdf
+      rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.PHRs.pdf
+     done
   done
 done
 ```

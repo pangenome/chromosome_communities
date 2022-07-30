@@ -70,6 +70,18 @@ mkdir /lizardfs/guarracino/chromosome_communities/assemblies
 cd /lizardfs/guarracino/chromosome_communities/assemblies
 ```
 
+GRCh38's missing/masked (Ns) regions:
+
+```shell
+python3 /lizardfs/guarracino/chromosome_communities/scripts/generate_masked_ranges.py \
+  /lizardfs/guarracino/chromosome_communities/assemblies/GCA_000001405.15_GRCh38_no_alt_analysis_set_maskedGRC_exclusions_v2_maskedcentromeres_auto_XY.fa.gz \
+  > /lizardfs/guarracino/chromosome_communities/assemblies/GCA_000001405.15_GRCh38_no_alt_analysis_set_maskedGRC_exclusions_v2_maskedcentromeres_auto_XY.Ns.bed
+awk -v OFS='\t' '{print($0,"grch38_Ns#000000")}' GCA_000001405.15_GRCh38_no_alt_analysis_set_maskedGRC_exclusions_v2_maskedcentromeres_auto_XY.Ns.bed \
+  > /lizardfs/guarracino/chromosome_communities/assemblies/GCA_000001405.15_GRCh38_no_alt_analysis_set_maskedGRC_exclusions_v2_maskedcentromeres_auto_XY.Ns.black.bed
+awk -v OFS='\t' '{print($0,"grch38_Ns#FFFFFF")}' GCA_000001405.15_GRCh38_no_alt_analysis_set_maskedGRC_exclusions_v2_maskedcentromeres_auto_XY.Ns.bed \
+  > /lizardfs/guarracino/chromosome_communities/assemblies/GCA_000001405.15_GRCh38_no_alt_analysis_set_maskedGRC_exclusions_v2_maskedcentromeres_auto_XY.Ns.white.bed
+```
+
 ### Whole HPRC dataset
 
 Prepare a single FASTA with all HPRCy1v2genbank samples (94 haplotypes):
