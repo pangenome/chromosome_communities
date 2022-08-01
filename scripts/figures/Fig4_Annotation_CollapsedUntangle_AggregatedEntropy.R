@@ -101,7 +101,12 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
     guides(
       colour = guide_legend(title="Chromosome", override.aes = list(size=10))
     )
-
+  # Gray-out regions with missing aligned contigs
+  p_collapsed_untangle <- p_collapsed_untangle +
+    annotate("rect",
+             xmin = 0, xmax = s_chr[1,]$end,
+             ymin = 0, ymax = max(10, max(s_chr_long$value)),
+             fill = "#444444", alpha = .1, color = "#ffffff", size = 0.1)
   
   # Apply filters
   e_chr_average <- e_average[e_average$ground.target == chr,]
@@ -109,7 +114,7 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
   p_entropy_average <- ggplot(e_chr_average, aes(x=start.pos, y=average_sdi, color=ground.target)) +
     geom_step(alpha=0.8) +
     scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0, 0, 0)) +
-    scale_y_continuous(limits = c(0, max(2, max(e_chr_average$average_sdi))), breaks=pretty_breaks(n=6)) +
+    scale_y_continuous(limits = c(0, min(2, max(e_chr_average$average_sdi, na.rm = T))), breaks=pretty_breaks(n=6)) +
     theme_bw() +
     theme(
       plot.title = element_text(hjust = 0.5),
@@ -131,7 +136,13 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
     ) +
     scale_color_manual(values=colors) +
     guides(colour = guide_legend(override.aes = list(size=10)))
-
+  # Gray-out regions with missing aligned contigs
+  p_entropy_average <- p_entropy_average +
+    annotate("rect",
+             xmin = 0, xmax = e_chr_average[!is.na(e_chr_average$average_sdi),][1,]$start.pos,
+             ymin = 0, ymax = min(2, max(e_chr_average$average_sdi, na.rm = T)),
+             fill = "#444444", alpha = .1, color = "#ffffff", size = 0.1)
+  
   # Final panel
   p_panel <- ggpubr::ggarrange(
     p_annotation, p_collapsed_untangle, p_entropy_average,
