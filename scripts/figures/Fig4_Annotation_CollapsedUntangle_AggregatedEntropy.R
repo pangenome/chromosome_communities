@@ -7,7 +7,7 @@ path_output <- args[9]
 x_min <- 0
 x_max <- 25000000
 width <- 90
-height <- 19
+height <- 20
 
 
 # library
@@ -147,7 +147,7 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
   p_panel <- ggpubr::ggarrange(
     p_annotation, p_collapsed_untangle, p_entropy_average,
     labels=c('', '', ''), font.label = list(size = 40, color = "black", face = "bold", family = NULL),
-    heights = c(0.95, 1, 1),
+    heights = c(1.2, 1, 1),
     legend = "right", # legend position,
     common.legend = T,
     nrow = 3
@@ -184,3 +184,4 @@ ggsave(
   dpi = 100, bg = "white",
   limitsize = FALSE
 )
+

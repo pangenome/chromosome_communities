@@ -7,7 +7,7 @@ path_output <- args[9]
 x_min <- 0
 x_max <- 25000000
 width <- 90
-height <- 30
+height <- 31
 
 panel_spacing <- 0.2
 
@@ -179,7 +179,7 @@ for (i in seq_along(chromosomes)){
   p_panel <- ggpubr::ggarrange(
     p_annotation, p_untangle,
     labels=c('', '', ''), font.label = list(size = 40, color = "black", face = "bold", family = NULL),
-    heights = c(0.9, 3.5),
+    heights = c(1.1, 3.5),
     legend = "right", # legend position,
     common.legend = T,
     nrow = 2
@@ -216,3 +216,4 @@ ggsave(
   dpi = 100, bg = "white",
   limitsize = FALSE
 )
+
