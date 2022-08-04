@@ -1,4 +1,6 @@
-library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
 library(bracer)
 library(magrittr)
 
@@ -18,36 +20,44 @@ for (f in fileList){
   new <-rbind(new,all)
 }
 
-# calculate D statistics in 20bp windows and plot
+# calculate r2 statistics in binsizebp windows and plot
 # x = ranges = distance
-# y =  D-statistics
-# d_count = D count
+# y =  R2 statistics 
+# d_count = number of observationin a bin 
 # type = Type
 # recombinant = PHR
-new %>% 
-  mutate(ranges=cut(BP_B-BP_A, seq(min(BP_B-BP_A), max(BP_B-BP_A), 20 ) ) ) %>%
+
+binsize=500 #in base pairs 
+midpointsize=5000  # in base pairs 
+
+colpalette<-c('#C499BA', '#FF7396', '#0096FF' ) #'#EF5B0C') # '#FFB562')
+
+new %>%
+  filter(R2>0) %>%  
+  mutate(kb_dist=BP_B-BP_A) %>% 
+  mutate(ranges=cut(kb_dist, seq(min(kb_dist), max(kb_dist), binsize ) ) ) %>%
   group_by(ranges, type, chrom ) %>%
   summarize( d_count= length (R2), d_stat=mean(R2), d_sd=sd(R2) , ci= 1.96*(d_sd/sqrt(d_count)), upper= d_stat+ci ,  lower= d_stat-ci ) %>% 
   filter(!is.na(ranges)) %>% 
   separate(ranges, into = c('start', 'end'), sep = "," ,remove = FALSE, convert = TRUE) %>%
-  mutate(realStart = gsub("\\(", "", start)) %>% 
-  mutate(realEnd = gsub("\\]", "", end)) %>% 
+  mutate(realStart = as.numeric(gsub('\\(', '', start))) %>% 
+  mutate(realEnd = as.numeric(gsub('\\]', '', end))) %>% 
   select(-start, -end) %>% 
-  mutate(start = as.numeric(as.character(realStart)), end = as.numeric(as.character(realEnd))) %>% 
-  select(-realStart, -realEnd) %>% 
-  mutate(midpoint = (start+end)/2) %>% 
-  filter(midpoint < 1000) %>% 
-  ggplot(aes(ranges, d_stat, color = type, size = d_count)) + 
-    geom_point() + 
+  mutate(midpoint = (realStart+realEnd)/2) %>% 
+  filter(midpoint  < midpointsize) %>% 
+  ggplot(aes(as.factor(midpoint), d_count, color = type, size = d_count)) +
+    geom_point() +
     geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.2) + 
-    scale_x_discrete(guide = guide_axis(angle = 90)) + 
-    xlab("Distances") + ylab("D statistics") +
+    xlab('Distances (kb) ') + ylab('Average r2') +
+    scale_colour_manual(values =colpalette ) +
     facet_wrap( .~ chrom, nrow = 5) + 
-    theme_bw() + 
+    theme_light() + 
     theme(
-      legend.text=element_text(size=14),
+      legend.text=element_text(size=16),
       axis.text.x=element_text(size=14),
       axis.text.y = element_text(size = 14),
-      axis.title=element_text(size = 14), strip.text = element_text(size = 14)) +
+      axis.title=element_text(size = 14), strip.text = element_text(size = 14), 
+      legend.title=element_blank()) +
     ylim(0,1) 
-ggsave(args[2], width = 20, heigh = 20)
+ggsave(args[2], width = 16, heigh = 20)
+

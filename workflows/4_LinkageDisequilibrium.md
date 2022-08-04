@@ -5,8 +5,8 @@
 Download the files:
 
 ```shell
-mkdir -p /lizardfs/guarracino/chromosome_communities/linkage_disequilibrium
-cd /lizardfs/guarracino/chromosome_communities/linkage_disequilibrium
+mkdir -p ../linkage_disequilibrium
+cd ../linkage_disequilibrium
 
 wget http://hypervolu.me/~guarracino/chrcommunity/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.snv.norm.no_HG002-hifi.vcf.gz
 wget http://hypervolu.me/~guarracino/chrcommunity/chrACRO_29-Jul-22_PHRs.bed
@@ -19,6 +19,59 @@ zgrep -v "CONFLICT" chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1
     bgzip -c -@ 48 > chrACRO+refs.vcf.gz
 tabix -p vcf chrACRO+refs.vcf.gz
 ```
+## Data exploration 
+
+```shell
+mkdir stats 
+```
+
+#### Determine fraction onf missing sites per locus 
+
+```shell
+plink \
+--vcf chrACRO+refs.vcf.gz \
+--missing  \
+--chr-set -5 \
+--allow-extra-chr \
+--extract 'range' ../data/annotation/chm13.p_arms.approximate.acros.bed \
+--out stats/chrACRO+refs.pArm \
+
+plink \
+--vcf chrACRO+refs.vcf.gz \
+--missing  \
+--chr-set -5 \
+--allow-extra-chr \
+--extract 'range' ../data/annotation/chm13.q_arms.approximate.acros.bed \
+--out stats/chrACRO+refs.qpArm \
+
+plink \
+--vcf chrACRO+refs.vcf.gz \
+    --chr-set -5 \
+--missing  \
+--allow-extra-chr \
+--extract 'range' chrACRO_29-Jul-22_PHRs.bed \
+--out stats/chrACRO+refs.recombinant \
+```
+
+#### Calculate allele frequencies 
+```shell
+plink \
+--vcf chrACRO+refs.vcf.gz \
+--freq  \
+--chr-set -5 \
+--allow-extra-chr \
+--out stats/chrACRO+refs
+```
+
+#### Make a file of chr positions 
+```shell
+zcat chrACRO+refs.vcf.gz | grep -v '##' | cut -f1,2 > stats/chrpos.txt
+```
+
+#### visualization - supplementary figure 
+
+Rscript ../scripts/plot_stats.R '../stats/*.lmiss' '../stats/chrACRO+refs.frq' '../chrACRO_29-Jul-22_PHRs.bed' '../stats/chrpos.txt'  statsSupp.pdf
+
 
 ## Compute linkage disequilibrium (LD)
 
