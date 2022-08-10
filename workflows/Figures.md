@@ -39,7 +39,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/Fig5_Annotat
 
 ## Supplementary figures
 
-## Figure 3, 4, 5, 6, 7
+## Figure 5, 6, 7, 8, 9
 
 For each chromosome:
 - top: annotation bars;
@@ -48,7 +48,7 @@ For each chromosome:
 ```shell
 path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 
-n=2
+n=5
 (seq 13 15; seq 21 22) | while read i; do
     echo "chr$i"
         
@@ -62,13 +62,13 @@ n=2
       0.9 \
       <(zgrep '^HG002#1\|^HG002#2' -v $path_grounded_pq_touching_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
       /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-      ~/SuppFigure${n}.pdf
+      ~/SupplementaryFigure${n}.pdf
       
     n=$((n+1))
 done
 ```
 
-## Figure 8, 9
+## Figure 11, 12
 
 Average entropy across chrX and Y:
 
@@ -81,17 +81,17 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BE
   90 \
   'X' \
   /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
-  ~/SuppFigure8.pdf
+  ~/SuppFigure11.pdf
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BED_annotation.R \
   $path_entropy_by_contig_tsv \
   0 63000000 \
   90 \
   'Y' \
   /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
-  ~/SuppFigure9.pdf
+  ~/SuppFigure12.pdf
 ```
 
-## Figure 10, 11, 12, 13, 14
+## Figure 13, 14, 15, 16, 17
 
 For each chromosome:
 - top: annotation bars;
@@ -100,7 +100,7 @@ For each chromosome:
 ```shell
 path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 
-n=10
+n=13
 (seq 13 15; seq 21 22) | while read i; do
     echo "chr$i"
     
@@ -121,7 +121,7 @@ done
 ```
 
 
-## Figure 15, 16, 17, 18, 19
+## Figure 24, 25, 26, 27, 28
 
 For each chromosome:
 - top: annotation bars;

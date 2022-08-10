@@ -662,7 +662,8 @@ for chr in chrX chrY; do
     <( grep $chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed | sed 's/^/chm13#/g' | \
         awk -v OFS='\t' -v ref=chm13#$chr -v max=$max_count '{print $1,".",".",ref,".",".","1","+",max,"1",ref,$2,$3,"1","1",ref}' ) \
     <( grep $chr $f | \
-        awk '$1 == 0 && $2 == 0.9' | cut -f 3,4,5,6 | awk '$4 > 0' | bedtools sort | bedtools merge -o mean -c 4 -d 0 | \
+        awk '$1 == 0 && $2 == 0.9' | cut -f 3,4,5,6 | awk '$4 > 0' | bedtools sort | bedtools merge -o mean -c 4 -d 10000 | \
+        awk '$3 - $2 > 30000' | \
         awk -v OFS='\t' -v ref=chm13#$chr '{print $1,".",".",ref,".",".","1","+",$4,"1",ref,$2,$3,"1","1",ref}' ) | sort -r >> chrXY+recombinant.tsv
 done
 
@@ -670,12 +671,13 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_recombinant_reg
   chrXY+recombinant.tsv \
   90 10 \
   "X" \
-  /lizardfs/guarracino/chromosome_communities/chrX.recombinant_regions.eid0900.pdf
+  /lizardfs/guarracino/chromosome_communities/chrX.recombinant_regions.eid0900.pdf # Supplementary figure
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_recombinant_regions_chrXY.R \
   chrXY+recombinant.tsv \
   90 12 \
   "Y" \
-  /lizardfs/guarracino/chromosome_communities/chrY.recombinant_regions.eid0900.pdf
+  /lizardfs/guarracino/chromosome_communities/chrY.recombinant_regions.eid0900.pdf # Supplementary figure
+  
 # Merge chromosomes's PDF files
 /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
   /lizardfs/guarracino/chromosome_communities/chrX.recombinant_regions.eid0900.pdf /lizardfs/guarracino/chromosome_communities/chrY.recombinant_regions.eid0900.pdf \
