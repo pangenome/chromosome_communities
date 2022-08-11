@@ -39,7 +39,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/Fig5_Annotat
 
 ## Supplementary figures
 
-## Figure 5, 6, 7, 8, 9
+## Figure 6, 7, 8, 9, 10
 
 For each chromosome:
 - top: annotation bars;
@@ -48,7 +48,7 @@ For each chromosome:
 ```shell
 path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 
-n=5
+n=6
 (seq 13 15; seq 21 22) | while read i; do
     echo "chr$i"
         
@@ -68,7 +68,7 @@ n=5
 done
 ```
 
-## Figure 11, 12
+## Figure 12, 13
 
 Average entropy across chrX and Y:
 
@@ -81,17 +81,17 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BE
   90 \
   'X' \
   /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
-  ~/SuppFigure11.pdf
+  ~/SupplementaryFigure12.pdf
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BED_annotation.R \
   $path_entropy_by_contig_tsv \
   0 63000000 \
   90 \
   'Y' \
   /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
-  ~/SuppFigure12.pdf
+  ~/SupplementaryFigure13.pdf
 ```
 
-## Figure 13, 14, 15, 16, 17
+## Figure 14, 15, 16, 17, 18
 
 For each chromosome:
 - top: annotation bars;
@@ -100,7 +100,7 @@ For each chromosome:
 ```shell
 path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 
-n=13
+n=14
 (seq 13 15; seq 21 22) | while read i; do
     echo "chr$i"
     
@@ -121,7 +121,7 @@ done
 ```
 
 
-## Figure 24, 25, 26, 27, 28
+## Figure 28, 29, 30, 31, 32
 
 For each chromosome:
 - top: annotation bars;

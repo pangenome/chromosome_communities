@@ -1074,6 +1074,38 @@ for e in 50000; do
 done
 ```
 
+
+#### SST1 in the ref-free acro-PVG
+
+Use the untangle output to get where the SST1 is projected on the contigs:
+
+```shell
+n=1
+refn=1
+e=50000
+m=1000
+path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+
+# A BED for the SST1 and a BED for its neighbour
+# bedtools intersect -wb: write the original entry in B for each overlap.
+bedtools intersect -wb \
+  -a <(zcat $path_grounded_pq_touching_reliable_ALL_tsv_gz | sed '1d' | \
+    awk -v OFS='\t' -v n=$n -v refn=$refn '{if($10 == n && $15 == refn){print($11,$12,$13,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$1"_"$2"_"$3"_"$14"_"$15"_"$16)}}' | \
+    bedtools sort) \
+  -b <(grep SST /lizardfs/guarracino/chromosome_communities/data/annotation/chm13.SST1.200kbps.aproximate.acros.bed | grep censat -v | cut -f 1,2,3,4 | \
+    bedtools sort) | \
+  awk -v OFS='\t' '{split($4, a, "_"); print($1,$2,$3,a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],$5, $6, $7, $8)}' | cut -f 11,12,13,20 | bedtools sort |\
+  bedtools merge -c 4 -o distinct > SST1.200kbps.approximate.contigs.bed
+bedtools intersect -wb \
+  -a <(zcat $path_grounded_pq_touching_reliable_ALL_tsv_gz | sed '1d' | \
+    awk -v OFS='\t' -v n=$n -v refn=$refn '{if($10 == n && $15 == refn){print($11,$12,$13,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$1"_"$2"_"$3"_"$14"_"$15"_"$16)}}' | \
+    bedtools sort) \
+  -b <(grep SST /lizardfs/guarracino/chromosome_communities/data/annotation/chm13.SST1.200kbps.aproximate.acros.bed | grep censat | cut -f 1,2,3,4 | \
+    bedtools sort) | \
+  awk -v OFS='\t' '{split($4, a, "_"); print($1,$2,$3,a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],$5, $6, $7, $8)}' | cut -f 11,12,13,20 | bedtools sort |\
+  bedtools merge -c 4 -o distinct >> SST1.200kbps.approximate.contigs.bed
+```
+
 [//]: # (Plot with manually selected paths:)
 [//]: # ()
 [//]: # (```shell)

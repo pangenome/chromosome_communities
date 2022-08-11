@@ -262,7 +262,7 @@ for (i in seq_along(chromosomes)){
 
   ggsave(
     plot = p_panel,
-    file.path(path_output, paste0('SuppFigure', 23 + i, '.pdf')),
+    file.path(path_output, paste0('SuppFigure', 27 + i, '.pdf')),
     width = width, height = height,
     units = "cm",
     dpi = 100, bg = "white",
