@@ -226,7 +226,7 @@ ls $PAF.edges.weights.txt.community.*.txt | while read f; do
      awk -v OFS='\t' -v n=$n '{a[$2]+=$3}END { for (key in a) { print (n, key, a[key]) } }' >> $PAF.community2size.tsv
 done
 
-# Compute community composition, adding a column regarding their size
+# Compute community composition, adding a column regarding their size (remove the first column for the Supplementary Table 1)
 python3 /lizardfs/guarracino/chromosome_communities/scripts/get_table_about_communities.py $PAF.edges.weights.txt.community.*.txt | cut -f 1-26,28 > $PAF.community.leiden.tsv
 cat $PAF.community.leiden.tsv | column -t
 

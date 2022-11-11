@@ -402,6 +402,7 @@ grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.p
 
 ####################################
 # Original graph
+flipped=false
 path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.og
 
 # Flipped graph
@@ -527,7 +528,7 @@ for e in 50000; do
         echo "-e $e -m $m $ref filtering&annotation"
 
         # "p-touching contigs" intersected "q-touching contigs"
-        if [[ flipped == false ]]; then
+        if [[ $flipped == false ]]; then
             comm -12 \
               <(bedtools intersect \
                 -a <(zcat ${path_grounded_tsv_gz} | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
@@ -542,7 +543,6 @@ for e in 50000; do
                 grep 'chm13#\|grch38#' -v > $ref.tmp.txt
         else
             # All targets are flipped in the flipped graph, so we flip p/q-arms coordinates for filtering
-            
             len=$(grep $ref /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.fa.gz.fai | cut -f 2)
             comm -12 \
               <(bedtools intersect \
@@ -602,6 +602,17 @@ for e in 50000; do
           <(zgrep '^grch38\|^chm13' ${path_grounded_tsv_gz}  | awk -v OFS='\t' -v ref=$ref '{print $0,ref}') \
             > ${path_grounded_pq_touching_tsv}
         rm $ref.tmp2.txt
+              
+        if [[ $flipped == true ]]; then
+          # All targets are flipped in the flipped graph, so we flip p/q-arms coordinates for the grounding
+          len=$(grep $ref /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.fa.gz.fai | cut -f 2)
+          
+          cat \
+            <(head ${path_grounded_pq_touching_tsv} -n 1) \
+            <(sed '1d' ${path_grounded_pq_touching_tsv} | awk -v OFS='\t' -v len=$len '{print($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,len-$13,len-$12,$14,$15,$16)}') \
+            > ${path_grounded_pq_touching_tsv}.tmp
+          mv ${path_grounded_pq_touching_tsv}.tmp ${path_grounded_pq_touching_tsv}
+        fi
               
         # Add annotation
         zgrep rDNA /lizardfs/guarracino/chromosome_communities/data/chm13.CentromeresAndTelomeres.CenSatAnnotation.txt.gz | \
