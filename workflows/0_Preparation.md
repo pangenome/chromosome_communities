@@ -30,7 +30,13 @@ git clone --recursive https://github.com/pangenome/odgi.git
 cd odgi
 git checkout 454197fa29b772050c3135d5de47c816ce38e62c
 cmake -H. -Bbuild && cmake --build build -- -j 48
-cd ..
+mv bin/odgi bin/odgi-b3f4578f37000922cdd193c2d183951f48f6e612
+
+# For the bug-fixed odgi flip
+git checkout 0b21b3525fc2ed9305c7df2386475a008a9337bd
+cmake -H. -Bbuild && cmake --build build -- -j 48
+mv bin/odgi bin/odgi-0b21b3525fc2ed9305c7df2386475a008a9337bd
+cd ....
 
 git clone --recursive https://github.com/pangenome/pggb.git
 cd pggb

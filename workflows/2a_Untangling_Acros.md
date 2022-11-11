@@ -400,8 +400,15 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/untangle
 path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle/chm13.target_paths.txt
 grep chm13 /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.fa.gz.fai | cut -f 1 > $path_targets_txt
 
-# Graph
+####################################
+# Original graph
 path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.og
+
+# Flipped graph
+flipped=true
+path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.s50k.l250k.p98.n162/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.flip.og
+####################################
+
 prefix=$(basename $path_input_og .og)
 
 RUN_ODGI=/home/guarracino/tools/odgi/bin/odgi-454197fa29b772050c3135d5de47c816ce38e62c
@@ -464,7 +471,8 @@ for e in 50000; do
   done
 done
 
-# Fixed 7661 hits covering 11171215 bps on the queries.
+# Original graph: Fixed 7661 hits covering 11171215 bps on the queries.
+#  Flipped graph: Fixed 9221 hits covering 31176252 bps on the queries.
 ```
 
 
@@ -519,18 +527,38 @@ for e in 50000; do
         echo "-e $e -m $m $ref filtering&annotation"
 
         # "p-touching contigs" intersected "q-touching contigs"
-        comm -12 \
-          <(bedtools intersect \
-            -a <(zcat ${path_grounded_tsv_gz} | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
-            -b <(grep $ref /lizardfs/guarracino/chromosome_communities/assemblies/partitioning_pq/p_arms.bed | bedtools sort) | \
-            #awk '$3-$2+1>=1000' | \
-            cut -f 4 | sort | uniq) \
-          <(bedtools intersect \
-            -a <(zcat ${path_grounded_tsv_gz} | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
-            -b <(grep $ref /lizardfs/guarracino/chromosome_communities/assemblies/partitioning_pq/q_arms.bed | bedtools sort) | \
-            #awk '$3-$2+1>=1000' | \
-            cut -f 4 | sort | uniq) | \
-            grep 'chm13#\|grch38#' -v > $ref.tmp.txt
+        if [[ flipped == false ]]; then
+            comm -12 \
+              <(bedtools intersect \
+                -a <(zcat ${path_grounded_tsv_gz} | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
+                -b <(grep $ref /lizardfs/guarracino/chromosome_communities/assemblies/partitioning_pq/p_arms.bed | bedtools sort) | \
+                #awk '$3-$2+1>=1000' | \
+                cut -f 4 | sort | uniq) \
+              <(bedtools intersect \
+                -a <(zcat ${path_grounded_tsv_gz} | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
+                -b <(grep $ref /lizardfs/guarracino/chromosome_communities/assemblies/partitioning_pq/q_arms.bed | bedtools sort) | \
+                #awk '$3-$2+1>=1000' | \
+                cut -f 4 | sort | uniq) | \
+                grep 'chm13#\|grch38#' -v > $ref.tmp.txt
+        else
+            # All targets are flipped in the flipped graph, so we flip p/q-arms coordinates for filtering
+            
+            len=$(grep $ref /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.fa.gz.fai | cut -f 2)
+            comm -12 \
+              <(bedtools intersect \
+                -a <(zcat ${path_grounded_tsv_gz} | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
+                -b <(grep $ref /lizardfs/guarracino/chromosome_communities/assemblies/partitioning_pq/p_arms.bed | \
+                  awk -v OFS='\t' -v len=$len '{print($1,len-$3,len-$2)}' | bedtools sort) | \
+                #awk '$3-$2+1>=1000' | \
+                cut -f 4 | sort | uniq) \
+              <(bedtools intersect \
+                -a <(zcat ${path_grounded_tsv_gz} | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
+                -b <(grep $ref /lizardfs/guarracino/chromosome_communities/assemblies/partitioning_pq/q_arms.bed | \
+                  awk -v OFS='\t' -v len=$len '{print($1,len-$3,len-$2)}' | bedtools sort) | \
+                #awk '$3-$2+1>=1000' | \
+                cut -f 4 | sort | uniq) | \
+                grep 'chm13#\|grch38#' -v > $ref.tmp.txt
+        fi
         #zcat ${path_grounded_tsv_gz} | cut -f 1 | sed '1d' | sort | uniq >  $ref.tmp.txt # ALL
       
         # Consider only chromosome-partitioned contigs
