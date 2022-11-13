@@ -7,8 +7,7 @@ with open(path_x_tsv) as f:
         query, query_start, query_end, info, _, ann_start, ann_end, label, _, _, _, _, _, ann_len = line.strip().split('\t')
 
         info_list = info.split('_')
-
-        ground_ref_start, ground_ref_end = info_list[7:9]
+        ground_ref_start, ground_ref_end = info_list[8:10]
 
         if int(ann_start) <= int(query_start):
             new_start = int(ground_ref_start)
