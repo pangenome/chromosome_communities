@@ -23,7 +23,7 @@ with open(path_x_tsv) as f:
 
         info_list = info.split('_')
         ground_ref_start, ground_ref_end = info_list[8:10]
-        chm13#chr13, 113563195, 113564966, 0.413751, -, 1, 1, chm13#chr13, 113563195, 113564966
+
         if int(ann_start) <= int(query_start):
             new_start = int(ground_ref_start)
         else:
