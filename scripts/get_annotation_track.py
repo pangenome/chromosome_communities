@@ -38,7 +38,7 @@ with open(path_x_tsv) as f:
         info_list[3] = '1'
         info_list[4] = '+'
         info_list[5] = '1'
-        info_list[5] = '6'
+        info_list[5] = '1'
         info_list[8] = str(new_start)
         info_list[9] = str(new_end)
         info_list.extend(['1', '1', info_list[7]])
