@@ -1400,11 +1400,15 @@ for e in 50000; do
           echo $CONTIG "--->" $SAMPLE
            
           zgrep "^$CONTIG" $path_grounded_pq_touching_tsv_gz | sort -k 2n | awk -v OFS='\t' '{ if($10 <= 1 && $15 <= 1) {print($1,$2,$3,$4"_"$5"_"$6"_"$7"_"$8"_"$9"_"$10"_"$11"_"$12"_"$13"_"$14"_"$15"_"$16)} }' > x.$CONTIG.bed
-          cat \
-            <( grep $CONTIG $path_unreliable_bed | cut -f 1,2,3,4) \
-            <( grep $CONTIG $path_unreliable_bed | bedtools sort | \
-              bedtools complement -i - -g <(grep $CONTIG /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | cut -f 1,2) | awk -v OFS='\t' '{print($1,$2,$3,"Reliable")}' ) \
-            > y.$CONTIG.bed
+          
+          # To get only Unreliable intervals
+          grep $CONTIG $path_unreliable_bed | cut -f 1,2,3,4 > y.$CONTIG.bed
+          # To get both Reliable and Unreliable intervals
+          #cat \
+          #  <( grep $CONTIG $path_unreliable_bed | cut -f 1,2,3,4) \
+          #  <( grep $CONTIG $path_unreliable_bed | bedtools sort | \
+          #    bedtools complement -i - -g <(grep $CONTIG /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | cut -f 1,2) | awk -v OFS='\t' '{print($1,$2,$3,"Reliable")}' ) \
+          #  > y.$CONTIG.bed
             
           # wao: write the original A and B entries plus the number of base pairs of overlap between the two features.
           bedtools intersect -a x.$CONTIG.bed -b y.$CONTIG.bed -wo >> z.tsv
