@@ -42,7 +42,7 @@ x <- x[x$estimated_identity >= estimated_identity_threshold,]
 colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
 if (length(unique(x$target)) > 5) {
   # Mobin's annotations
-  colors <- c(colors, "#000000", "#000000", "#000000")
+  colors <- c(colors, "#000000", "#000000", "#000000", "#000000")
 }
 
 # Apply filters
@@ -103,7 +103,8 @@ p <- ggplot(
   ) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values = colors) +
-  labs(x = "Position", fill="Target")
+  labs(x = "Position", fill="Target") + 
+  scale_alpha_discrete(range = c(0.3, 1))# + scale_x_reverse()
 #ggsave(plot = p, paste0(path_untangle_grounded_all_tsv, '.pdf'), width = width, height = height, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
 
 
