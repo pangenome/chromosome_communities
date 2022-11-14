@@ -35,9 +35,9 @@ if (sum(x$jaccard > 1) > 0) {
 }
 
 # From https://doi.org/10.1093/bioinformatics/btac244
-#x$estimated_identity <- exp((1.0 + log(2.0 * x$jaccard/(1.0+x$jaccard)))-1.0)
+x$estimated_identity <- exp((1.0 + log(2.0 * x$jaccard/(1.0+x$jaccard)))-1.0)
 
-#x <- x[x$estimated_identity >= estimated_identity_threshold,]
+x <- x[x$estimated_identity >= estimated_identity_threshold,]
 
 colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
 if (length(unique(x$target)) > 5) {
