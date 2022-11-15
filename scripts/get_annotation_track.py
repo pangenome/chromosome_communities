@@ -45,7 +45,7 @@ with open(path_x_tsv) as f:
         # grounded.target
         print(
             '\t'.join([
-                query + '_',
+                query + '.',
                 query_start if int(ann_start) <= int(query_start) else ann_start,
                 ann_end if int(ann_end) <= int(query_end) else query_end,
             ] + info_list)
