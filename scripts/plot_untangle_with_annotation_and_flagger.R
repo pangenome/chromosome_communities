@@ -110,8 +110,6 @@ p <- ggplot(
   scale_fill_manual(values = colors) +
   labs(x = "Position", fill="Target")
 p
-
-ggsave(plot = p, 'x.pdf', width = width, height = 100, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
 #ggsave(plot = p, paste0(path_untangle_grounded_all_tsv, '.pdf'), width = width, height = height, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
 
 
@@ -125,14 +123,14 @@ ggplotted_img <- ggplot() +
     xmin = - Inf, xmax = Inf,
     ymin = - Inf, ymax = Inf
   ) + theme(
-    plot.margin = unit(c(0,1,0.5,0), "cm")
+    plot.margin = unit(c(0,1,0.5,-0.3), "cm")
   )
 
 library(ggpubr)
 p_with_annotation <- ggpubr::ggarrange(
   ggplotted_img, p,
   labels=c('', ''),
-  heights = c(height_bar*8, height_bar*length(unique(xx$query))*nth.best),
+  heights = c(height_bar*7.9, height_bar*length(unique(xx$query))*nth.best),
   legend = "right", # legend position,
   common.legend = T,
   nrow = 2
@@ -146,4 +144,3 @@ ggsave(
   dpi = 100, bg = "white",
   limitsize = FALSE
 )
-
