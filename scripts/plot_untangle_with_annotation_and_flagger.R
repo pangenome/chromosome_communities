@@ -130,7 +130,7 @@ library(ggpubr)
 p_with_annotation <- ggpubr::ggarrange(
   ggplotted_img, p,
   labels=c('', ''),
-  heights = c(height_bar*7.9, height_bar*length(unique(xx$query))*nth.best),
+  heights = c(height_bar*7.3, height_bar*length(unique(xx$query))*nth.best),
   legend = "right", # legend position,
   common.legend = T,
   nrow = 2
