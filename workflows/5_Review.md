@@ -24,42 +24,48 @@ rm $path_flipped_og
 $RUN_ODGI build -g $prefix.gfa -o $path_flipped_og -t 48 -P
 ```
 
-Extract the region:
+Plots:
 
 ```shell
-grep censat /lizardfs/guarracino/chromosome_communities/data/annotation/chm13.SST1.200kbps.aproximate.acros.bed | \
-  bedtools slop -i - -b 1000000 -g <(cut -f 1,3 /lizardfs/guarracino/chromosome_communities/data/annotation/chm13.q_arms.approximate.acros.bed) \
-  > SST1_regions_1Mpbs.bed
+#chm13#chr13  12301367  12440010  SST1#222222
+path_flip_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.flip.untangle.chm13#chr13.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
+  $path_flip_grounded_pq_touching_reliable_tsv_gz \
+  11301367 13440010 \
+  90 0.9 \
+  1.0 \
+  3 1 \
+  13 \
+  0.9 \
+  <(zgrep '^HG002#1\|^HG002#2' -v $path_flip_grounded_pq_touching_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_402b1_506680_chr13_SST1_1Mbps.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/SupplementaryFigureX6.chr13.SST1.1Mbps.n1.nref1.pdf
 
-path_input_og=chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.og
-$RUN_ODGI extract \
-  -i $path_input_og -b SST1_regions_1Mpbs.bed \
-  -d 100000 -e 3 -o - -t 48 -P | \
-  $RUN_ODGI sort -i - -o SST1_regions_1Mpbs.og -O -p gYs -t 48 -P
+#chm13#chr14  6960008 6988409 SST_Composite#222222
+path_flip_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.flip.untangle.chm13#chr14.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
+  $path_flip_grounded_pq_touching_reliable_tsv_gz \
+  5960008 7988409 \
+  90 0.9 \
+  1.0 \
+  3 1 \
+  14 \
+  0.9 \
+  <(zgrep '^HG002#1\|^HG002#2' -v $path_flip_grounded_pq_touching_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_92a4_50bdd0_chr14_SST1_1Mbps.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/SupplementaryFigureX7.chr14.SST1.1Mbps.n1.nref1.pdf
 
-# All targets are flipped in the flipped graph, so we flip p/q-arms coordinates for filtering
-rm SST1_regions_1Mpbs.flip.bed
-for ref in chm13#chr13 chm13#chr14 chm13#chr21; do
-  len=$(grep $ref /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.fa.gz.fai | cut -f 2)
-  grep censat /lizardfs/guarracino/chromosome_communities/data/annotation/chm13.SST1.200kbps.aproximate.acros.bed | grep $ref | \
-    bedtools slop -i - -b 1000000 -g <(cut -f 1,3 /lizardfs/guarracino/chromosome_communities/data/annotation/chm13.q_arms.approximate.acros.bed) |
-    awk -v OFS='\t' -v len=$len '{print($1,len-$3,len-$2)}' | bedtools sort \
-    >> SST1_regions_1Mpbs.flip.bed
-done
-$RUN_ODGI extract \
-  -i $path_flipped_og -b SST1_regions_1Mpbs.bed \
-  -d 100000 -e 3 -o - -t 48 -P | \
-  $RUN_ODGI sort -i - -o SST1_regions_1Mpbs.flip.og -O -p gYs -t 48 -P
-  
-$RUN_ODGI view -i SST1_regions_2Mpbs.og -g > SST1_regions_2Mpbs.gfa
-$RUN_ODGI layout -i SST1_regions_2Mpbs.og -T SST1_regions_2Mpbs.layout.tsv -t 48 -P
-
-~/git/gfaestus/target/release/gfaestus SST1_regions_2Mpbs.gfa SST1_regions_2Mpbs.layout.tsv 
-
-
-
-$RUN_ODGI extract \
-  -i $path_input_og -b /lizardfs/guarracino/chromosome_communities/data/annotation/chm13.p_arms.approximate.acros.bed \
-  -d 100000 -e 3 -o - -t 48 -P | \
-  $RUN_ODGI sort -i - -o p_arms.og -O -p gYs -t 48 -P
+#chm13#chr21  9375567 9453313   SST1_Composite#222222
+path_flip_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.flip.untangle.chm13#chr21.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
+  $path_flip_grounded_pq_touching_reliable_tsv_gz \
+  8375567 10453313 \
+  90 0.9 \
+  1.0 \
+  3 1 \
+  21 \
+  0.9 \
+  <(zgrep '^HG002#1\|^HG002#2' -v $path_flip_grounded_pq_touching_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_bf20_50ca50_chr21_SST1_1Mbps.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/SupplementaryFigureX8.chr21.SST1.1Mbps.n1.nref1.pdf
 ```
