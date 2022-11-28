@@ -1379,6 +1379,7 @@ bedtools intersect -wb \
 [//]: # ()
 
 #### Plot Mobin's annotations
+
 Take only reliable blocks [flagged with "Hh" or "Hc"](https://github.com/human-pangenomics/hpp_production_workflows/blob/asset/coverage/README.md#components).
 
 ```shell
@@ -1419,7 +1420,7 @@ for e in 50000; do
         
       cat \
         <( zcat $path_grounded_pq_touching_tsv_gz | sed '1d' ) \
-        <( python3 scripts/get_annotation_track.py z.tsv ) | tr ' ' '\t' >> xyz.tsv
+        <( python3 /lizardfs/guarracino/chromosome_communities/scripts/get_annotation_track.py z.tsv ) | tr ' ' '\t' >> xyz.tsv
       rm z.tsv
     done
     
@@ -1438,7 +1439,7 @@ for e in 50000; do
     (seq 13 15; seq 21 22) | while read i; do
       echo "-e $e -m $m chr$i"
       
-      Rscript scripts/plot_untangle_with_annotation_and_flagger.R \
+      Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_and_flagger.R \
         e$m.m$m.annot.tsv.gz \
         0 25000000 \
         90 \

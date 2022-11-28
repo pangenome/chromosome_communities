@@ -481,7 +481,7 @@ for e in 50000; do
 done
 
 
-
+# Full chromosome X
 for e in 50000; do
   for m in 1000; do
     for refn in 1; do
@@ -497,7 +497,6 @@ for e in 50000; do
           > /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt
         
         if [[ $i == "X" ]]; then        
-            # Full chromosome X
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_reliable_tsv_gz \
               0 154259566 \
@@ -509,7 +508,6 @@ for e in 50000; do
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n2.nref${refn}.pdf
         else           
-            # Full chromosome Y
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_reliable_tsv_gz \
               0 62460029 \
