@@ -272,7 +272,10 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
   12301367 12440010 \
   1000000 \
   5 \
-  <((cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep "${ref}$"; echo "chm13#chr14"; echo "chm13#chr21")) \
+  <((
+    cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep 'chr13$\|chr14$\|chr21$'; \
+    zgrep 'HG002#.AT' pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | cut -f 1 | grep 'chr13\|chr14\|chr21'; \
+    echo "chm13#chr13"; echo "chm13#chr14"; echo "chm13#chr21")) \
   /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}
 
 ref=chr14
@@ -283,7 +286,10 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
   6960008 6988409 \
   1000000 \
   5 \
-  <((cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep "${ref}$"; echo "chm13#chr13"; echo "chm13#chr21")) \
+  <((
+    cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep 'chr13$\|chr14$\|chr21$'; \
+    zgrep 'HG002#.AT' pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | cut -f 1 | grep 'chr13\|chr14\|chr21'; \
+    echo "chm13#chr13"; echo "chm13#chr14"; echo "chm13#chr21")) \
   /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}
 
 ref=chr21
@@ -294,7 +300,10 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
   9175567 9653313 \
   1000000 \
   5 \
-  <((cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep "${ref}$"; echo "chm13#chr13"; echo "chm13#chr14")) \
+  <((
+    cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep 'chr13$\|chr14$\|chr21$'; \
+    zgrep 'HG002#.AT' pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | cut -f 1 | grep 'chr13\|chr14\|chr21'; \
+    echo "chm13#chr13"; echo "chm13#chr14"; echo "chm13#chr21")) \
   /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}
 ```
 
