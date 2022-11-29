@@ -32,7 +32,7 @@ options(scipen = 9)
 
 ref.name <- unique(x$ref.name)
 
-dir.create(dir_output)
+dir.create(dir_output, recursive=T)
 
 for(q in unique(x$query.name)){
   for(nth_b in seq(1, nth_best)) {
