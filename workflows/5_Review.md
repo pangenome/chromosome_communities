@@ -261,13 +261,41 @@ Open `gepard`, load pairs of sequences, and use several `word length` values to 
 java -jar Gepard-2.1.jar
 ```
 
-Dotplots from the untangle output:
+Dot plots from the untangle output:
 
 ```shell
-#TODO
-f=chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
-cat <(zcat $f | head -n 1) <(zcat $f | awk '$16 == "chm13#chr13"' | awk -v OFS='\t' '$8 == "-" { x=$6; $6=$5; $5=x; } { print }') | pigz > chr13.tsv.gz
+ref=chr13
+path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_dotplot.R \
+  $path_untangle_single_chr_tsv_gz \
+  "censat_13_27_SST1" \
+  12301367 12440010 \
+  1000000 \
+  5 \
+  <((cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep "${ref}$"; echo "chm13#chr14"; echo "chm13#chr21")) \
+  /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}
 
+ref=chr14
+path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_dotplot.R \
+  $path_untangle_single_chr_tsv_gz \
+  "censat_14_39_SST_Composite" \
+  6960008 6988409 \
+  1000000 \
+  5 \
+  <((cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep "${ref}$"; echo "chm13#chr13"; echo "chm13#chr21")) \
+  /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}
+
+ref=chr21
+path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_dotplot.R \
+  $path_untangle_single_chr_tsv_gz \
+  "censat_21_45_SST1_Composite" \
+  9175567 9653313 \
+  1000000 \
+  5 \
+  <((cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep "${ref}$"; echo "chm13#chr13"; echo "chm13#chr14")) \
+  /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}
 ```
 
 # Robertsonian translocation

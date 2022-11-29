@@ -6,7 +6,7 @@ x_max_sst1 <- as.numeric(args[9])
 size_range <- as.numeric(args[10])
 nth_best <- as.numeric(args[11])
 path_query_to_consider <- args[12]
-path_output <- args[13]
+dir_output <- args[13]
 
 library(ggplot2)
 library(ggforce)
