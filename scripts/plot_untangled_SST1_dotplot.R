@@ -72,8 +72,8 @@ for(q in unique(x$query.name)){
     ann_text <- data.frame(
       `query.start` = min(yy$query.start)+(max(yy$query.start)-min(yy$query.start))/2,
       `query.end` = min(yy$query.start)+(max(yy$query.start)-min(yy$query.start))/2,
-      `ref.start_` = x_min_sst1-(x_max_sst1-x_min_sst1)/2,
-      `ref.end_` = x_min_sst1-(x_max_sst1-x_min_sst1)/2,
+      `ref.start_` = x_min_sst1+(x_max_sst1-x_min_sst1)/2,
+      `ref.end_` = x_min_sst1+(x_max_sst1-x_min_sst1)/2,
       `query.name` = factor(q, levels = q)
     )
     p <- p + geom_text(data = ann_text, label = label_sst1, size = 4)
