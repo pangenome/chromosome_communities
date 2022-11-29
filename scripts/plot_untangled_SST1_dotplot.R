@@ -70,7 +70,7 @@ for(q in unique(x$query.name)){
                       ymin = x_min_sst1, ymax = x_max_sst1,
                       fill = "#EE2222", alpha = .2, color = "#444444", size = 0.1)
     ann_text <- data.frame(
-      `query.start` = min(yy$query.start)+(max(yy$query.start)-min(yy$query.start))/5,
+      `query.start` = min(yy$query.start)+(max(yy$query.start)-min(yy$query.start))/2,
       `query.end` = min(yy$query.start)+(max(yy$query.start)-min(yy$query.start))/2,
       `ref.start_` = x_min_sst1-(x_max_sst1-x_min_sst1),
       `ref.end_` = x_min_sst1-(x_max_sst1-x_min_sst1),
