@@ -1,27 +1,12 @@
-path_untangle_grounded_tsv <- '/home/guarracino/Downloads/Pangenomics/chromosome_communities/Review1/sst1_dotplots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr13.e50000.m1000.j0.n100.bed.gz'
-num_chr <- 13
-label_sst1 <- 'censat_13_27_SST1'
-x_min_sst1 <- 12301367
-x_max_sst1 <- 12440010
-size_range <- 1000000
-
-path_untangle_grounded_tsv <- '/home/guarracino/Downloads/Pangenomics/chromosome_communities/Review1/sst1_dotplots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr14.e50000.m1000.j0.n100.bed.gz'
-num_chr <- 14
-label_sst1 <- 'censat_14_39_SST_Composite'
-x_min_sst1 <- 6960008
-x_max_sst1 <- 6988409
-
-path_untangle_grounded_tsv <- '/home/guarracino/Downloads/Pangenomics/chromosome_communities/Review1/sst1_dotplots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr21.e50000.m1000.j0.n100.bed.gz'
-num_chr <- 21
-label_sst1 <- 'censat_21_45_SST1_Composite'
-x_min_sst1 <- 9175567
-x_max_sst1 <- 9653313
-
-
-nth_best <- 5
-#estimated_identity_threshold <- 0.9
-path_query_to_consider <- '/home/guarracino/Downloads/Pangenomics/chromosome_communities/Review1/paths.txt'
-dir_output <- '/home/guarracino/Downloads/Pangenomics/chromosome_communities/Review1/sst1_dotplots/'
+args <- commandArgs()
+path_untangle_tsv <- args[6]
+label_sst1 <- args[7]
+x_min_sst1 <- as.numeric(args[8])
+x_max_sst1 <- as.numeric(args[9])
+size_range <- as.numeric(args[10])
+nth_best <- as.numeric(args[11])
+path_query_to_consider <- args[12]
+path_output <- args[13]
 
 library(ggplot2)
 library(ggforce)
@@ -32,7 +17,7 @@ query_to_consider <- read.delim(path_query_to_consider, header = F)
 x_min <- x_min_sst1-1000000
 x_max <- x_max_sst1+1000000
 
-x <- read.delim(path_untangle_grounded_tsv) %>%
+x <- read.delim(path_untangle_tsv) %>%
   rename(query.name=X.query.name) %>%
   filter(query.name %in% query_to_consider$V1 & nth.best <= nth_best & ref.start >= x_min & ref.end <= x_max)
 
