@@ -35,7 +35,7 @@ ref.name <- unique(x$ref.name)
 dir.create(dir_output, recursive=T)
 
 for(q in unique(x$query.name)){
-  for(nth_b in seq(1, nth_best)) {
+  for(nth_b in c(1, nth_best)) {
     print(paste(q, nth_b))
     
     yy <- x %>% filter(query.name %in% q & nth.best <= nth_b)
