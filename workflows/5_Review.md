@@ -307,6 +307,57 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
   /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}
 ```
 
+
+# Evolutionary strata
+
+```shell
+wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/CHM13/assemblies/chain/v1_nflo/chm13v2-hg19.chain
+
+e=50000
+m=1000
+eid=0.900
+eid_str=$(echo $eid | sed 's/\.//g')
+n=2
+path_targets_txt=/lizardfs/guarracino/chromosome_communities/untangle_sex/chm13.SEX.target_paths.txt
+path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrSEX+refs.s50k.l250k.p98.n102/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.og
+prefix=$(basename $path_input_og .og)
+
+path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$prefix.untangle.chm13#chrSEX.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.tsv
+PREFIX=$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}
+        
+#chrX#PAR1   0  2394410 su CHM13
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_match_order_with_BED_annotation.R \
+  $path_entropy_match_order_tsv \
+  0 2694410 \
+  40 \
+  'X' \
+  /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
+  /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chrX.PAR1.pdf
+# The entropy (metric we use to find PHRs) is > 0 un to 2435289, 40879 bp a destra di PAR1
+
+#chrX#PAR2	153925834	154259566
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_match_order_with_BED_annotation.R \
+  $path_entropy_match_order_tsv \
+  153625834 154259566 \
+  40 \
+  'X' \
+  /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
+  /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chrX.PAR2.pdf
+
+#chrX#XTR	87642550	91570785
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_match_order_with_BED_annotation.R \
+  $path_entropy_match_order_tsv \
+  87342550 91870785 \
+  40 \
+  'X' \
+  /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
+  /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chrX.XTR.pdf
+Su PAR2 non sforiamo, su XTR sforiamo un poco di 2636 bp sulla destra. Quindi lo sforamento + grande è quello sulla destra di PAR1 (di 40879 bp
+
+
+```
+
+
 # Robertsonian translocation
 
 ```shell
@@ -459,11 +510,5 @@ done
 bedtools intersect -a <(bedtools makewindows -g <(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | grep 'HG002#MAT#chr13' | cut -f 1,2) -w 20000) -b <(grep HG002#MAT#chr13 *bed) -c | column -t | less -S
 ```
 
-
-# Evolutionary strata
-
-```shell
-wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/CHM13/assemblies/chain/v1_nflo/chm13v2-hg19.chain
-```
 
 
