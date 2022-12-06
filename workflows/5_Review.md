@@ -201,7 +201,7 @@ path_flip_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg0
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
   $path_flip_grounded_pq_touching_reliable_tsv_gz \
   11301367 13440010 \
-  90 0.9 \
+  90 0.9 12 \
   1.0 \
   3 1 \
   13 \
@@ -215,7 +215,7 @@ path_flip_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg0
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
   $path_flip_grounded_pq_touching_reliable_tsv_gz \
   5960008 7988409 \
-  90 0.9 \
+  90 0.9 12 \
   1.0 \
   3 1 \
   14 \
@@ -229,7 +229,7 @@ path_flip_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg0
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
   $path_flip_grounded_pq_touching_reliable_tsv_gz \
   8375567 10453313 \
-  90 0.9 \
+  90 0.9 12 \
   1.0 \
   3 1 \
   21 \
@@ -311,21 +311,17 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
 # New figure 5 centered in the SST1 region
 
 ```shell
-chm13#chr13	12101367	12640010	censat_13_27_SST1#F8766D
-chm13#chr14	6760008	7188409	censat_14_39_SST_Composite#A3A500
-chm13#chr21	9175567	9653313		censat_21_45_SST1_Composite#00B0F6
-
-#chm13#chr13  12301367  12440010  SST1#222222
+#chm13#chr13	12301367	12440010	SST1#222222
 path_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr13.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
   $path_flip_grounded_pq_touching_reliable_tsv_gz \
   11301367 13440010 \
-  90 0.9 \
+  90 0.9 7.5 \
   1.0 \
-  3 1 \
+  5 1 \
   13 \
   0.9 \
-  <(echo 'chm13#chr13' 'grch38#chr13' 'HG002#MAT#chr13.prox', 'HG002#PAT#chr13.prox' 'HG01361#2#JAGYYW010000010.1' 'HG01978#1#JAGYVS010000056.1' 'HG02486#1#JAGYVM010000043.1' 'HG03540#2#JAGYVX010000153.1' | tr ' ' '\n') \
+  <(echo 'chm13#chr13' 'grch38#chr13' 'HG002#MAT#chr13.prox' 'HG002#PAT#chr13.prox' 'HG01361#2#JAGYYW010000010.1' 'HG01978#1#JAGYVS010000056.1' 'HG02486#1#JAGYVM010000043.1' 'HG03540#2#JAGYVX010000153.1' | tr ' ' '\n') \
   /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_402b1_506680_chr13_SST1_1Mbps_CenSatAnnDense.png \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/SupplementaryFigureX6.chr13.SST1.1Mbps.n1.nref1.pdf
   
@@ -334,7 +330,7 @@ path_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg002pro
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
   $path_grounded_pq_touching_reliable_tsv_gz \
   5960008 7988409 \
-  90 0.9 \
+  90 0.9 7.5 \
   1.0 \
   3 1 \
   14 \
@@ -348,7 +344,7 @@ path_flip_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg0
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
   $path_grounded_pq_touching_reliable_tsv_gz \
   8375567 10453313 \
-  90 0.9 \
+  90 0.9 7.5 \
   1.0 \
   3 1 \
   21 \

@@ -4,14 +4,15 @@ x_min <- as.numeric(args[7])
 x_max <- as.numeric(args[8])
 width <- as.numeric(args[9])
 height_bar <- as.numeric(args[10])
-panel_spacing <- as.numeric(args[11])
-nth.best <- as.numeric(args[12])
-ref.nth.best <- as.numeric(args[13])
-num_chr <- as.numeric(args[14])
-estimated_identity_threshold <- as.numeric(args[15])
-path_query_to_consider <- args[16]
-path_annotation <- args[17]
-path_output <- args[18]
+num_bars_for_annotation <- as.numeric(args[11])
+panel_spacing <- as.numeric(args[12])
+nth.best <- as.numeric(args[13])
+ref.nth.best <- as.numeric(args[14])
+num_chr <- as.numeric(args[15])
+estimated_identity_threshold <- as.numeric(args[16])
+path_query_to_consider <- args[17]
+path_annotation <- args[18]
+path_output <- args[19]
 
 
 library(ggplot2)
@@ -76,7 +77,7 @@ p <- ggplot(
     x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin ,
     y = ordered(query.hacked, levels = rev(unique(query.hacked))),
     fill = target,
-    alpha = strand
+    alpha = estimated_identity
   )
 ) +
   geom_tile() +
@@ -105,9 +106,8 @@ p <- ggplot(
   ) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values = colors) +
-  labs(x = "Position", fill="Target", alpha="Strand") + 
-  scale_alpha_discrete(range = c(0.4, 1))# + scale_x_reverse()
-p
+  labs(x = "Position", fill="Target", alpha="Strand") #+ 
+  #scale_alpha_discrete(range = c(0.4, 1))# + scale_x_reverse()
 #ggsave(plot = p, path_output, width = width, height = (12+length(unique(xx$query))*nth.best) * height_bar, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
 #ggsave(plot = p, paste0(path_untangle_grounded_all_tsv, '.pdf'), width = width, height = height, units = "cm", dpi = 300, bg = "transparent", limitsize = FALSE)
 
@@ -129,7 +129,7 @@ library(ggpubr)
 p_with_annotation <- ggpubr::ggarrange(
   ggplotted_img, p,
   labels=c('', ''),
-  heights = c(height_bar*12, height_bar*length(unique(xx$query))*nth.best),
+  heights = c(height_bar*num_bars_for_annotation, height_bar*length(unique(xx$query))*nth.best),
   legend = "right", # legend position,
   common.legend = T,
   nrow = 2
