@@ -174,8 +174,8 @@ eid_str=$(echo $eid | sed 's/\.//g')
 path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.tsv
       
 cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
-  bedtools merge -i - -d 10000 -c 4,5 -o mean | \
-  awk '$3 - $2 > 30000' | sed 's/chm13#//' > chrACRO_29-Jul-22_PHRs.bed # Supplementary Table
+  bedtools merge -i - -d 30000 -c 4,5 -o mean | \
+  awk '$3 - $2 > 30000' | sed 's/chm13#//' > chrACRO_6-Dec-22_PHRs.bed # Supplementary Table
 ```
 
 Plots:
@@ -233,6 +233,8 @@ done
 #### Sex chromosomes
 
 ```shell
+mkdir -p /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/
+
 path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrSEX+refs.s50k.l250k.p98.n102/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.og
 prefix=$(basename $path_input_og .og)
 
@@ -274,8 +276,8 @@ eid_str=$(echo $eid | sed 's/\.//g')
 path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$prefix.untangle.chm13#chrSEX.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.tsv
 
 cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
-  bedtools merge -i - -d 10000 -c 4,5 -o mean | \
-  awk '$3 - $2 > 30000' | sed 's/chm13#//' > chrSEX_29-Jul-22_PHRs.bed # Supplementary Table
+  bedtools merge -i - -d 30000 -c 4,5 -o mean | \
+  awk '$3 - $2 > 30000' | sed 's/chm13#//' > chrSEX_6-Dec-22_PHRs.bed # Supplementary Table
 ```
 
 Plots:

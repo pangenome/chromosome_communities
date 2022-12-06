@@ -308,11 +308,59 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
 ```
 
 
+# New figure 5 centered in the SST1 region
+
+```shell
+chm13#chr13	12101367	12640010	censat_13_27_SST1#F8766D
+chm13#chr14	6760008	7188409	censat_14_39_SST_Composite#A3A500
+chm13#chr21	9175567	9653313		censat_21_45_SST1_Composite#00B0F6
+
+#chm13#chr13  12301367  12440010  SST1#222222
+path_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr13.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
+  $path_flip_grounded_pq_touching_reliable_tsv_gz \
+  11301367 13440010 \
+  90 0.9 \
+  1.0 \
+  3 1 \
+  13 \
+  0.9 \
+  <(echo 'chm13#chr13' 'grch38#chr13' 'HG002#MAT#chr13.prox', 'HG002#PAT#chr13.prox' 'HG01361#2#JAGYYW010000010.1' 'HG01978#1#JAGYVS010000056.1' 'HG02486#1#JAGYVM010000043.1' 'HG03540#2#JAGYVX010000153.1' | tr ' ' '\n') \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_402b1_506680_chr13_SST1_1Mbps_CenSatAnnDense.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/SupplementaryFigureX6.chr13.SST1.1Mbps.n1.nref1.pdf
+  
+#chm13#chr14  6960008 6988409 SST_Composite#222222
+path_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr14.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  5960008 7988409 \
+  90 0.9 \
+  1.0 \
+  3 1 \
+  14 \
+  0.9 \
+  <(echo 'chm13#chr14' 'grch38#chr14' 'HG002#MAT#chr14.prox' 'HG002#PAT#chr14.prox' 'HG00735#1#JAHBCH010000039.1' 'HG00741#2#JAHALX010000038.1' 'HG01978#1#JAGYVS010000055.1' 'HG02630#1#JAHAOQ010000067.1' | tr ' ' '\n') \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_92a4_50bdd0_chr14_SST1_1Mbps_CenSatAnnDense.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/SupplementaryFigureX7.chr14.SST1.1Mbps.n1.nref1.pdf
+
+#chm13#chr21  9375567 9453313   SST1_Composite#222222
+path_flip_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr21.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  8375567 10453313 \
+  90 0.9 \
+  1.0 \
+  3 1 \
+  21 \
+  0.9 \
+  <(echo 'chm13#chr21' 'grch38#chr21' 'HG002#MAT#chr21.prox' 'HG002#PAT#chr21.prox' 'HG00735#2#JAHBCG010000066.1' 'HG02886#1#JAHAOU010000106.1' 'NA18906#1#JAHEOO010000072.1' 'NA19240#2#JAHEOL010000065.1' | tr ' ' '\n') \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_bf20_50ca50_chr21_SST1_1Mbps_CenSatAnnDense.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/SupplementaryFigureX8.chr21.SST1.1Mbps.n1.nref1.pdf
+```
+
 # Evolutionary strata
 
 ```shell
-wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/CHM13/assemblies/chain/v1_nflo/chm13v2-hg19.chain
-
 e=50000
 m=1000
 eid=0.900
@@ -328,33 +376,37 @@ PREFIX=$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entr
 #chrX#PAR1   0  2394410 su CHM13
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_match_order_with_BED_annotation.R \
   $path_entropy_match_order_tsv \
-  0 2694410 \
+  0 2894410 \
   40 \
   'X' \
   /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
   /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chrX.PAR1.pdf
-# The entropy (metric we use to find PHRs) is > 0 un to 2435289, 40879 bp a destra di PAR1
+# The entropy (the metric we use to find PHRs) is greater than 0 up to 2435289 => 2435289−2394410 = 40879 bp
 
 #chrX#PAR2	153925834	154259566
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_match_order_with_BED_annotation.R \
   $path_entropy_match_order_tsv \
-  153625834 154259566 \
+  153425834 154259566 \
   40 \
   'X' \
   /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
   /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chrX.PAR2.pdf
+Su PAR2 non sforiamo
 
 #chrX#XTR	87642550	91570785
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_match_order_with_BED_annotation.R \
   $path_entropy_match_order_tsv \
-  87342550 91870785 \
+  87392550 91820785 \
   40 \
   'X' \
   /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
   /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chrX.XTR.pdf
-Su PAR2 non sforiamo, su XTR sforiamo un poco di 2636 bp sulla destra. Quindi lo sforamento + grande è quello sulla destra di PAR1 (di 40879 bp
+Su XTR sforiamo un poco di 2636 bp sulla destra.
 
-
+path_entropy_match_order_tsv=/home/guarracino/Downloads/Pangenomics/chromosome_communities/Review1/evolutionary_strata/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrSEX.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n2.tsv
+cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
+  bedtools merge -i - -d 10000 -c 4,5 -o mean | \
+  awk '$3 - $2 > 0' | sed 's/chm13#//' > chrSEX_29-Nov-22_PHRs.bed # Supplementary Table
 ```
 
 

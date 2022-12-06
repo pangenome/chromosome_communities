@@ -123,7 +123,7 @@ p_with_annotation <- ggpubr::ggarrange(
   common.legend = T,
   nrow = 2
 )
-
+p_with_annotation
 ggsave(
   plot = p_with_annotation,
   path_output,
