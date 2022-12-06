@@ -81,16 +81,7 @@ done
 Fix best hits (if there are multiple best hits, put as first the target-chromosome of origin of the contig):
 
 ```shell
-for e in 50000; do
-  for m in 1000 ; do
-    path_ref_fixed_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.fixed.bed.gz
-    if [[ ! -s ${path_ref_fixed_bed_gz} ]]; then
-      echo "-e $e -m $m"
-      
-      path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.bed.gz
-      python3 /lizardfs/guarracino/chromosome_communities/scripts/fix_best_hit.py \
-        $path_bed_gz \
-        <(cat \
+cat \
             <(cat assemblies/partitioning/*.partitions.tsv | sed 's/chr/chm13#chr/') \
             <(echo -e HG002-bakeoff#PAT#SY_unloc_13"\t"chm13#chrY) \
             <(echo -e HG002-bakeoff#PAT#SY_unloc_15"\t"chm13#chrY) \
@@ -205,7 +196,18 @@ for e in 50000; do
             <(echo -e chm13#chrX"\t"chm13#chrX) \
             <(echo -e chm13#chrY"\t"chm13#chrY) \
             <(echo -e grch38#chrX"\t"chm13#chrX) \
-            <(echo -e grch38#chrY"\t"chm13#chrY)) | tr ' ' '\t' | pigz -c -9 > $path_ref_fixed_bed_gz
+            <(echo -e grch38#chrY"\t"chm13#chrY) > /lizardfs/guarracino/chromosome_communities/untangle_sex/partitioning.contig2chr.tsv
+
+for e in 50000; do
+  for m in 1000 ; do
+    path_ref_fixed_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.fixed.bed.gz
+    if [[ ! -s ${path_ref_fixed_bed_gz} ]]; then
+      echo "-e $e -m $m"
+      
+      path_bed_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.bed.gz
+      python3 /lizardfs/guarracino/chromosome_communities/scripts/fix_best_hit.py \
+        $path_bed_gz \
+        /lizardfs/guarracino/chromosome_communities/untangle_sex/partitioning.contig2chr.tsv | tr ' ' '\t' | pigz -c -9 > $path_ref_fixed_bed_gz
     fi;
   done
 done
@@ -260,7 +262,8 @@ for e in 50000; do
         echo "-e $e -m $m $ref filtering&annotation"
         ref_chr=$(echo $ref | sed 's/chm13#//')
         
-#        # Contigs overlapping (or close at least 100kbps to) a PARs/XTRs region
+        ###############################################################################
+        # Contigs overlapping (or close at least 100kbps to) a PARs/XTRs region
 #        bedtools intersect \
 #          -a <(zcat x.tsv.gz | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
 #          -b <(grep $ref_chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed |\
@@ -272,9 +275,25 @@ for e in 50000; do
 #          #Remove references to avoid grepping everything later (with zgrep -f)
 #          grep -v chr |\
 #          sort | uniq > $ref.tmp.txt
+        
+        # Contigs touching regions that are no PARs/XTRs
+        #bedtools intersect \
+        #  -a <(zcat x.tsv.gz | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | grep "^$ref" | bedtools sort) \
+        #  -b <(bedtools complement \
+        #        -i <(grep $ref_chr data/chm13_hg002.PARs.bed | sed "s/$ref_chr/chm13/" | sed -e "s/PAR1/$ref_chr/" -e "s/PAR2/$ref_chr/" -e "s/XTR[12]/$ref_chr/" -e "s/XTR/$ref_chr/" | bedtools sort) -g <(cut -f 1,2 /lizardfs/guarracino/chromosome_communities/assemblies/chrSEX+refs.fa.gz.fai | grep $ref)            
+        #  ) | \
+        #  cut -f 4 | \
+        #  #Remove references to avoid grepping everything later (with zgrep -f)
+        #  grep -v chr |\
+        #  sort | uniq > $ref.tmp.txt
+
+        # Contigs with respect to the partitioning
+        zcat x.tsv.gz | sed '1d' | cut -f 1 | grep -v chr | grep -f <(grep $ref /lizardfs/guarracino/chromosome_communities/untangle_sex/partitioning.contig2chr.tsv | cut -f 1) | sort | uniq > $ref.tmp.txt
+        
         # All contigs 
-        zcat x.tsv.gz | sed '1d' | cut -f 1 | grep -v chr | sort | uniq > $ref.tmp.txt
-           
+        #zcat x.tsv.gz | sed '1d' | cut -f 1 | grep -v chr | sort | uniq > $ref.tmp.txt
+        ###############################################################################
+
         # Add grounded.target column, re-add the references, and add annotation
         cat \
           <(zcat x.tsv.gz | head -n 1 | awk -v OFS='\t' '{print $0, "grounded.target"}') \
@@ -341,8 +360,10 @@ done
 Plot (`[start-500kbps,end+500kbps]` centered in the PARs/XTRs regions):
 
 ```shell
-#PAR1/2/3
+# PAR1/2/3
 # https://link.springer.com/article/10.1007/s10142-013-0323-6/figures/1
+
+n=1
 
 for e in 50000; do
   for m in 1000; do
@@ -365,11 +386,11 @@ for e in 50000; do
               0 2894410 \
               90 0.4 \
               0 \
-              1 $refn \
+              $n $refn \
               $i \
               0.9 \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
-              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR1.pdf
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n$n.nref${refn}.PAR1.pdf
               
             # chrX#PAR2:153925834-154259566
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
@@ -377,11 +398,11 @@ for e in 50000; do
               153425834 154259566 \
               90 0.4 \
               0 \
-              1 $refn \
+              $n $refn \
               $i \
               0.9 \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
-              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR2.pdf
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n$n.nref${refn}.PAR2.pdf
               
             # chrX#PAR2:87642550-91570785
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
@@ -389,11 +410,11 @@ for e in 50000; do
               87142550 92070785 \
               90 0.4 \
               0 \
-              1 $refn \
+              $n $refn \
               $i \
               0.9 \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
-              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.XTR.pdf
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n$n.nref${refn}.XTR.pdf
         
             # Full chromosome X
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
@@ -401,11 +422,11 @@ for e in 50000; do
               0 154259566 \
               200 0.4 \
               0 \
-              1 $refn \
+              $n $refn \
               $i \
               0.9 \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
-              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.pdf
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n$n.nref${refn}.pdf
         else
             # chrY#PAR1:0-2458320
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
@@ -413,11 +434,11 @@ for e in 50000; do
               0 2958320 \
               90 0.4 \
               0 \
-              1 $refn \
+              $n $refn \
               $i \
               0.9 \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
-              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR1.pdf
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n$n.nref${refn}.PAR1.pdf
               
             # chrY#PAR2:62122809-62460029
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
@@ -425,11 +446,11 @@ for e in 50000; do
               61622809 62460029 \
               90 0.4 \
               0 \
-              1 $refn \
+              $n $refn \
               $i \
               0.9 \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
-              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.PAR2.pdf
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n$n.nref${refn}.PAR2.pdf
               
             # chrY#XTR1:2727072-5914561
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
@@ -437,11 +458,11 @@ for e in 50000; do
               2227072 6414561 \
               90 0.4 \
               0 \
-              1 $refn \
+              $n $refn \
               $i \
               0.9 \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
-              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.XTR1.pdf
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n$n.nref${refn}.XTR1.pdf
               
             # chrY#XTR2:6200973-6400875
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
@@ -449,11 +470,11 @@ for e in 50000; do
               5700973 6900875 \
               90 0.4 \
               0 \
-              1 $refn \
+              $n $refn \
               $i \
               0.9 \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
-              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.XTR2.pdf
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n$n.nref${refn}.XTR2.pdf
             
             # Full chromosome Y
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
@@ -461,21 +482,21 @@ for e in 50000; do
               0 62460029 \
               80 0.4 \
               0 \
-              1 $refn \
+              $n $refn \
               $i \
               0.9 \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
-              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n1.nref${refn}.pdf
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n$n.nref${refn}.pdf
         fi
       done
       
       # Merge chromosomes's PDF files
-      rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chrSEX.e$e.m$m.grounded.reliable.n1.nref${refn}.merged.pdf
-      /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
-        /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.reliable.n1.nref${refn}.*pdf \
-        /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chrSEX.e$e.m$m.grounded.reliable.n1.nref${refn}.merged.pdf
-      rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.reliable.n1.nref${refn}.pdf
-      rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.reliable.n1.nref${refn}.*R*.pdf
+      #rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chrSEX.e$e.m$m.grounded.reliable.n$n.nref${refn}.merged.pdf
+      #/gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+      #  /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.reliable.n$n.nref${refn}.*pdf \
+      #  /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chrSEX.e$e.m$m.grounded.reliable.n$n.nref${refn}.merged.pdf
+      #rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.reliable.n$n.nref${refn}.pdf
+      #rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.chm13#chr*.e$e.m$m.grounded.reliable.n$n.nref${refn}.*R*.pdf
     done
   done
 done
