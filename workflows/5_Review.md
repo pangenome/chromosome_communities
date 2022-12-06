@@ -207,7 +207,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   13 \
   0.9 \
   <(zgrep '^HG002#1\|^HG002#2' -v $path_flip_grounded_pq_touching_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
-  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_402b1_506680_chr13_SST1_1Mbps.png \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr13_SST1_1Mbps.png \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/SupplementaryFigureX6.chr13.SST1.1Mbps.n1.nref1.pdf
 
 #chm13#chr14  6960008 6988409 SST_Composite#222222
@@ -221,7 +221,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   14 \
   0.9 \
   <(zgrep '^HG002#1\|^HG002#2' -v $path_flip_grounded_pq_touching_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
-  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_92a4_50bdd0_chr14_SST1_1Mbps.png \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr14_SST1_1Mbps.png \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/SupplementaryFigureX7.chr14.SST1.1Mbps.n1.nref1.pdf
 
 #chm13#chr21  9375567 9453313   SST1_Composite#222222
@@ -235,7 +235,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   21 \
   0.9 \
   <(zgrep '^HG002#1\|^HG002#2' -v $path_flip_grounded_pq_touching_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
-  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_bf20_50ca50_chr21_SST1_1Mbps.png \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr21_SST1_1Mbps.png \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/SupplementaryFigureX8.chr21.SST1.1Mbps.n1.nref1.pdf
 ```
 
@@ -312,9 +312,9 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
 
 ```shell
 #chm13#chr13	12301367	12440010	SST1#222222
-path_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr13.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr13.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
-  $path_flip_grounded_pq_touching_reliable_tsv_gz \
+  $path_grounded_pq_touching_reliable_tsv_gz \
   11301367 13440010 \
   90 0.9 7.5 \
   1.0 \
@@ -322,11 +322,11 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   13 \
   0.9 \
   <(echo 'chm13#chr13' 'grch38#chr13' 'HG002#MAT#chr13.prox' 'HG002#PAT#chr13.prox' 'HG01361#2#JAGYYW010000010.1' 'HG01978#1#JAGYVS010000056.1' 'HG02486#1#JAGYVM010000043.1' 'HG03540#2#JAGYVX010000153.1' | tr ' ' '\n') \
-  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_402b1_506680_chr13_SST1_1Mbps_CenSatAnnDense.png \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/SupplementaryFigureX6.chr13.SST1.1Mbps.n1.nref1.pdf
+  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr13_SST1_1Mbps_CenSatAnnDense.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr13.SST1.1Mbps.n1.nref1.pdf
   
 #chm13#chr14  6960008 6988409 SST_Composite#222222
-path_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr14.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr14.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
   $path_grounded_pq_touching_reliable_tsv_gz \
   5960008 7988409 \
@@ -336,11 +336,11 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   14 \
   0.9 \
   <(echo 'chm13#chr14' 'grch38#chr14' 'HG002#MAT#chr14.prox' 'HG002#PAT#chr14.prox' 'HG00735#1#JAHBCH010000039.1' 'HG00741#2#JAHALX010000038.1' 'HG01978#1#JAGYVS010000055.1' 'HG02630#1#JAHAOQ010000067.1' | tr ' ' '\n') \
-  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_92a4_50bdd0_chr14_SST1_1Mbps_CenSatAnnDense.png \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/SupplementaryFigureX7.chr14.SST1.1Mbps.n1.nref1.pdf
+  /lizardfs/guarracino/chromosome_communities/data/annotation/hgenome_browser_chr14_SST1_1Mbps_CenSatAnnDense.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr14.SST1.1Mbps.n1.nref1.pdf
 
 #chm13#chr21  9375567 9453313   SST1_Composite#222222
-path_flip_grounded_pq_touching_reliable_tsv_gz=chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr21.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+path_flip_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr21.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
   $path_grounded_pq_touching_reliable_tsv_gz \
   8375567 10453313 \
@@ -350,8 +350,8 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   21 \
   0.9 \
   <(echo 'chm13#chr21' 'grch38#chr21' 'HG002#MAT#chr21.prox' 'HG002#PAT#chr21.prox' 'HG00735#2#JAHBCG010000066.1' 'HG02886#1#JAHAOU010000106.1' 'NA18906#1#JAHEOO010000072.1' 'NA19240#2#JAHEOL010000065.1' | tr ' ' '\n') \
-  /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_bf20_50ca50_chr21_SST1_1Mbps_CenSatAnnDense.png \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/SupplementaryFigureX8.chr21.SST1.1Mbps.n1.nref1.pdf
+  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr21_SST1_1Mbps_CenSatAnnDense.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr21.SST1.1Mbps.n1.nref1.pdf
 ```
 
 # Evolutionary strata
