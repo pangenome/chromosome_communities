@@ -335,7 +335,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   3 1 \
   14 \
   0.9 \
-  <(echo 'chm13#chr14' 'grch38#chr14' 'HG002#MAT#chr14.prox' 'HG002#PAT#chr14.prox' 'HG00735#1#JAHBCH010000039.1' 'HG00741#2#JAHALX010000038.1' 'HG01978#1#JAGYVS010000055.1' 'HG02630#1#JAHAOQ010000067.1' | tr ' ' '\n') \
+  <(echo 'chm13#chr14' 'grch38#chr14' 'HG002#MAT#chr14.prox' 'HG002#PAT#chr14.prox' 'HG00735#1#JAHBCH010000039.1' 'HG00741#2#JAHALX010000038.1' 'HG01978#1#JAGYVS010000055.1' 'HG03453#2#JAGYVV010000008.1' | tr ' ' '\n') \
   /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr14_SST1_1Mbps_CenSatAnnDense.png \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr14.SST1.1Mbps.n1.nref1.pdf
 
@@ -368,18 +368,18 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr13_SST1_3Mbps_CenSatAnnDense.png \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr13.SST1.3Mbps.n1.nref1.pdf
   
-#chm13#chr14  3960008 6988409 SST_Composite#222222
+#chm13#chr14  6960008 6988409 SST_Composite#222222
 path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr14.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
   $path_grounded_pq_touching_reliable_tsv_gz \
-  5960008 9988409 \
+  3960008 9988409 \
   90 0.9 7.5 \
   1.0 \
   3 1 \
   14 \
   0.9 \
-  <(echo 'chm13#chr14' 'grch38#chr14' 'HG002#MAT#chr14.prox' 'HG002#PAT#chr14.prox' 'HG00735#1#JAHBCH010000039.1' 'HG00741#2#JAHALX010000038.1' 'HG01978#1#JAGYVS010000055.1' 'HG02630#1#JAHAOQ010000067.1' | tr ' ' '\n') \
-  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr14_SST1_3bps_CenSatAnnDense.png \
+  <(echo 'chm13#chr14' 'grch38#chr14' 'HG002#MAT#chr14.prox' 'HG002#PAT#chr14.prox' 'HG00735#1#JAHBCH010000039.1' 'HG00741#2#JAHALX010000038.1' 'HG01978#1#JAGYVS010000055.1' 'HG03453#2#JAGYVV010000008.1' | tr ' ' '\n') \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr14_SST1_3Mbps_CenSatAnnDense.png \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr14.SST1.3Mbps.n1.nref1.pdf
 
 #chm13#chr21  9375567 9453313   SST1_Composite#222222
