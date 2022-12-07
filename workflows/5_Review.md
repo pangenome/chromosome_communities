@@ -502,15 +502,13 @@ zcat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_cont
 
 RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
 sbatch -p workers -c 48 --job-name meme-PRDM9 --wrap "hostname; cd /scratch && $RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa"
-
-
 ```
 
 Convert the output in BED format:
 
 ```shell
 # Remove the last lines, remove the header line, remove the last empty line, prepare the columns, and sort the BED file
-grep '^#' fimo.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3,$4,$1,$6,$5,$7,$8,$9)}' | bedtools sort > fimo.bedE
+grep '^#' fimo.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3,$4,$1,$6,$5,$7,$8,$9)}' | bedtools sort > fimo.bed
 ```
 
 Plots:
@@ -598,7 +596,28 @@ for e in 50000; do
 done
 
 
-bedtools intersect -a <(bedtools makewindows -g <(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | grep 'HG002#MAT#chr13' | cut -f 1,2) -w 20000) -b <(grep HG002#MAT#chr13 *bed) -c | column -t | less -S
+# All 17 motif logos returned by our motif-finding algorithm are listed, 
+# along with histograms indicating their positions within the central 300 bp
+# of our human PRDM9 peaks, as a measure of how centrally enriched they are
+# (and therefore likely to represent true binding targets). 
+# Only the seven motifs for which greater than 85% of occurrences within peaks
+# are within 100 bp of the peak center were retained for downstream analyses.
+# The remaining, less centrally enriched, motifs are either degenerate (as seen
+# in mice containing the human allele: (Davies et al., 2016) or may arise as a 
+# consequence of PRDM9 binding to promoter regions 
+max_qvalue=1
+window_size=20000
+(seq 13 15; seq 21 22) | while read i; do
+  echo $i
+
+  # Only the seven motifs for which greater than 85% of occurrences within peaks
+  # are within 100 bp of the peak center were retained for downstream analyses.
+  bedtools intersect \
+    -a <(bedtools makewindows -g <(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | grep "chm13#chr$i" | cut -f 1,2) -w $window_size) \
+    -b <(grep chm13#chr$i fimo.bed | grep -P 'Human[1]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+    > fimo.w${window_size}.chm13#chr$i.bed
+done
+
 ```
 
 

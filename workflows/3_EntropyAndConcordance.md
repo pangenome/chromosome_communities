@@ -112,10 +112,10 @@ for e in 50000; do
           done
           
           # Merge chromosomes's PDF files
-          /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
-            /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr*.pdf \
-            /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.merged.pdf
-          rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr*.pdf
+          #/gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+          #  /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr*.pdf \
+          #  /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.merged.pdf
+          #rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr*.pdf
         done
       done
     done
@@ -176,6 +176,17 @@ path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangl
 cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
   bedtools merge -i - -d 10000 -c 4,5 -o mean | \
   awk '$3 - $2 > 30000' | sed 's/chm13#//' > chrACRO_29-Jul-22_PHRs.bed # Supplementary Table
+
+cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
+  bedtools merge -i - -d 30000 -c 4,5 -o mean | \
+  awk '$3 - $2 > 30000' | sed 's/chm13#//' > chrACRO_7-Dec-22_PHRs.bed # Supplementary Table
+
+# To check the sizes
+f=chrACRO_7-Dec-22_PHRs.bed
+cut -f 1 $f | sort | uniq | while read x; do
+  echo $f $x
+  grep $x $f | awk '{l+=$3-$2;}END{print(l/1000000)}'
+done
 ```
 
 Plots:
@@ -220,11 +231,11 @@ for e in 50000; do
       done
         
       # Merge chromosomes's PDF files
-      PREFIX=$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}
-      /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
-        /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.PHRs.pdf \
-        /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.PHRs.merged.pdf
-      rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.PHRs.pdf
+      #PREFIX=$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}
+      #/gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+      #  /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.PHRs.pdf \
+      #  /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.PHRs.merged.pdf
+      #rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr*.PHRs.pdf
      done
   done
 done
@@ -233,6 +244,8 @@ done
 #### Sex chromosomes
 
 ```shell
+cd /lizardfs/guarracino/chromosome_communities/
+
 mkdir -p /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/
 
 path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrSEX+refs.s50k.l250k.p98.n102/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.og
@@ -278,6 +291,16 @@ path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangl
 cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
   bedtools merge -i - -d 10000 -c 4,5 -o mean | \
   awk '$3 - $2 > 30000' | sed 's/chm13#//' > chrSEX_6-Dec-22_PHRs.bed # Supplementary Table
+cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
+  bedtools merge -i - -d 30000 -c 4,5 -o mean | \
+  awk '$3 - $2 > 30000' | sed 's/chm13#//' > chrSEX_7-Dec-22_PHRs.bed # Supplementary Table
+
+# To check the sizes
+f=chrSEX_6-Dec-22_PHRs.bed 
+cut -f 1 $f | sort | uniq | while read x; do
+  echo $f $x
+  grep $x $f | awk '{l+=$3-$2;}END{print(l/1000000)}'
+done
 ```
 
 Plots:
@@ -310,13 +333,14 @@ for e in 50000; do
       done
       
       # Merge chromosomes's PDF files
-      /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
-        /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr*.pdf \
-        /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.merged.pdf
+      #/gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+      #  /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr*.pdf \
+      #  /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.merged.pdf
       #rm /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$PREFIX.chr*.pdf
     done
   done
 done
+# For Supplementari Figures 24 and 25
 ```
 
 
