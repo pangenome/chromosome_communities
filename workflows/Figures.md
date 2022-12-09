@@ -114,7 +114,7 @@ n=14
       0.9 \
       <(zgrep '^HG002#1\|^HG002#2' -v $path_grounded_pq_touching_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
       /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-      ~/SuppFigure${n}.pdf
+      ~/SupplementaryFigure${n}.pdf
          
     n=$((n+1))
 done

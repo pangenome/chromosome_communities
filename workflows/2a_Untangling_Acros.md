@@ -784,28 +784,28 @@ grep '^chm13' /lizardfs/guarracino/chromosome_communities/assemblies/chrA.pan+HG
 # guix install r-ggridges
 for e in 50000; do
   for m in 1000; do
-    for eid in 0.900 0.950 0.975 0.995 1.000; do
+    for eid in 0.900; do # 0.950 0.975 0.995 1.000; do
       eid_str=$(echo $eid | sed 's/\.//g')
       for refn in 1; do
         echo "-e $e -m $m $eid -refn $refn"
 
         path_grounded_pq_touching_reliable_ALL_support_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.eid${eid_str}.n1.nref${refn}.tsv.gz
-        if [[ ! -s  $path_grounded_pq_touching_reliable_ALL_support_tsv_gz ]]; then
-          path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
-          python3 /lizardfs/guarracino/chromosome_communities/scripts/support.py \
-            $path_grounded_pq_touching_reliable_ALL_tsv_gz \
-            /lizardfs/guarracino/chromosome_communities/chm13#ACRO.len.tsv 1 $refn \
-            $eid \
-            <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq ) | \
-            pigz -c -9 > $path_grounded_pq_touching_reliable_ALL_support_tsv_gz
-        fi
+        #if [[ ! -s  $path_grounded_pq_touching_reliable_ALL_support_tsv_gz ]]; then
+        #  path_grounded_pq_touching_reliable_ALL_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.ALL.e$e.m$m.grounded.pq_touching.reliable.tsv.gz
+        #  python3 /lizardfs/guarracino/chromosome_communities/scripts/support.py \
+        #    $path_grounded_pq_touching_reliable_ALL_tsv_gz \
+        #    /lizardfs/guarracino/chromosome_communities/chm13#ACRO.len.tsv 1 $refn \
+        #    $eid \
+        #    <( zgrep '^chm13\|^grch38\|^HG002#1\|HG002#2\|^HG01978#MAT\|^HG01978#PAT\|bakeoff' $path_grounded_pq_touching_reliable_ALL_tsv_gz -v | sed '1d' | cut -f 1 | sort | uniq ) | \
+        #    pigz -c -9 > $path_grounded_pq_touching_reliable_ALL_support_tsv_gz
+        #fi
     
         path_grounded_pq_touching_reliable_ALL_support_dedup_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.dedup.eid${eid_str}.n1.nref${refn}.tsv.gz
-        if [[ ! -s $path_grounded_pq_touching_reliable_ALL_support_dedup_tsv_gz ]]; then
-          python3 /lizardfs/guarracino/chromosome_communities/scripts/support_deduplication.py \
+        #if [[ ! -s $path_grounded_pq_touching_reliable_ALL_support_dedup_tsv_gz ]]; then
+        #  python3 /lizardfs/guarracino/chromosome_communities/scripts/support_deduplication.py \
             $path_grounded_pq_touching_reliable_ALL_support_tsv_gz | \
             pigz -c > $path_grounded_pq_touching_reliable_ALL_support_dedup_tsv_gz
-        fi
+        #fi
         
         PREFIX=$(basename $path_grounded_pq_touching_reliable_ALL_support_dedup_tsv_gz .tsv.gz);
         (seq 13 15; seq 21 22) | while read i; do
@@ -820,14 +820,14 @@ for e in 50000; do
         done
         
         # Merge chromosomes's PDF files
-        /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
-          /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.dedup.eid${eid_str}.n1.nref${refn}.chr*.separated.pdf \
-          /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.dedup.eid${eid_str}.n1.nref${refn}.separated.merged.pdf
-        rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.dedup.eid${eid_str}.n1.nref${refn}.chr*.separated.pdf
-        /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
-          /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.dedup.eid${eid_str}.n1.nref${refn}.chr*.together.pdf \
-          /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.dedup.eid${eid_str}.n1.nref${refn}.together.merged.pdf
-        rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.dedup.eid${eid_str}.n1.nref${refn}.chr*.together.pdf 
+        #/gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+        #  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.dedup.eid${eid_str}.n1.nref${refn}.chr*.separated.pdf \
+        #  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.dedup.eid${eid_str}.n1.nref${refn}.separated.merged.pdf
+        #rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.dedup.eid${eid_str}.n1.nref${refn}.chr*.separated.pdf
+        #/gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+        #  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.dedup.eid${eid_str}.n1.nref${refn}.chr*.together.pdf \
+        #  /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.dedup.eid${eid_str}.n1.nref${refn}.together.merged.pdf
+        #rm /lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.support.dedup.eid${eid_str}.n1.nref${refn}.chr*.together.pdf 
       done
     done
   done

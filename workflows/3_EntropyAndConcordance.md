@@ -193,6 +193,8 @@ Plots:
 
 ```shell
 #guix install r-dplyr
+
+n=5
 for e in 50000; do
   for m in 1000; do
     for eid in 0.900; do
@@ -226,7 +228,7 @@ for e in 50000; do
           0 25000000 \
           90 \
           $i \
-          chrACRO_29-Jul-22_PHRs.bed \
+          /lizardfs/guarracino/chromosome_communities/PHRs/chrACRO_7-Dec-22_PHRs.bed \
           /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$PREFIX.chr${i}.PHRs.pdf
       done
         

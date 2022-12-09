@@ -94,7 +94,7 @@ library(ggpubr)
 p_with_annotation <- ggpubr::ggarrange(
   ggplotted_img, p,
   labels=c('', ''),
-  heights = c(1.8, 3),
+  heights = c(1.1, 3),
   legend = "right", # legend position,
   common.legend = T,
   nrow = 2
@@ -112,7 +112,7 @@ ggsave(
 p_all_together_with_annotation <- ggpubr::ggarrange(
   ggplotted_img, p_all_together,
   labels=c('', ''),
-  heights = c(1.8, 1),
+  heights = c(1.1, 1),
   legend = "right", # legend position,
   common.legend = T,
   nrow = 2

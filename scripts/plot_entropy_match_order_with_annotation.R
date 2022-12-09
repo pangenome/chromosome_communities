@@ -49,7 +49,7 @@ p <- ggplot(xx, aes(x=start, y=shannon_div_index, color=ground.target)) +
   theme(
     plot.title = element_text(hjust = 0.5),
     
-    text = element_text(size = 26),
+    text = element_text(size = 22),
     axis.text.x = element_text(size = 18),
     axis.text.y = element_text(size = 18),
     
@@ -59,7 +59,7 @@ p <- ggplot(xx, aes(x=start, y=shannon_div_index, color=ground.target)) +
     
     strip.text.x = element_blank(),
     strip.text.y = element_blank(),
-    plot.margin = unit(c(0,1.03,0,7.1), "cm")
+    plot.margin = unit(c(0,0.98,0,4.9), "cm")
   ) + labs(
     x = paste('Position'),
     y = paste('Order entropy\n'),
@@ -81,14 +81,14 @@ ggplotted_img <- ggplot() +
     xmin = - Inf, xmax = Inf,
     ymin = - Inf, ymax = Inf
   ) + theme(
-    plot.margin = unit(c(0,0.95,0.5,0.3), "cm")
+    plot.margin = unit(c(0,0.95,0.5,0), "cm")
   )
 
 library(ggpubr)
 p_with_annotation <- ggpubr::ggarrange(
   ggplotted_img, p,
   labels=c('', ''),
-  heights = c(8, max(7, length(unique(xx$contig)))),
+  heights = c(10, max(7, length(unique(xx$contig)))),
   legend = "right", # legend position,
   common.legend = T,
   nrow = 2
@@ -101,4 +101,4 @@ ggsave(
   dpi = 100, bg = "white",
   limitsize = FALSE
 )
-
+  
