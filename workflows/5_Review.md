@@ -54,7 +54,7 @@ for e in 50000; do
     path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.pq_touching.tsv.gz
     cat \
       <( zcat $path_grounded_pq_touching_tsv_gz | head -n 1 ) \
-       xyz.tsv | pigz -c > e$m.m$m.annot.tsv.gz
+       xyz.tsv | pigz -c > e$e.m$m.annot.tsv.gz
     rm xyz.tsv
   done
 done
@@ -66,7 +66,7 @@ for e in 50000; do
       echo "-e $e -m $m chr$i"
       
       Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_and_flagger.R \
-        e$m.m$m.annot.tsv.gz \
+        e$e.m$m.annot.tsv.gz \
         0 25000000 \
         90 \
         0.9 1.0 \
@@ -74,12 +74,12 @@ for e in 50000; do
         $i \
         0.9 \
         /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-        e$m.m$m.annot.chr$i.pdf
+        e$e.m$m.annot.chr$i.pdf
     done
     
     # Merge chromosomes's PDF files
     /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
-      e$m.m$m.annot.chr*.pdf e$m.m$m.annot.chrACRO.pdf
+      e$e.m$m.annot.chr*.pdf e$e.m$m.annot.chrACRO.pdf
   done
 done
 ```
@@ -679,13 +679,13 @@ for e in 50000; do
     path_grounded_pq_touching_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.pq_touching.tsv.gz
     cat \
       <( zcat $path_grounded_pq_touching_tsv_gz | head -n 1 ) \
-       xyz.tsv | pigz -c > e$m.m$m.annot.tsv.gz
+       xyz.tsv | pigz -c > e$e.m$m.annot.tsv.gz
     rm xyz.tsv
   done
 done
 
 
-zcat e$m.m$m.annot.tsv.gz | sed 's/Human[0-9]\{1,\}/Err/' | pigz -c > e$m.m$m.annot.sed.tsv.gz
+zcat e$e.m$m.annot.tsv.gz | sed 's/Human[0-9]\{1,\}/Err/' | pigz -c > e$e.m$m.annot.sed.tsv.gz
 
 for e in 50000; do
   for m in 1000 ; do
@@ -693,7 +693,7 @@ for e in 50000; do
       echo "-e $e -m $m chr$i"
       
       Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_and_flagger.R \
-        e$m.m$m.annot.sed.tsv.gz \
+        e$e.m$m.annot.sed.tsv.gz \
         0 25000000 \
         90 \
         0.9 1.0 \
@@ -701,12 +701,12 @@ for e in 50000; do
         $i \
         0.9 \
         /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-        e$m.m$m.annot.chr$i.pdf
+        e$e.m$m.annot.chr$i.pdf
     done
     
     # Merge chromosomes's PDF files
     /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
-      e$m.m$m.annot.chr*.pdf e$m.m$m.annot.chrACRO.pdf
+      e$e.m$m.annot.chr*.pdf e$e.m$m.annot.chrACRO.pdf
   done
 done
 ```
