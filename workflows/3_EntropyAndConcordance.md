@@ -163,9 +163,13 @@ for e in 50000; do
     done
   done
 done
+```
 
+Compute the Pseudo-Homologous Regions (PHRs):
 
-# PHRs
+```shell
+mkdir -p /lizardfs/guarracino/chromosome_communities/PHRs
+
 e=50000
 m=1000
 eid=0.900
@@ -174,15 +178,11 @@ eid_str=$(echo $eid | sed 's/\.//g')
 path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/$prefix.untangle.chm13#chrACRO.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.tsv
       
 cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
-  bedtools merge -i - -d 10000 -c 4,5 -o mean | \
-  awk '$3 - $2 > 30000' | sed 's/chm13#//' > chrACRO_29-Jul-22_PHRs.bed # Supplementary Table
-
-cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
   bedtools merge -i - -d 30000 -c 4,5 -o mean | \
-  awk '$3 - $2 > 30000' | sed 's/chm13#//' > chrACRO_7-Dec-22_PHRs.bed # Supplementary Table
+  awk '$3 - $2 > 30000' | sed 's/chm13#//' > /lizardfs/guarracino/chromosome_communities/PHRs/chrACRO_7-Dec-22_PHRs.bed # Supplementary Table
 
 # To check the sizes
-f=chrACRO_7-Dec-22_PHRs.bed
+f=/lizardfs/guarracino/chromosome_communities/PHRs/chrACRO_7-Dec-22_PHRs.bed
 cut -f 1 $f | sort | uniq | while read x; do
   echo $f $x
   grep $x $f | awk '{l+=$3-$2;}END{print(l/1000000)}'
@@ -279,8 +279,13 @@ for e in 50000; do
     done
   done
 done
+```
 
-# PHRs
+Compute the Pseudo-Homologous Regions (PHRs):
+
+```shell
+mkdir -p /lizardfs/guarracino/chromosome_communities/PHRs
+
 e=50000
 m=1000
 eid=0.900
@@ -289,14 +294,11 @@ eid_str=$(echo $eid | sed 's/\.//g')
 path_entropy_match_order_tsv=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/entropy/$prefix.untangle.chm13#chrSEX.e$e.m$m.grounded.pq_touching.reliable.entropy_match_order.eid${eid_str}.n${n}.tsv
 
 cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
-  bedtools merge -i - -d 10000 -c 4,5 -o mean | \
-  awk '$3 - $2 > 30000' | sed 's/chm13#//' > chrSEX_6-Dec-22_PHRs.bed # Supplementary Table
-cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
   bedtools merge -i - -d 30000 -c 4,5 -o mean | \
-  awk '$3 - $2 > 30000' | sed 's/chm13#//' > chrSEX_7-Dec-22_PHRs.bed # Supplementary Table
+  awk '$3 - $2 > 30000' | sed 's/chm13#//' > /lizardfs/guarracino/chromosome_communities/PHRs/chrSEX_7-Dec-22_PHRs.bed # Supplementary Table
 
 # To check the sizes
-f=chrSEX_6-Dec-22_PHRs.bed 
+f=/lizardfs/guarracino/chromosome_communities/PHRs/chrSEX_7-Dec-22_PHRs.bed 
 cut -f 1 $f | sort | uniq | while read x; do
   echo $f $x
   grep $x $f | awk '{l+=$3-$2;}END{print(l/1000000)}'

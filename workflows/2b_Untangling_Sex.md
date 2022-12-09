@@ -263,20 +263,23 @@ for e in 50000; do
         ref_chr=$(echo $ref | sed 's/chm13#//')
         
         ###############################################################################
-        # Contigs overlapping (or close at least 100kbps to) a PARs/XTRs region
-#        bedtools intersect \
-#          -a <(zcat x.tsv.gz | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
-#          -b <(grep $ref_chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed |\
-#            bedtools sort |\
-#            bedtools slop -b 100000 -g /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.sizes |\
-#            awk -v OFS='\t' -v ref=$ref '{print(ref,$2,$3)}') | \
-#          #awk '$3-$2+1>=100000' | \
-#          cut -f 4 | \
-#          #Remove references to avoid grepping everything later (with zgrep -f)
-#          grep -v chr |\
-#          sort | uniq > $ref.tmp.txt
+        # Contigs with respect to the partitioning
+        zcat x.tsv.gz | sed '1d' | cut -f 1 | grep -v chr | grep -f <(grep $ref /lizardfs/guarracino/chromosome_communities/untangle_sex/partitioning.contig2chr.tsv | cut -f 1) | sort | uniq > $ref.tmp.txt
+
+        # WRONG (it takes too many contigs): contigs overlapping (or close at least 100kbps to) a PARs/XTRs region
+        #bedtools intersect \
+        #  -a <(zcat x.tsv.gz | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | bedtools sort) \
+        #  -b <(grep $ref_chr /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed |\
+        #    bedtools sort |\
+        #    bedtools slop -b 100000 -g /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.sizes |\
+        #    awk -v OFS='\t' -v ref=$ref '{print(ref,$2,$3)}') | \
+        #  #awk '$3-$2+1>=100000' | \
+        #  cut -f 4 | \
+        #  #Remove references to avoid grepping everything later (with zgrep -f)
+        #  grep -v chr |\
+        #  sort | uniq > $ref.tmp.txt
         
-        # Contigs touching regions that are no PARs/XTRs
+        # WRONG (it takes too many contigs): contigs touching regions that are no PARs/XTRs
         #bedtools intersect \
         #  -a <(zcat x.tsv.gz | awk -v OFS="\t" '{print $11,$12,$13,$1, "", "+"}' | sed '1d' | grep "^$ref" | bedtools sort) \
         #  -b <(bedtools complement \
@@ -287,11 +290,8 @@ for e in 50000; do
         #  grep -v chr |\
         #  sort | uniq > $ref.tmp.txt
 
-        # Contigs with respect to the partitioning
-        zcat x.tsv.gz | sed '1d' | cut -f 1 | grep -v chr | grep -f <(grep $ref /lizardfs/guarracino/chromosome_communities/untangle_sex/partitioning.contig2chr.tsv | cut -f 1) | sort | uniq > $ref.tmp.txt
-        
-        # All contigs 
-        #zcat x.tsv.gz | sed '1d' | cut -f 1 | grep -v chr | sort | uniq > $ref.tmp.txt
+        # WRONG: it mixes chrX and chrY contigs
+        #zcat x.tsv.gz | sed '1d' | cut -f 1 | grep -v chr | sort | uniq > $ref.tmp.txt      
         ###############################################################################
 
         # Add grounded.target column, re-add the references, and add annotation
@@ -545,10 +545,10 @@ for e in 50000; do
   done
 done
 ```
-CONTINUE
-Plot 2 hits: XXX
-CONTINUE
-Compute support: XXX
+
+CONTINUE (IF NEEDED) - Plot 2 hits: XXX
+
+CONTINUE (IF NEEDED) - Compute support: XXX
 
 ```shell
 # Merge files for all sex chromosomes (used for computing the support and the histogram length)
@@ -574,12 +574,12 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx todo
 ```
 
 
-Statistics on removed regions: XXX
+CONTINUE (IF NEEDED) - Statistics on removed regions: XXX
 
 
-Statistics on untangled segment lengths: XXX
+CONTINUE (IF NEEDED) - Statistics on untangled segment lengths: XXX
 
-CONTINUE
+TO FINISH, IF NEEDED
 Estimate regions that can recombine using multi-hit untangled regions:
 
 ```shell
@@ -713,7 +713,6 @@ awk '$1 == 0 && $2 == 0.9 && $6 > 0' $f | cut -f 3,4,5,6 | awk '$4 > 0' | bedtoo
 awk '$1 == 0 && $2 == 0.9 && $6 > 19' $f | cut -f 3,4,5,6 | awk '$4 > 0' | bedtools sort | bedtools merge | awk -v OFS='\t' '{SUM+=$3-$2}END{print(SUM)}'
 awk '$1 == 0 && $2 == 0.9 && $6 > 19' $f | cut -f 3,4,5,6 | awk '$4 > 0' | bedtools sort | bedtools merge | grep chrX | awk -v OFS='\t' '{SUM+=$3-$2}END{print(SUM)}'
 awk '$1 == 0 && $2 == 0.9 && $6 > 19' $f | cut -f 3,4,5,6 | awk '$4 > 0' | bedtools sort | bedtools merge | grep chrY | awk -v OFS='\t' '{SUM+=$3-$2}END{print(SUM)}'
-
 ```
 
 

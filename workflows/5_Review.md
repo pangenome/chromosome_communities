@@ -1,4 +1,4 @@
-#### Plot FLAGGER's annotations (for pq-contig quality control)
+# Plot FLAGGER's annotations (for pq-contig quality control)
 
 Take only reliable blocks [flagged with "Hh" or "Hc"](https://github.com/human-pangenomics/hpp_production_workflows/blob/asset/coverage/README.md#components).
 
@@ -332,7 +332,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   5960008 7988409 \
   90 0.9 7.5 \
   1.0 \
-  3 1 \
+  5 1 \
   14 \
   0.9 \
   <(echo 'chm13#chr14' 'grch38#chr14' 'HG002#MAT#chr14.prox' 'HG002#PAT#chr14.prox' 'HG00735#1#JAHBCH010000039.1' 'HG00741#2#JAHALX010000038.1' 'HG01978#1#JAGYVS010000055.1' 'HG03453#2#JAGYVV010000008.1' | tr ' ' '\n') \
@@ -346,7 +346,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   8375567 10453313 \
   90 0.9 7.5 \
   1.0 \
-  3 1 \
+  5 1 \
   21 \
   0.9 \
   <(echo 'chm13#chr21' 'grch38#chr21' 'HG002#MAT#chr21.prox' 'HG002#PAT#chr21.prox' 'HG00735#2#JAHBCG010000066.1' 'HG02886#1#JAHAOU010000106.1' 'NA18906#1#JAHEOO010000072.1' 'NA19240#2#JAHEOL010000065.1' | tr ' ' '\n') \
@@ -375,7 +375,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   3960008 9988409 \
   90 0.9 7.5 \
   1.0 \
-  3 1 \
+  5 1 \
   14 \
   0.9 \
   <(echo 'chm13#chr14' 'grch38#chr14' 'HG002#MAT#chr14.prox' 'HG002#PAT#chr14.prox' 'HG00735#1#JAHBCH010000039.1' 'HG00741#2#JAHALX010000038.1' 'HG01978#1#JAGYVS010000055.1' 'HG03453#2#JAGYVV010000008.1' | tr ' ' '\n') \
@@ -389,7 +389,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
   6375567 12453313 \
   90 0.9 7.5 \
   1.0 \
-  3 1 \
+  5 1 \
   21 \
   0.9 \
   <(echo 'chm13#chr21' 'grch38#chr21' 'HG002#MAT#chr21.prox' 'HG002#PAT#chr21.prox' 'HG00735#2#JAHBCG010000066.1' 'HG02886#1#JAHAOU010000106.1' 'NA18906#1#JAHEOO010000072.1' 'NA19240#2#JAHEOL010000065.1' | tr ' ' '\n') \
@@ -472,18 +472,26 @@ cat \
 
 # Recombination hotspots
 
-Prepare the tool:
+Prepare the tools:
 
 ```shell
+cd /home/guarracino/tools/
+
 # Download and install the MEME Suite
 wget -c https://meme-suite.org/meme/meme-software/5.5.0/meme-5.5.0.tar.gz
 tar -xf meme-5.5.0.tar.gz 
 cd ~/tools/meme-5.5.0
 ./configure --prefix=$HOME/meme --enable-build-libxml2 --enable-build-libxslt
 make
+
+# Download and compile TideHunter
+wget https://github.com/yangao07/TideHunter/releases/download/v1.5.4/TideHunter-v1.5.4.tar.gz
+tar -zxvf TideHunter-v1.5.4.tar.gz
+cd TideHunter-v1.5.4
+make
 ```
 
-Search PRDM9 motifs (downloaded from [here](https://pubmed.ncbi.nlm.nih.gov/29072575/)):
+Prepare PRDM9 motifs (downloaded from [here](https://pubmed.ncbi.nlm.nih.gov/29072575/)):
 
 ```shell
 mkdir -p /lizardfs/guarracino/chromosome_communities/recombination_hotspots
@@ -491,12 +499,25 @@ cd /lizardfs/guarracino/chromosome_communities/recombination_hotspots
 
 # Download the PWMs for all PRDM9 motifs
 wget -c https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5705219/bin/elife-28383-fig1-data2.txt
+# All 17 motif logos returned by our motif-finding algorithm are listed, 
+# along with histograms indicating their positions within the central 300 bp
+# of our human PRDM9 peaks, as a measure of how centrally enriched they are
+# (and therefore likely to represent true binding targets). 
+# Only the seven motifs for which greater than 85% of occurrences within peaks
+# are within 100 bp of the peak center were retained for downstream analyses.
+# The remaining, less centrally enriched, motifs are either degenerate (as seen
+# in mice containing the human allele: (Davies et al., 2016) or may arise as a 
+# consequence of PRDM9 binding to promoter regions 
 
 # Remove non-human motifs
 n=$(grep 'MOTIF Chimp1' elife-28383-fig1-data2.txt -n | cut -f 1 -d ':')
 n=$((n-2))
 head -n $n elife-28383-fig1-data2.txt > PRDM9_motifs.human.txt
+```
 
+Prepare PRDM9 motifs:
+
+```shell
 zcat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz \
   > /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa
 
@@ -507,11 +528,102 @@ sbatch -p workers -c 48 --job-name meme-PRDM9 --wrap "hostname; cd /scratch && $
 Convert the output in BED format:
 
 ```shell
+# https://meme-suite.org/meme/doc/fimo-output-format.html#tsv_results
+#	The start position of the motif occurrence; 1-based sequence coordinates.
+#	The end position of the motif occurrence; 1-based sequence coordinates.
+
 # Remove the last lines, remove the header line, remove the last empty line, prepare the columns, and sort the BED file
-grep '^#' fimo.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3,$4,$1,$6,$5,$7,$8,$9)}' | bedtools sort > fimo.bed
+grep '^#' fimo.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$6,$5,$7,$8,$9)}' | bedtools sort > fimo.bed
 ```
 
-Plots:
+Counts the number of hits in windows:
+#todo separate in Human1 hits, Human2 hits, ...
+
+```shell
+max_qvalue=1
+window_size=20000
+(seq 13 15; seq 21 22) | while read i; do
+  echo $i
+
+  # Only the seven motifs for which greater than 85% of occurrences within peaks
+  # are within 100 bp of the peak center were retained for downstream analyses.
+  bedtools intersect \
+    -a <(bedtools makewindows -g <(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | grep "chm13#chr$i" | cut -f 1,2) -w $window_size) \
+    -b <(grep chm13#chr$i fimo.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+    > fimo.w${window_size}.chm13#chr$i.bed
+done
+```
+
+Plot the number of hits in each window across the chromosomes:
+#todo take the R code: xxxxx script
+```shell
+
+```
+
+Obtain the repetitive unit of the SST1 arrays and rDNA arrays:
+
+```shell
+RUN_TIDEHUNTER=/home/guarracino/tools/TideHunter-v1.5.4/bin/TideHunter
+
+mkdir -p /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit
+cd /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit
+
+# SST1 arrays
+samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr13:12301367-12440010 > chm13.SST1.fa
+# Put the SST1 region of chr14 in reverse complement.
+# This help in getting with TideHunter all the repeat unit starting from the same point
+samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr14:6960008-6988409 -i >> chm13.SST1.fa
+samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr21:9375567-9453313 >> chm13.SST1.fa
+
+# https://github.com/yangao07/TideHunter#tabular-format
+$RUN_TIDEHUNTER -f 2 chm13.SST1.fa -t 48 -k 13 > chm13.SST1.TideHunter.tsv
+awk '{print(">"$1"_"$7"\n"$11)}' < chm13.SST1.TideHunter.tsv > chm13.SST1.TideHunter.fa
+
+
+
+# rDNA arrays
+samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr13:5770549-9348041 chm13#chr14:2099538-2817811 chm13#chr15:2506443-4707485 chm13#chr21:3108299-5612715 chm13#chr22:4793795-5720650 > chm13.rDNA.fa
+
+# https://github.com/yangao07/TideHunter#tabular-format
+$RUN_TIDEHUNTER -f 2 chm13.rDNA.fa -t 48 -k 13 > chm13.rDNA.TideHunter.tsv
+awk '{print(">"$1"_"$7"\n"$11)}' < chm13.rDNA.TideHunter.tsv > chm13.rDNA.TideHunter.fa
+```
+
+Show where the PRDM9 hits are on the SST1 and rDNA unites
+
+```shell
+RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
+$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/chm13.SST1.TideHunter.fa
+
+samtools faidx chm13.SST1.TideHunter.fa
+cat chm13.SST1.TideHunter.fa.fai | awk -v OFS='\t' '{print($1,"0",$2,"SST1","+","0")}' > chm13.SST1.TideHunter.PRDM9.bed
+grep '^Human' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/fimo.tsv | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$5,$8)}' >> chm13.SST1.TideHunter.PRDM9.bed
+
+#todo take the R code: yyyyyyy script
+
+max_qvalue=1
+window_size=1
+rm chm13.SST1.TideHunter.PRDM9.w${window_size}.bed
+(echo 13; echo 14; echo 21) | while read i; do
+  echo $i
+
+  bedtools intersect \
+    -a <(bedtools makewindows -g <(cat chm13.SST1.TideHunter.fa.fai | grep "chm13#chr$i" | cut -f 1,2) -w $window_size) \
+    -b <(grep chm13#chr$i chm13.SST1.TideHunter.PRDM9.bed | awk -v max_qvalue=$max_qvalue '$6 <= max_qvalue && $4 != "SST1"') -c \
+    >> chm13.SST1.TideHunter.PRDM9.w${window_size}.bed
+done
+
+
+
+
+# For dotplots with Gepard
+samtools faidx chm13.SST1.TideHunter.fa chm13#chr13:12301367-12440010_1409 > SST1.chr13.fa
+samtools faidx chm13.SST1.TideHunter.fa chm13#chr14:6960008-6988409/rc_1407 > SST1.chr14rc.fa
+samtools faidx chm13.SST1.TideHunter.fa chm13#chr21:9375567-9453313_1406 > SST1.chr21.fa
+```
+
+
+Alrenative plots of the hits:
 
 ```shell
 # List of contigs with at least one match
@@ -569,7 +681,6 @@ for e in 50000; do
 done
 
 
-# Supplementary Figures
 zcat e$m.m$m.annot.tsv.gz | sed 's/Human[0-9]\{1,\}/Err/' | pigz -c > e$m.m$m.annot.sed.tsv.gz
 
 for e in 50000; do
@@ -594,31 +705,11 @@ for e in 50000; do
       e$m.m$m.annot.chr*.pdf e$m.m$m.annot.chrACRO.pdf
   done
 done
-
-
-# All 17 motif logos returned by our motif-finding algorithm are listed, 
-# along with histograms indicating their positions within the central 300 bp
-# of our human PRDM9 peaks, as a measure of how centrally enriched they are
-# (and therefore likely to represent true binding targets). 
-# Only the seven motifs for which greater than 85% of occurrences within peaks
-# are within 100 bp of the peak center were retained for downstream analyses.
-# The remaining, less centrally enriched, motifs are either degenerate (as seen
-# in mice containing the human allele: (Davies et al., 2016) or may arise as a 
-# consequence of PRDM9 binding to promoter regions 
-max_qvalue=1
-window_size=20000
-(seq 13 15; seq 21 22) | while read i; do
-  echo $i
-
-  # Only the seven motifs for which greater than 85% of occurrences within peaks
-  # are within 100 bp of the peak center were retained for downstream analyses.
-  bedtools intersect \
-    -a <(bedtools makewindows -g <(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | grep "chm13#chr$i" | cut -f 1,2) -w $window_size) \
-    -b <(grep chm13#chr$i fimo.bed | grep -P 'Human[1]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
-    > fimo.w${window_size}.chm13#chr$i.bed
-done
-
 ```
+
+
+
+
 
 
 

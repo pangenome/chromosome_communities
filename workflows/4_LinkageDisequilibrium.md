@@ -9,10 +9,8 @@ mkdir -p ../linkage_disequilibrium
 cd ../linkage_disequilibrium
 
 wget http://hypervolu.me/~guarracino/chrcommunity/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.chm13.haploid.snv.norm.no_HG002-hifi.vcf.gz
-wget http://hypervolu.me/~guarracino/chrcommunity/chrACRO_29-Jul-22_PHRs.bed
-sed -i 's/^/chm13#/g' chrACRO_29-Jul-22_PHRs.bed
-
-sed 's/^/chm13#/g' chrACRO_7-Dec-22_PHRs.bed > linkage_disequilibrium/chrACRO_7-Dec-22_PHRs.bed
+wget http://hypervolu.me/~guarracino/chrcommunity/chrACRO_7-Dec-22_PHRs.bed
+sed -i 's/^/chm13#/g' chrACRO_7-Dec-22_PHRs.bed
 ```
 
 Remove CONFLICT regions from the VCF file:
