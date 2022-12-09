@@ -103,10 +103,9 @@ p <- ggplot(
   ) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values = colors) +
-  labs(x = "Position", fill="Target") + 
-  scale_alpha_discrete(range = c(0.3, 1))# + scale_x_reverse()
+  labs(x = "Position", fill="Target", alpha="Estimated identity") 
+#+ scale_alpha_discrete(range = c(0.3, 1))# + scale_x_reverse()
 #ggsave(plot = p, paste0(path_untangle_grounded_all_tsv, '.pdf'), width = width, height = height, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
-
 
 library(png)
 library(grid)
@@ -118,14 +117,14 @@ ggplotted_img <- ggplot() +
     xmin = - Inf, xmax = Inf,
     ymin = - Inf, ymax = Inf
   ) + theme(
-    plot.margin = unit(c(0,1,0.5,0), "cm")
+    plot.margin = unit(c(0,1,0.5,2.54), "cm")
   )
 
 library(ggpubr)
 p_with_annotation <- ggpubr::ggarrange(
   ggplotted_img, p,
   labels=c('', ''),
-  heights = c(height_bar*8, height_bar*length(unique(xx$query))*nth.best),
+  heights = c(height_bar*10, height_bar*length(unique(xx$query))*nth.best),
   legend = "right", # legend position,
   common.legend = T,
   nrow = 2

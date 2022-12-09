@@ -135,5 +135,6 @@ done
 #### Visualization
 
 ```shell
-Rscript ../scripts/plot_ld_1.R 'ld/*.ld' 100 4000 acrocentrics_ld.pdf
+Rscript ../scripts/plot_ld_1.R 'ld/*.ld' 100 4000 Figure6.pdf
+Rscript ../scripts/plot_ld_1.R 'ld/*.ld' 100 4000 Figure6.png
 ```
