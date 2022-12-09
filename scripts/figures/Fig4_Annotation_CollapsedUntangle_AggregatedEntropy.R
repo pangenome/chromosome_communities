@@ -1,8 +1,8 @@
 args <- commandArgs()
-path_support_dedup_tsv <- '/home/guarracino/Downloads/Pangenomics/chromosome_communities/Review1/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.support.dedup.eid0900.n1.nref1.tsv.gz'
-path_entropy_tsv <- '/home/guarracino/Downloads/Pangenomics/chromosome_communities/Review1/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy.by_contig.eid0900.w50000.n1.nref1.tsv'
-dir_annotation <- '/home/guarracino/git/chromosome_communities/data/annotation/'
-path_output <- '/home/guarracino/'
+path_support_dedup_tsv <- args[6]
+path_entropy_tsv <- args[7]
+dir_annotation <- args[8]
+path_output <- args[9]
 
 x_min <- 0
 x_max <- 25000000
