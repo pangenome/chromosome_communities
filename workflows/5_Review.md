@@ -242,6 +242,8 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_a
 
 # Dot plots (to hypothesize recombination mechanisms for the graphical abstract)
 
+## With Gepard
+
 Extract regions centered in the SST1 array:
 
 ```shell
@@ -256,6 +258,8 @@ java -jar Gepard-2.1.jar
 ```
 
 Open `gepard`, load pairs of sequences, and use several `word length` values to change the level of detail:
+
+## With odgi untangle's output
 
 ```shell
 java -jar Gepard-2.1.jar
