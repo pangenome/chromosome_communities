@@ -1,8 +1,8 @@
 args <- commandArgs()
-path_support_dedup_tsv <- args[6]
-path_entropy_tsv <- args[7]
-dir_annotation <- args[8]
-path_output <- args[9]
+path_support_dedup_tsv <- '/home/guarracino/Downloads/Pangenomics/chromosome_communities/Review1/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.support.dedup.eid0900.n1.nref1.tsv.gz'
+path_entropy_tsv <- '/home/guarracino/Downloads/Pangenomics/chromosome_communities/Review1/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy.by_contig.eid0900.w50000.n1.nref1.tsv'
+dir_annotation <- '/home/guarracino/git/chromosome_communities/data/annotation/'
+path_output <- '/home/guarracino/'
 
 x_min <- 0
 x_max <- 25000000
@@ -93,7 +93,7 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
       
       strip.text.x = element_blank(),
       strip.text.y = element_blank(),
-      plot.margin = unit(c(0,1.03,0,6.74), "cm")
+      plot.margin = unit(c(0,1.03,0,4.39), "cm")
     ) + labs(
       x = paste(''),
       y = paste('# contigs\n')
@@ -129,7 +129,7 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
       
       strip.text.x = element_blank(),
       strip.text.y = element_blank(),
-      plot.margin = unit(c(0,1.03,0,6.7), "cm")
+      plot.margin = unit(c(0,1.03,0,4.22), "cm")
     ) + labs(
       x = paste('Position'),
       y = paste('Entropy\n')
@@ -147,7 +147,7 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
   p_panel <- ggpubr::ggarrange(
     p_annotation, p_collapsed_untangle, p_entropy_average,
     labels=c('', '', ''), font.label = list(size = 40, color = "black", face = "bold", family = NULL),
-    heights = c(1.2, 1, 1),
+    heights = c(1.34, 1, 1),
     legend = "right", # legend position,
     common.legend = T,
     nrow = 3
