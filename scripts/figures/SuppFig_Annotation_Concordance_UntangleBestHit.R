@@ -142,7 +142,7 @@ for (i in seq_along(chromosomes)){
       xmin = - Inf, xmax = Inf,
       ymin = - Inf, ymax = Inf
     ) + theme(
-      plot.margin = unit(c(0,7.95,0.5,-0.17), "cm")
+      plot.margin = unit(c(0,7.95,0.5,2.39), "cm")
     )
   
   
@@ -173,7 +173,7 @@ for (i in seq_along(chromosomes)){
       legend.text = element_text(size = 20),
       legend.position = "top",
       
-      plot.margin = unit(c(0,0.25,0,5.47), "cm"),
+      plot.margin = unit(c(0,0.25,0,5.45), "cm"),
       panel.spacing = unit(panel_spacing, "lines")
       #axis.title.y=element_blank()
     ) +
@@ -214,7 +214,7 @@ for (i in seq_along(chromosomes)){
       width = ref.end - ref.begin,
       y = ordered(query.hacked, levels = rev(unique(query.hacked))),
       fill = target,
-      alpha = jaccard
+      alpha = estimated_identity
     )
   ) +
     geom_tile() +
@@ -232,7 +232,7 @@ for (i in seq_along(chromosomes)){
       legend.text = element_text(size = 20),
       legend.position = "top",
       
-      plot.margin = unit(c(0,2.6,0,0), "cm"),
+      plot.margin = unit(c(0,0.15,0,0), "cm"),
       
       panel.spacing = unit(panel_spacing, "lines"),
       #panel.border = element_rect(color = "grey", fill = NA, size = 1), #element_blank(),
@@ -246,7 +246,7 @@ for (i in seq_along(chromosomes)){
     labs(x = "Position") +
     guides(
       fill = guide_legend(title="Target", override.aes = list(size=10)),
-      alpha = guide_legend(title="Jaccard", override.aes = list(size=10))
+      alpha = guide_legend(title="Estimated identity", override.aes = list(size=10))
     )
   
   
@@ -254,7 +254,7 @@ for (i in seq_along(chromosomes)){
   p_panel <- ggpubr::ggarrange(
     p_annotation, p_concordance, p_untangle,
     labels=c('', '', ''), font.label = list(size = 40, color = "black", face = "bold", family = NULL),
-    heights = c(0.95, 0.7, 2.5),
+    heights = c(1.65, 0.7, 2.5),
     legend = "right", # legend position,
     common.legend = F,
     nrow = 3

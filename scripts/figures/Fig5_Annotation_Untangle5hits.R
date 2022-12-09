@@ -111,7 +111,7 @@ for (i in seq_along(chromosomes)){
       xmin = - Inf, xmax = Inf,
       ymin = - Inf, ymax = Inf
     ) + theme(
-      plot.margin = unit(c(0,1,0.5,2.05), "cm")
+      plot.margin = unit(c(0,1,0.5,2.0), "cm")
     )
   
 
