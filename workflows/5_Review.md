@@ -74,12 +74,12 @@ for e in 50000; do
         $i \
         0.9 \
         /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-        e$e.m$m.annot.chr$i.pdf
+        SupplementaryFigureX.e$e.m$m.annot.chr$i.pdf
     done
     
     # Merge chromosomes's PDF files
-    /gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
-      e$e.m$m.annot.chr*.pdf e$e.m$m.annot.chrACRO.pdf
+    #/gnu/store/d0njxcgymxvf8s7di32m9q4v9vibd11z-poppler-0.86.1/bin/pdfunite \
+    #  e$e.m$m.annot.chr*.pdf e$e.m$m.annot.chrACRO.pdf
   done
 done
 ```
@@ -453,7 +453,7 @@ cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
 ```
 
 
-# Robertsonian translocation
+# Robertsonian translocation breakpoints
 
 ```shell
 RUN_WFMASH=/home/guarracino/tools/wfmash/build/bin/wfmash-ad8aebae1be96847839778af534866bc9545adb9
@@ -464,13 +464,13 @@ cd /lizardfs/guarracino/chromosome_communities/robertsonian_translocation
 # Download the sequence from https://www.ncbi.nlm.nih.gov/nuccore/CR382332
 
 $RUN_WFMASH /lizardfs/guarracino/chromosome_communities/assemblies/chm13.fa.gz CR382332.fasta.gz -t 48 \
-  -p 98 -s 1k -n 10 -N -m > CR382332.vs.CHM13.p98.s1k.n10.N.paf
+  -p 90 -s 1k -n 10 -N -m > CR382332.vs.CHM13.p90.s1k.n10.N.paf
   
 
 cat \
-  <(cut -f 1,2,3 SupplementaryTable4.chrACRO_29-Jul-22_PHRs.bed | awk -v OFS='\t' '{print($0,"100.0","PHRs")}') \
-  <(cut -f 6,8,9,13 CR382332.vs.CHM13.p97.s1k.n10.N.paf | sed 's/id:f://' | awk -v OFS='\t' '{print($0,"CR382332")}') \
-  > PHRs+CR382332.bed
+  <(cut -f 1,2,3 /lizardfs/guarracino/chromosome_communities/PHRs/chrACRO_7-Dec-22_PHRs.bed | awk -v OFS='\t' '{print("chm13#"$0,"100.0","PHRs")}') \
+  <(cut -f 6,8,9,13 CR382332.vs.CHM13.p90.s1k.n10.N.paf | sed 's/id:f://' | awk -v OFS='\t' '{print($0,"CR382332")}') \
+  > chrACRO_7-Dec-22_PHRs+CR382332.bed
 ```
 
 
@@ -627,6 +627,9 @@ samtools faidx chm13.SST1.TideHunter.fa chm13#chr21:9375567-9453313_1406 > SST1.
 ```
 
 
+
+
+NOT USED
 Alrenative plots of the hits:
 
 ```shell
@@ -710,10 +713,3 @@ for e in 50000; do
   done
 done
 ```
-
-
-
-
-
-
-
