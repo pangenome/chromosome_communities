@@ -465,12 +465,13 @@ cd /lizardfs/guarracino/chromosome_communities/robertsonian_translocation
 
 $RUN_WFMASH /lizardfs/guarracino/chromosome_communities/assemblies/chm13.fa.gz CR382332.fasta.gz -t 48 \
   -p 90 -s 1k -n 10 -N -m > CR382332.vs.CHM13.p90.s1k.n10.N.paf
-  
 
 cat \
   <(cut -f 1,2,3 /lizardfs/guarracino/chromosome_communities/PHRs/chrACRO_7-Dec-22_PHRs.bed | awk -v OFS='\t' '{print("chm13#"$0,"100.0","PHRs")}') \
   <(cut -f 6,8,9,13 CR382332.vs.CHM13.p90.s1k.n10.N.paf | sed 's/id:f://' | awk -v OFS='\t' '{print($0,"CR382332")}') \
   > chrACRO_7-Dec-22_PHRs+CR382332.bed
+
+# Use the plot_PHRs_and_clone_CR382332_mappings.R script
 ```
 
 
@@ -537,34 +538,51 @@ Convert the output in BED format:
 #	The end position of the motif occurrence; 1-based sequence coordinates.
 
 # Remove the last lines, remove the header line, remove the last empty line, prepare the columns, and sort the BED file
-grep '^#' fimo.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$6,$5,$7,$8,$9)}' | bedtools sort > fimo.bed
+grep '^#' fimo.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$6,$5,$7,$8,$9)}' | bedtools sort > chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.bed
 ```
 
 Counts the number of hits in windows:
-#todo separate in Human1 hits, Human2 hits, ...
 
 ```shell
+#TODO IF NEEDED: separate in Human1 hits, Human2 hits, ...
+
 max_qvalue=1
 window_size=20000
+chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed
 (seq 13 15; seq 21 22) | while read i; do
   echo $i
 
-  # Only the seven motifs for which greater than 85% of occurrences within peaks
-  # are within 100 bp of the peak center were retained for downstream analyses.
   bedtools intersect \
     -a <(bedtools makewindows -g <(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | grep "chm13#chr$i" | cut -f 1,2) -w $window_size) \
-    -b <(grep chm13#chr$i fimo.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
-    > fimo.w${window_size}.chm13#chr$i.bed
+    -b <(grep chm13#chr$i chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+    >> chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed
 done
 ```
 
-Plot the number of hits in each window across the chromosomes:
-#todo take the R code: xxxxx script
-```shell
+Plot the number of hits in each window across the whole chromosomes:
 
+```shell
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed \
+  35 \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9motifshits.whole_chromosomes.w${window_size}.pdf
 ```
 
-Obtain the repetitive unit of the SST1 arrays and rDNA arrays:
+Plot the number of hits in each window across a chromosome region, with annotation on the top:
+
+```shell
+(seq 13 15; seq 21 22) | while read i; do
+  Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_with_annotation.R \
+    /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed \
+    0 25000000 \
+    $i
+    35 \
+    /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr$i_0_25Mbp.png \
+    /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9motifshits.chr$i.with_annotation.w${window_size}.pdf
+done
+```
+
+Obtain the repetitive unit of the SST1 arrays:
 
 ```shell
 RUN_TIDEHUNTER=/home/guarracino/tools/TideHunter-v1.5.4/bin/TideHunter
@@ -584,16 +602,15 @@ $RUN_TIDEHUNTER -f 2 chm13.SST1.fa -t 48 -k 13 > chm13.SST1.TideHunter.tsv
 awk '{print(">"$1"_"$7"\n"$11)}' < chm13.SST1.TideHunter.tsv > chm13.SST1.TideHunter.fa
 
 
-
-# rDNA arrays
-samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr13:5770549-9348041 chm13#chr14:2099538-2817811 chm13#chr15:2506443-4707485 chm13#chr21:3108299-5612715 chm13#chr22:4793795-5720650 > chm13.rDNA.fa
-
+## rDNA arrays
+#samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr13:5770549-9348041 chm13#chr14:2099538-2817811 chm13#chr15:2506443-4707485 chm13#chr21:3108299-5612715 chm13#chr22:4793795-5720650 > chm13.rDNA.fa
+#
 # https://github.com/yangao07/TideHunter#tabular-format
-$RUN_TIDEHUNTER -f 2 chm13.rDNA.fa -t 48 -k 13 > chm13.rDNA.TideHunter.tsv
-awk '{print(">"$1"_"$7"\n"$11)}' < chm13.rDNA.TideHunter.tsv > chm13.rDNA.TideHunter.fa
+#$RUN_TIDEHUNTER -f 2 chm13.rDNA.fa -t 48 -k 13 > chm13.rDNA.TideHunter.tsv
+#awk '{print(">"$1"_"$7"\n"$11)}' < chm13.rDNA.TideHunter.tsv > chm13.rDNA.TideHunter.fa
 ```
 
-Show where the PRDM9 hits are on the SST1 and rDNA unites
+Show where the PRDM9 hits are on the SST1 units:
 
 ```shell
 RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
@@ -620,7 +637,7 @@ done
 
 
 
-# For dotplots with Gepard
+# For dotplots with Gepard (to check that all the repeat units have the same start /end)
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr13:12301367-12440010_1409 > SST1.chr13.fa
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr14:6960008-6988409/rc_1407 > SST1.chr14rc.fa
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr21:9375567-9453313_1406 > SST1.chr21.fa
