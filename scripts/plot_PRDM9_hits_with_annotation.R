@@ -5,7 +5,7 @@ x_max <- as.numeric(args[8])
 num_chr <- as.numeric(args[9])
 width <- as.numeric(args[10])
 path_annotation <- args[11]
-path_output <- args[8]
+path_output <- args[12]
 
 library(ggridges)
 library(ggplot2)
@@ -72,7 +72,7 @@ p <- ggplot(xx, aes(
   #ggtitle('PRDM9 density hits for each bp in the SST1 repetitive unit') +
   scale_color_manual(values=colors) +
   guides(colour = guide_legend(override.aes = list(size=10)))
-p
+#p
 #ggsave(plot = p, path_output, width = width, height = length(unique(x$chrom))*4, units = "cm", dpi = 300, bg = "transparent", limitsize = FALSE)
 
 
