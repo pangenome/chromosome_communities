@@ -1,7 +1,9 @@
 args <- commandArgs()
 path_fimo_window_bed <- args[6]
-width <- as.numeric(args[7])
-path_output <- args[8]
+scale <- as.numeric(args[7])
+x_axis_label <- args[8]
+width <- as.numeric(args[9])
+path_output <- args[10]
 
 library(ggridges)
 library(ggplot2)
@@ -14,13 +16,18 @@ options(scipen = 9)
 x <- read.delim(path_fimo_window_bed, header = F)
 colnames(x) <- c('chrom', 'ref.begin', 'ref.end', 'hits')
 
-#x$chrom <- gsub('[:].*$','', x$chrom)
-
-colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
-
+x$chrom <- gsub('[:].*$', chrom_suffix, x$chrom)
 xx <- x
+
+if(length(unique(xx$chrom)) == 5) {
+  colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
+} else {
+  # Assume 3 (chr13/chr14/chr21)
+  colors <- c("#F8766D", "#A3A500", "#00B0F6")
+}
+
 p <- ggplot(xx, aes(
-  x = (ref.begin + (ref.end - ref.begin) / 2) / 1000000, width = ref.end - ref.begin,
+  x = (ref.begin + (ref.end - ref.begin) / 2) / scale, width = ref.end - ref.begin,
   y=hits,
   color=chrom)
 ) +
@@ -45,7 +52,7 @@ p <- ggplot(xx, aes(
     #limits = c(x_min, x_max),
     breaks = pretty_breaks(n=20),
     expand = c(0.01, 0.01)) + labs(
-      x = paste('Position (Mbp)'),
+      x = paste(x_axis_label),
       y = paste('PRDM9 motif hits'),
       color = "Chromosome"
     ) + scale_y_continuous(
@@ -53,8 +60,7 @@ p <- ggplot(xx, aes(
       breaks=pretty_breaks(n=6)
     ) +
   #ggtitle('PRDM9 density hits for each bp in the SST1 repetitive unit') +
-  scale_color_manual(values=colors) +
+  scale_color_manual(values = colors) +
   guides(colour = guide_legend(override.aes = list(size=10)))
 #p
 ggsave(plot = p, path_output, width = width, height = length(unique(x$chrom))*4, units = "cm", dpi = 300, bg = "transparent", limitsize = FALSE)
-
