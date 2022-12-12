@@ -1,5 +1,5 @@
 args <- commandArgs()
-path_fimo_window_bed <- args[6]
+path_fimo_bed <- args[6]
 width <- as.numeric(args[7])
 path_output <- args[8]
 
