@@ -548,6 +548,7 @@ Counts the number of hits in windows:
 
 max_qvalue=1
 window_size=20000
+
 rm chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed
 (seq 13 15; seq 21 22) | while read i; do
   echo $i
@@ -640,13 +641,14 @@ Counts the number of hits in each base pair:
 ```shell
 max_qvalue=1
 window_size=1
+
 rm chm13.SST1.TideHunter.PRDM9.w${window_size}.bed
 (echo 13; echo 14; echo 21) | while read i; do
   echo $i
 
   bedtools intersect \
     -a <(bedtools makewindows -g <(cat chm13.SST1.TideHunter.fa.fai | grep "chm13#chr$i" | cut -f 1,2) -w $window_size) \
-    -b <(grep chm13#chr$i chm13.SST1.TideHunter.PRDM9.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$6 <= max_qvalue && $4 != "SST1"') -c \
+    -b <(grep chm13#chr$i chm13.SST1.TideHunter.PRDM9.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$6 <= max_qvalue && $4 != "') -c \
     >> chm13.SST1.TideHunter.PRDM9.w${window_size}.bed
 done
 ```
@@ -658,7 +660,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_with
   /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/chm13.SST1.TideHunter.PRDM9.w${window_size}.bed \
   1 \
   'Position (bp)' \
-  '#SST1' \
+  '' \
   35 \
   /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/PRDM9motifhits.SST1.TideHunter.w${window_size}.pdf
 ```

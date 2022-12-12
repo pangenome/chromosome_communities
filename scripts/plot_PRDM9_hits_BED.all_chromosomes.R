@@ -14,7 +14,7 @@ library(gtools) # for mixedsort install.packages("gtools")
 x <- read.delim(path_fimo_bed, header = F)
 colnames(x) <- c('ref', 'ref.begin', 'ref.end', 'label', 'strand', 'qvalue')
 
-x$ref <- gsub('[:].*$', '#SST1', x$ref)
+x$ref <- gsub('[:].*$', '', x$ref)
 
 x$loq10qvalue <- -log10(x$qvalue)
 x[!is.finite(x$loq10qvalue),]$loq10qvalue <- max(x[is.finite(x$loq10qvalue),]$loq10qvalue)
