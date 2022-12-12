@@ -548,7 +548,7 @@ Counts the number of hits in windows:
 
 max_qvalue=1
 window_size=20000
-chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed
+rm chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed
 (seq 13 15; seq 21 22) | while read i; do
   echo $i
 
@@ -565,7 +565,7 @@ Plot the number of hits in each window across the whole chromosomes:
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
   /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed \
   35 \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9motifshits.whole_chromosomes.w${window_size}.pdf
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9motifhits.whole_chromosomes.w${window_size}.pdf
 ```
 
 Plot the number of hits in each window across a chromosome region, with annotation on the top:
@@ -578,7 +578,7 @@ Plot the number of hits in each window across a chromosome region, with annotati
     $i \
     35 \
     /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-    /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9motifshits.chr$i.with_annotation.w${window_size}.pdf
+    /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9motifhits.chr$i.with_annotation.w${window_size}.pdf
 done
 ```
 
