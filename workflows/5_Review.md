@@ -657,10 +657,10 @@ Show where the PRDM9 hits are on the SST1 units:
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
   /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/chm13.SST1.TideHunter.PRDM9.w${window_size}.bed \
   1 \
-  'Position (bp)' \
-  '#SST1' \
+  "Position (bp)" \
+  "#SST1" \
   35 \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/PRDM9motifhits.ST1.TideHunter.w${window_size}.pdf
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/PRDM9motifhits.SST1.TideHunter.w${window_size}.pdf
 ```
 
 

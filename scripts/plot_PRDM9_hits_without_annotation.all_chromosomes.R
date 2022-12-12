@@ -2,8 +2,9 @@ args <- commandArgs()
 path_fimo_window_bed <- args[6]
 scale <- as.numeric(args[7])
 x_axis_label <- args[8]
-width <- as.numeric(args[9])
-path_output <- args[10]
+chrom_suffix <- args[9]
+width <- as.numeric(args[10])
+path_output <- args[11]
 
 library(ggridges)
 library(ggplot2)
