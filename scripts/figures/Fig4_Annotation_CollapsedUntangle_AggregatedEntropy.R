@@ -74,6 +74,7 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
   # Apply filters
   s_chr <- s[s$ground.target == chr, ]
   s_chr_long <- pivot_longer(s_chr, chr13:chr22, "chromosome")
+  s_chr_long$chromosome <- paste0('chm13#', s_chr_long$chromosome)
   
   p_collapsed_untangle <- ggplot(s_chr_long, aes(x=start, y=value, color=chromosome)) +
     geom_step(alpha=0.5) +
@@ -93,7 +94,7 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
       
       strip.text.x = element_blank(),
       strip.text.y = element_blank(),
-      plot.margin = unit(c(0,1.03,0,4.39), "cm")
+      plot.margin = unit(c(0,1.03,0,4.29), "cm")
     ) + labs(
       x = paste(''),
       y = paste('# contigs\n')
@@ -129,7 +130,7 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
       
       strip.text.x = element_blank(),
       strip.text.y = element_blank(),
-      plot.margin = unit(c(0,1.03,0,4.22), "cm")
+      plot.margin = unit(c(0,0.96,0,4.11), "cm")
     ) + labs(
       x = paste('Position'),
       y = paste('Entropy\n')
