@@ -5,6 +5,7 @@ path_output <- args[8]
 
 library(ggridges)
 library(ggplot2)
+library(ggsci)
 library(tidyverse)
 library(scales) # for pretty_breaks()
 library(gtools) # for mixedsort install.packages("gtools")
