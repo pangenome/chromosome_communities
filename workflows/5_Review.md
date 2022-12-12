@@ -651,19 +651,26 @@ rm chm13.SST1.TideHunter.PRDM9.w${window_size}.bed
 done
 ```
 
-Show where the PRDM9 hits are on the SST1 units:
+Plot the number of hits in each window across on the SST1 units:
 
 ```shell
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
   /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/chm13.SST1.TideHunter.PRDM9.w${window_size}.bed \
   1 \
-  "Position (bp)" \
-  "#SST1" \
+  'Position (bp)' \
+  '#SST1' \
   35 \
   /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/PRDM9motifhits.SST1.TideHunter.w${window_size}.pdf
 ```
 
+Show where the PRDM9 hits are on the SST1 units:
 
+```shell
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_BED.all_chromosomes.R \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/chm13.SST1.TideHunter.PRDM9.w${window_size}.bed \
+  35 \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/chm13.SST1.TideHunter.PRDM9.w${window_size}.bars.pdf
+```
 
 
 NOT USED
