@@ -106,7 +106,7 @@ p <- ggplot(
   ) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values = colors) +
-  labs(x = "Position", fill="Target", alpha="Strand") #+ 
+  labs(x = "Position", fill="Target", alpha="Estimated identity") #+ 
   #scale_alpha_discrete(range = c(0.4, 1))# + scale_x_reverse()
 #ggsave(plot = p, path_output, width = width, height = (12+length(unique(xx$query))*nth.best) * height_bar, units = "cm", dpi = 100, bg = "transparent", limitsize = FALSE)
 #ggsave(plot = p, paste0(path_untangle_grounded_all_tsv, '.pdf'), width = width, height = height, units = "cm", dpi = 300, bg = "transparent", limitsize = FALSE)
