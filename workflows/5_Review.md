@@ -269,7 +269,7 @@ Dot plots from the untangle output:
 
 ```shell
 ref=chr13
-path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
+path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.flip.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_dotplot.R \
   $path_untangle_single_chr_tsv_gz \
   "censat_13_27_SST1" \
@@ -284,7 +284,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
   /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}.1Mbp
 
 ref=chr14
-path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
+path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.flip.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_dotplot.R \
   $path_untangle_single_chr_tsv_gz \
   "censat_14_39_SST_Composite" \
@@ -299,7 +299,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
   /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}.1Mbp
 
 ref=chr21
-path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
+path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.flip.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_dotplot.R \
   $path_untangle_single_chr_tsv_gz \
   "censat_21_45_SST1_Composite" \
@@ -315,7 +315,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
 
 
 ref=chr13
-path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
+path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.flip.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_dotplot.R \
   $path_untangle_single_chr_tsv_gz \
   "censat_13_27_SST1" \
@@ -330,7 +330,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
   /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}.6Mbps
 
 ref=chr14
-path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
+path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.flip.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_dotplot.R \
   $path_untangle_single_chr_tsv_gz \
   "censat_14_39_SST_Composite" \
@@ -345,7 +345,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
   /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}.6Mbps
 
 ref=chr21
-path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
+path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.flip.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_dotplot.R \
   $path_untangle_single_chr_tsv_gz \
   "censat_21_45_SST1_Composite" \
