@@ -62,7 +62,7 @@ p <- ggplot(xx, aes(
     #limits = c(x_min, x_max),
     breaks = pretty_breaks(n=20),
     expand = c(0.01, 0.01)) + labs(
-      x = paste('Position (MBp)'),
+      x = paste('Position (Mbp)'),
       y = paste('PRDM9 motif hits'),
       color = "Chromosome"
     ) + scale_y_continuous(
