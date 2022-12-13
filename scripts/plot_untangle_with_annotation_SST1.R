@@ -102,7 +102,7 @@ p <- ggplot(
     strip.text.y = element_blank(),
     axis.title.y = element_blank(),
     
-    plot.margin = unit(c(0,1.03,0,2.20), "cm"),
+    plot.margin = unit(c(0,0.94,0,2.12), "cm"),
   ) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values = colors) +
