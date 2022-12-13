@@ -14,8 +14,8 @@ library(tidyverse)
 
 query_to_consider <- read.delim(path_query_to_consider, header = F)
 
-x_min <- x_min_sst1-1000000
-x_max <- x_max_sst1+1000000
+x_min <- x_min_sst1-size_range
+x_max <- x_max_sst1+size_range
 
 x <- read.delim(path_untangle_tsv) %>%
   rename(query.name=X.query.name) %>%

@@ -259,11 +259,11 @@ java -jar Gepard-2.1.jar
 
 Open `gepard`, load pairs of sequences, and use several `word length` values to change the level of detail:
 
-## With odgi untangle's output
-
 ```shell
 java -jar Gepard-2.1.jar
 ```
+
+## With odgi untangle's output
 
 Dot plots from the untangle output:
 
@@ -278,9 +278,9 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
   5 \
   <((
     cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep 'chr13$\|chr14$\|chr21$'; \
-    zgrep 'HG002#.AT' pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | cut -f 1 | grep 'chr13\|chr14\|chr21'; \
+    zgrep 'HG002#.AT' /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | cut -f 1 | grep 'chr13\|chr14\|chr21'; \
     echo "chm13#chr13"; echo "chm13#chr14"; echo "chm13#chr21")) \
-  /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}
+  /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}.1Mbp
 
 ref=chr14
 path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
@@ -292,9 +292,9 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
   5 \
   <((
     cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep 'chr13$\|chr14$\|chr21$'; \
-    zgrep 'HG002#.AT' pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | cut -f 1 | grep 'chr13\|chr14\|chr21'; \
+    zgrep 'HG002#.AT' /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | cut -f 1 | grep 'chr13\|chr14\|chr21'; \
     echo "chm13#chr13"; echo "chm13#chr14"; echo "chm13#chr21")) \
-  /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}
+  /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}.1Mbp
 
 ref=chr21
 path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
@@ -306,9 +306,52 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
   5 \
   <((
     cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep 'chr13$\|chr14$\|chr21$'; \
-    zgrep 'HG002#.AT' pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | cut -f 1 | grep 'chr13\|chr14\|chr21'; \
+    zgrep 'HG002#.AT' /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | cut -f 1 | grep 'chr13\|chr14\|chr21'; \
     echo "chm13#chr13"; echo "chm13#chr14"; echo "chm13#chr21")) \
-  /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}
+  /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}.1Mbp
+
+
+ref=chr13
+path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_dotplot.R \
+  $path_untangle_single_chr_tsv_gz \
+  "censat_13_27_SST1" \
+  12301367 12440010 \
+  3000000 \
+  5 \
+  <((
+    cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep 'chr13$\|chr14$\|chr21$'; \
+    zgrep 'HG002#.AT' /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | cut -f 1 | grep 'chr13\|chr14\|chr21'; \
+    echo "chm13#chr13"; echo "chm13#chr14"; echo "chm13#chr21")) \
+  /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}.3Mbps
+
+ref=chr14
+path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_dotplot.R \
+  $path_untangle_single_chr_tsv_gz \
+  "censat_14_39_SST_Composite" \
+  6960008 6988409 \
+  3000000 \
+  5 \
+  <((
+    cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep 'chr13$\|chr14$\|chr21$'; \
+    zgrep 'HG002#.AT' /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | cut -f 1 | grep 'chr13\|chr14\|chr21'; \
+    echo "chm13#chr13"; echo "chm13#chr14"; echo "chm13#chr21")) \
+  /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}.3Mbps
+
+ref=chr21
+path_untangle_single_chr_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#${ref}.e50000.m1000.j0.n100.bed.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_dotplot.R \
+  $path_untangle_single_chr_tsv_gz \
+  "censat_21_45_SST1_Composite" \
+  9175567 9653313 \
+  3000000 \
+  5 \
+  <((
+    cat /lizardfs/guarracino/chromosome_communities/assemblies/partitioning/*.vs.refs.partitions.tsv | grep 'chr13$\|chr14$\|chr21$'; \
+    zgrep 'HG002#.AT' /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | cut -f 1 | grep 'chr13\|chr14\|chr21'; \
+    echo "chm13#chr13"; echo "chm13#chr14"; echo "chm13#chr21")) \
+  /lizardfs/guarracino/chromosome_communities/untangle/sst1_region_dotplots/query_vs_${ref}.3Mbps
 ```
 
 
