@@ -633,6 +633,18 @@ Plot the number of hits in each window across a chromosome region, with annotati
     /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
     /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9motifhits.chr$i.with_annotation.w${window_size}.pdf
 done
+
+# --delta for white space between the pieces
+pdfjam --delta '0 7' --no-landscape --nup 1x5 \
+  PRDM9motifhits.chr13.with_annotation.w${window_size}.pdf \
+  PRDM9motifhits.chr14.with_annotation.w${window_size}.pdf \
+  PRDM9motifhits.chr15.with_annotation.w${window_size}.pdf \
+  PRDM9motifhits.chr21.with_annotation.w${window_size}.pdf \
+  PRDM9motifhits.chr22.with_annotation.w${window_size}.pdf \
+  --outfile output.pdf
+
+pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigureX.PRDM9motifhits.chrACRO.with_annotation.w${window_size}.pdf
+rm output.pdf
 ```
 
 ## SST1 array repetitive unit

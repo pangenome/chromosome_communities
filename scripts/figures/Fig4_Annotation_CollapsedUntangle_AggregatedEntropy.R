@@ -170,7 +170,8 @@ for (num_chr in c(13, 14, 15, 21, 22)) {
 # Put panels together
 p_figure <- ggpubr::ggarrange(
   p_panels[[1]], NULL, p_panels[[2]], NULL, p_panels[[3]], NULL, p_panels[[4]], NULL, p_panels[[5]],
-  #labels=c('A', 'B', 'C', 'D', 'E'), font.label = list(size = 40, color = "black", face = "bold", family = NULL),
+  labels=c('chr13', '', 'chr14', '', 'chr15', '', 'chr21', '', 'chr22'),
+  font.label = list(size = 50, color = "black", face = "bold", family = NULL), hjust=-0.1, vjust=+2,
   heights = c(1,0.05,1,0.05,1,0.05,1,0.05,1),
   legend = "right", # legend position,
   common.legend = T,

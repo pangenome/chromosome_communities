@@ -68,7 +68,7 @@ n=6
 done
 ```
 
-## Figure 12, 13
+## Figure 12 (and 13)
 
 Average entropy across chrX and Y:
 
@@ -81,15 +81,26 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BE
   90 \
   'X' \
   /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
-  ~/SupplementaryFigure12.pdf
+  ~/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrSEX.e50000.m1000.grounded.reliable.entropy.eid0900.w50000.n1.nref1.chrX.pdf
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BED_annotation.R \
   $path_entropy_by_contig_tsv \
   0 63000000 \
   90 \
   'Y' \
   /lizardfs/guarracino/chromosome_communities/data/chm13_hg002.PARs.bed \
-  ~/SupplementaryFigure13.pdf
+  ~/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrSEX.e50000.m1000.grounded.reliable.entropy.eid0900.w50000.n1.nref1.chrY.pdf
 ```
+
+## Figure 19 (20,21,22,23)
+# --delta for white space between the pieces
+pdfjam --delta '0 7' --no-landscape --nup 1x5 \
+  chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrSEX.e50000.m1000.grounded.reliable.entropy.eid0900.w50000.n1.nref1.chrX.pdf \
+  chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrSEX.e50000.m1000.grounded.reliable.entropy.eid0900.w50000.n1.nref1.chrY.pdf \
+  --outfile output.pdf
+
+pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigure12.chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrSEX.e50000.m1000.grounded.reliable.entropy.eid0900.w50000.n1.nref1.chrSEX.pdf
+rm output.pdf
+
 
 ## Figure 14, 15, 16, 17, 18
 
@@ -119,6 +130,30 @@ n=14
     n=$((n+1))
 done
 ```
+
+
+## Figure 19 (20,21,22,23)
+# --delta for white space between the pieces
+pdfjam --delta '0 7' --no-landscape --nup 1x5 \
+  chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n5.chr13.pdf \
+  chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n5.chr14.pdf \
+  chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n5.chr15.pdf \
+  chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n5.chr21.pdf \
+  chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n5.chr22.pdf \
+  --outfile output.pdf
+
+pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigure19.chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n5.chrACRO.pdf
+rm output.pdf
+
+## Figure 24 (25)
+# --delta for white space between the pieces
+pdfjam --delta '0 7' --no-landscape --nup 1x5 \
+  chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n2.chrX.pdf \
+  chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n2.chrY.pdf \
+  --outfile output.pdf
+
+pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigure24.chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n2.chrSEX.pdf
+rm output.pdf
 
 
 ## Figure 28, 29, 30, 31, 32
