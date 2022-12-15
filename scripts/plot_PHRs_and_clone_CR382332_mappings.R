@@ -38,7 +38,7 @@ x$info <- factor(
     "chr13-PHRs", "chr14-PHRs", "chr15-PHRs", "chr21-PHRs", "chr22-PHRs",
     "chr13-SST1", "chr14-SST1", "chr21-SST1",
     "chr13-rDNA", "chr14-rDNA", "chr15-rDNA", "chr21-rDNA", "chr22-rDNA",
-    "CR382285.2", "CR381535.11", "CR381572.5", "CR392039.8","CR381653.11", "CR382287.7", "CR382332.15"
+    "CR382285.2", "CR381535.11", "CR381572.5", "CR392039.8","CR381653.11", "CR382287.7", "CR382332.15", "CR381670.5"
     ))
 )
 
@@ -85,7 +85,7 @@ p <- ggplot(
     
     plot.margin = unit(c(0.1,1.3,0.1,0.3), "cm"),
   ) +
-  labs(x = "Position (Mbp)", fill="Info", alpha='Estimated identity') +
+  labs(x = "Position (Bp)", fill="Info", alpha='Estimated identity') +
   scale_alpha(range=c(0.05,1), limits=c(min_id,100)) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0), breaks=pretty_breaks(n=8)) +
   scale_fill_manual(guide = "none", values = c(
@@ -108,7 +108,8 @@ p <- ggplot(
     "CR392039.8"="#000000",
     "CR381653.11"="#000000",
     "CR382287.7"="#000000",
-    "CR382332.15"="#000000"
+    "CR382332.15"="#000000",
+    "CR381670.5"="#000000"
     ))
 #p
 ggsave(

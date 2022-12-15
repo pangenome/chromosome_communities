@@ -518,7 +518,7 @@ cd /lizardfs/guarracino/chromosome_communities/robertsonian_translocation
 # https://www.ncbi.nlm.nih.gov/nuccore/CR381535
 # https://www.ncbi.nlm.nih.gov/nuccore/CR381653
 # https://www.ncbi.nlm.nih.gov/nuccore/CR382332
-# https://www.ncbi.nlm.nih.gov/nuccore/CR381570
+# https://www.ncbi.nlm.nih.gov/nuccore/CR381670
 # https://www.ncbi.nlm.nih.gov/nuccore/CR392039
 # Download the BAC clones:
 # - Put all IDs in a text file, one per line
@@ -526,7 +526,7 @@ cd /lizardfs/guarracino/chromosome_communities/robertsonian_translocation
 # - Upload the IDs list
 # - Select all files
 # - Download in FASTA format
-# - Rename the file: mv sequence.fasta PMC4257996.clones.fasta
+# - mv sequence.fasta PMC4257996.clones.fasta
 # - bgzip PMC4257996.clones.fasta
 # - Upload: scp PMC4257996.clones.fasta.gz guarracino@octopus02:/lizardfs/guarracino/chromosome_communities/robertsonian_translocation
 
@@ -540,15 +540,14 @@ $RUN_WFMASH /lizardfs/guarracino/chromosome_communities/assemblies/chm13.fa.gz P
 comm -23 \
   <(cut -f 1 PMC4257996.clones.fasta.gz.fai | sort) \
   <(cut -f 1 PMC4257996.clones.vs.CHM13.p90.s1k.n10.N.paf | sort | uniq) > clones.unaligned.txt
-if [[ $(wc -l clones.unaligned.txt | cut -f 1 -d ' ' ) != 0 ]];
-    samtools faidx PMC4257996.clones.fasta.gz $(tr '\n' ' ' < clones.unaligned.txt) > clones.unaligned.fa
-    samtools faidx clones.unaligned.fa
-
-    # Allow query split
-    $RUN_WFMASH /lizardfs/guarracino/chromosome_communities/assemblies/chm13.fa.gz clones.unaligned.fa -t 48 \
-  -p 90 -s 1k -n 10 -m > clones.unaligned.vs.CHM13.p90.s1k.n10.N.paf
-  # NOTHING MAPPED!
-fi
+#if [[ $(wc -l clones.unaligned.txt | cut -f 1 -d ' ' ) != 0 ]];
+#    samtools faidx PMC4257996.clones.fasta.gz $(tr '\n' ' ' < clones.unaligned.txt) > clones.unaligned.fa
+#    samtools faidx clones.unaligned.fa
+#
+#    # Allow query split
+#    $RUN_WFMASH /lizardfs/guarracino/chromosome_communities/assemblies/chm13.fa.gz clones.unaligned.fa -t 48 \
+#  -p 90 -s 1k -n 10 -m > clones.unaligned.vs.CHM13.p90.s1k.n10.N.paf#
+#fi
 
 # How much PHRs do the mappings cover?
 
@@ -571,17 +570,18 @@ echo "%MAPPING covered$ = $perc_MAPs_covered"
 
 # min_id 90
 A = 18329090
-B = 5673439
-A and B = 4510759
-%PHRs covered = .24609836058418612162
-%MAPPING covered$ = .79506609659502816545
+B = 6063106
+A and B = 4714652
+%PHRs covered = .25722237165074752756
+%MAPPING covered$ = .77759682908397115273
+
 
 # min_id 99
 A = 18329090
-B = 2285988
-A and B = 1760814
-%PHRs covered = .09606663505935100978
-%MAPPING covered$ = .77026388589966351529
+B = 2675655
+A and B = 1964707
+%PHRs covered = .10719064612591241572
+%MAPPING covered$ = .73429010840336291487
 ```
 
 Plots:
@@ -644,14 +644,21 @@ n=$((n-2))
 head -n $n elife-28383-fig1-data2.txt > PRDM9_motifs.human.txt
 ```
 
-Search the PRDM9 motifs:
+Search the PRDM9 motifs in all acrocentric chromosomes:
 
 ```shell
-zcat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz \
-  > /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa
+rm /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13.chrACRO.fa
+(seq 13 15; seq 21 22) | while read i; do
+  echo chr$i
+
+  zcat /lizardfs/guarracino/chromosome_communities/assemblies/chm13.chr$i.fa.gz >> /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13.chrACRO.fa
+done
+
+#zcat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz \
+#  > /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa
 
 RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
-sbatch -p workers -c 48 --job-name meme-PRDM9 --wrap "hostname; cd /scratch && $RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa"
+sbatch -p workers -c 48 --job-name meme-PRDM9 --wrap "hostname; cd /scratch && $RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13.chrACRO.fa"
 ```
 
 Convert the output in BED format:
@@ -737,7 +744,7 @@ wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/CHM13/assemblie
 # Get all possible rDNA repetitie units with different lengths (> 40kbps)
 
 cat chm13v1.1.rdna_units.bed | awk -v OFS='\t' '{print($0,($3-$2)/1000)}' | awk '!a[$5]++' | grep \
-  -f <(cat chm13v1.1.rdna_units.bed | awk -v OFS='\t' '{print($0,($3-$2)/1000)}' | cut -f 5 | awk '$1 > 40' | sort | uniq) \
+  -f <(cat chm13v1.1.rdna_units.bed | awk -v OFS='\t' '{print($0,($3-$2)/1000)}' | cut -f 5 | awk '$1 > 0' | sort | uniq) \
   > chm13v1.1.rdna_units.unique.bed
 
 bedtools getfasta -fi /lizardfs/guarracino/chromosome_communities/assemblies/chm13.fa -bed <(cat chm13v1.1.rdna_units.unique.bed | cut -f 1,2,3 | sed 's/chr/chm13#chr/g') > chm13v1.1.rdna_units.unique.fa
@@ -834,7 +841,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_with
 
 # Search the PRDM9 motifs (stronger adjusted p-value threshold because, as we are not looking at motifs genome-wide, we are going to correct less p-values)
 RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
-$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/ --verbosity 1 --thresh 1.0E-9 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/KY962518.fasta
+$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/ --verbosity 1 --thresh 1.0E-8 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/KY962518.fasta
 
 # Convert the output in BED format
 grep '^#' fimo.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$6,$5,$7,$8,$9)}' | bedtools sort > KY962518.PRDM9.bed
@@ -862,17 +869,17 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_with
   'Position (bp)' \
   '' \
   45 \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/KY962518.PRDM9.w${window_size}.bed.pdf
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/KY962518.PRDM9.w${window_size}.png
 
 
 
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_BED.all_chromosomes.R \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.PRDM9.bed \
-  35 \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.PRDM9.pdf
+  <(cat /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/KY962518.PRDM9.bed | awk -v OFS='\t' '{print($1,$2,$3,$4,$6,$8)}' ) \
+  45 \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/KY962518.PRDM9.png
 ```
 
-```
+
 
 
 ### SST1
