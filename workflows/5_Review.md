@@ -671,7 +671,7 @@ Counts the number of hits in windows:
 #TODO IF NEEDED: separate in Human1 hits, Human2 hits, ...
 
 max_qvalue=1
-window_size=20000
+window_size=10000
 
 rm chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed
 (seq 13 15; seq 21 22) | while read i; do
@@ -770,7 +770,7 @@ done
 #ALTERNATIVE
 #bedtools intersect \
 #  -a <(grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.bed | bedtools sort) \
-#  -b <(bedtools sort -i /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v1.1.rdna_units.unique.bed | sed 's/chr/chm13#chr/g') -f 1.0 | wc -l\
+#  -b <(bedtools sort -i /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v1.1.rdna_units.unique.bed | sed 's/chr/chm13#chr/g') -f 1.0 | \
 #  > chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.bed
 ```
 
@@ -779,9 +779,9 @@ ALTERNATIVE APPROACH: it gives much more results, I think because of the p-value
 Having less pvalues (hits) to correct, more values get a p-value adjuster lower than the threshold (1.0E-4).
 
 ```shell
-# Search the PRDM9 motifs
+# Search the PRDM9 motifs (stronger adjusted p-value threshold because, as we are not looking at motifs genome-wide, we are going to correct less p-values)
 RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
-$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v1.1.rdna_units.unique.fa
+$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/ --verbosity 1 --thresh 1.0E-9 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v1.1.rdna_units.unique.fa
 
 # Convert the output in BED format
 grep '^#' fimo.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$6,$5,$7,$8,$9)}' | bedtools sort > chm13v1.1.rdna_units.unique.PRDM9.bed
@@ -798,7 +798,7 @@ samtools faidx chm13v1.1.rdna_units.unique.fa
 max_qvalue=1
 window_size=1
 
-rm chm13v1.1.rdna_units.unique.PRDM9.w${window_size}.bed
+rm chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.w${window_size}.bed
 bedtools sort -i /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v1.1.rdna_units.unique.bed | sed 's/chr/chm13#chr/g' | while read f; do
   chr=$(echo $f | cut -f 1 -d ' ')
   start=$(echo $f | cut -f 2 -d ' ')
@@ -807,23 +807,72 @@ bedtools sort -i /lizardfs/guarracino/chromosome_communities/recombination_hotsp
 
   bedtools intersect \
     -a <(bedtools makewindows -g <(cat chm13v1.1.rdna_units.unique.fa.fai | grep "$chr:$start-$end" | cut -f 1,2) -w $window_size) \
-    -b <(grep chm13#chr$i chm13v1.1.rdna_units.unique.PRDM9.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
-    >> chm13v1.1.rdna_units.unique.PRDM9.w${window_size}.bed
+    -b <(grep chm13#chr$i chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+    >> chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.w${window_size}.bed
 done
 ```
 
 Plot the number of hits in each window across on the units:
 
 ```shell
+window_size=1
+
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v1.1.rdna_units.unique.PRDM9.w${window_size}.bed \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.w${window_size}.bed\
   1 \
   'Position (bp)' \
   '' \
-  35 \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/PRDM9motifhits.SST1.TideHunter.w${window_size}.pdf
+  45 \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.w${window_size}.pdf
 ```
 
+## Adam Phillippy's sequence
+
+```shell
+# Download https://www.ncbi.nlm.nih.gov/nuccore/KY962518
+# scp /home/guarracino/Downloads/KY962518.fasta guarracino@octopus02:/lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518
+
+# Search the PRDM9 motifs (stronger adjusted p-value threshold because, as we are not looking at motifs genome-wide, we are going to correct less p-values)
+RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
+$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/ --verbosity 1 --thresh 1.0E-9 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/KY962518.fasta
+
+# Convert the output in BED format
+grep '^#' fimo.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$6,$5,$7,$8,$9)}' | bedtools sort > KY962518.PRDM9.bed
+
+
+
+samtools faidx KY962518.fasta
+max_qvalue=1
+window_size=1
+
+rm chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed
+(seq 13 15; seq 21 22) | while read i; do
+  echo $i
+
+  bedtools intersect \
+    -a <(bedtools makewindows -g <(cat KY962518.fasta.fai | cut -f 1,2) -w $window_size) \
+    -b <(grep -P 'Human[1-7]*[0-9]\t' KY962518.PRDM9.bed | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+    >> KY962518.PRDM9.w${window_size}.bed
+done
+
+window_size=1
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/KY962518.PRDM9.w${window_size}.bed \
+  1 \
+  'Position (bp)' \
+  '' \
+  45 \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/KY962518.PRDM9.w${window_size}.bed.pdf
+
+
+
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_BED.all_chromosomes.R \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.PRDM9.bed \
+  35 \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.PRDM9.pdf
+```
+
+```
 
 
 ### SST1
