@@ -647,22 +647,125 @@ pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigureX.PRDM9motifhits.chrAC
 rm output.pdf
 ```
 
-## SST1 array repetitive unit
+## rDNA/SST1 array repetitive unit
 
-Obtain the repetitive unit of the SST1 arrays:
+### rDNA
+
+Obtain the repetitive unit of the array:
 
 ```shell
-RUN_TIDEHUNTER=/home/guarracino/tools/TideHunter-v1.5.4/bin/TideHunter
+mkdir -p /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA
+cd /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA
 
-mkdir -p /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit
-cd /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit
+wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/CHM13/assemblies/annotation/chm13v1.1.rdna_units.bed
 
-# SST1 arrays
+# Get all possible rDNA repetitie units with different lengths (> 40kbps)
+
+cat chm13v1.1.rdna_units.bed | awk -v OFS='\t' '{print($0,($3-$2)/1000)}' | awk '!a[$5]++' | grep \
+  -f <(cat chm13v1.1.rdna_units.bed | awk -v OFS='\t' '{print($0,($3-$2)/1000)}' | cut -f 5 | awk '$1 > 40' | sort | uniq) \
+  > chm13v1.1.rdna_units.unique.bed
+
+bedtools getfasta -fi /lizardfs/guarracino/chromosome_communities/assemblies/chm13.fa -bed <(cat chm13v1.1.rdna_units.unique.bed | cut -f 1,2,3 | sed 's/chr/chm13#chr/g') > chm13v1.1.rdna_units.unique.fa
+
+
+# IT DOES NOT WORK
+#samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr13:5770549-9348041 chm13#chr14:2099538-2817811 chm13#chr15:2506443-4707485 chm13#chr21:3108299-5612715 chm13#chr22:4793795-5720650 > chm13.rDNA.fa
+#
+# https://github.com/yangao07/TideHunter#tabular-format
+#$RUN_TIDEHUNTER -f 2 chm13.rDNA.fa -t 48 -k 13 > chm13.rDNA.TideHunter.tsv
+#awk '{print(">"$1"_"$7"\n"$11)}' < chm13.rDNA.TideHunter.tsv > chm13.rDNA.TideHunter.fa
+```
+
+From the PRDM9 motifs found in the whole chromosomes, take those fully covering the repetitive unit:
+
+ ```shell
+rm chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.bed
+bedtools sort -i /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v1.1.rdna_units.unique.bed | sed 's/chr/chm13#chr/g' | while read f; do
+  chr=$(echo $f | cut -f 1 -d ' ')
+  start=$(echo $f | cut -f 2 -d ' ')
+  end=$(echo $f | cut -f 3 -d ' ')
+  echo "$chr:$start-$end"
+
+  bedtools intersect \
+    -a <(grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.bed | bedtools sort) \
+    -b <(echo $f | tr ' ' '\t') -f 1.0 | \
+    awk -v chr=$chr -v start=$start -v end=$end -v OFS='\t' '{print(chr":"start"-"end,$2-start,$3-start,$4,$5,$6,$7,$8,$9)}' >> chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.bed
+done
+
+#ALTERNATIVE
+#bedtools intersect \
+#  -a <(grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.bed | bedtools sort) \
+#  -b <(bedtools sort -i /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v1.1.rdna_units.unique.bed | sed 's/chr/chm13#chr/g') -f 1.0 | wc -l\
+#  > chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.bed
+```
+
+-----------------------------------------------------------------------------------------------------------
+ALTERNATIVE APPROACH: it gives much more results, I think because of the p-value correction.
+Having less pvalues (hits) to correct, more values get a p-value adjuster lower than the threshold (1.0E-4).
+
+```shell
+# Search the PRDM9 motifs
+RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
+$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v1.1.rdna_units.unique.fa
+
+# Convert the output in BED format
+grep '^#' fimo.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$6,$5,$7,$8,$9)}' | bedtools sort > chm13v1.1.rdna_units.unique.PRDM9.bed
+```
+-----------------------------------------------------------------------------------------------------------
+
+
+Counts the number of hits in windows:
+
+```shell
+#TODO IF NEEDED: separate in Human1 hits, Human2 hits, ...
+samtools faidx chm13v1.1.rdna_units.unique.fa
+
+max_qvalue=1
+window_size=1
+
+rm chm13v1.1.rdna_units.unique.PRDM9.w${window_size}.bed
+bedtools sort -i /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v1.1.rdna_units.unique.bed | sed 's/chr/chm13#chr/g' | while read f; do
+  chr=$(echo $f | cut -f 1 -d ' ')
+  start=$(echo $f | cut -f 2 -d ' ')
+  end=$(echo $f | cut -f 3 -d ' ')
+  echo "$chr:$start-$end"
+
+  bedtools intersect \
+    -a <(bedtools makewindows -g <(cat chm13v1.1.rdna_units.unique.fa.fai | grep "$chr:$start-$end" | cut -f 1,2) -w $window_size) \
+    -b <(grep chm13#chr$i chm13v1.1.rdna_units.unique.PRDM9.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+    >> chm13v1.1.rdna_units.unique.PRDM9.w${window_size}.bed
+done
+```
+
+Plot the number of hits in each window across on the units:
+
+```shell
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v1.1.rdna_units.unique.PRDM9.w${window_size}.bed \
+  1 \
+  'Position (bp)' \
+  '' \
+  35 \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/PRDM9motifhits.SST1.TideHunter.w${window_size}.pdf
+```
+
+
+
+### SST1
+
+Obtain the repetitive unit of the array:
+
+```shell
+mkdir -p /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1
+cd /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1
+
 samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr13:12301367-12440010 > chm13.SST1.fa
 # Put the SST1 region of chr14 in reverse complement.
 # This help in getting with TideHunter all the repeat unit starting from the same point
 samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr14:6960008-6988409 -i >> chm13.SST1.fa
 samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr21:9375567-9453313 >> chm13.SST1.fa
+
+RUN_TIDEHUNTER=/home/guarracino/tools/TideHunter-v1.5.4/bin/TideHunter
 
 # https://github.com/yangao07/TideHunter#tabular-format
 $RUN_TIDEHUNTER -f 2 chm13.SST1.fa -t 48 -k 13 > chm13.SST1.TideHunter.tsv
@@ -672,21 +775,13 @@ awk '{print(">"$1"_"$7"\n"$11)}' < chm13.SST1.TideHunter.tsv > chm13.SST1.TideHu
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr13:12301367-12440010_1409 > SST1.chr13.fa
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr14:6960008-6988409/rc_1407 > SST1.chr14rc.fa
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr21:9375567-9453313_1406 > SST1.chr21.fa
-
-
-## rDNA arrays
-#samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr13:5770549-9348041 chm13#chr14:2099538-2817811 chm13#chr15:2506443-4707485 chm13#chr21:3108299-5612715 chm13#chr22:4793795-5720650 > chm13.rDNA.fa
-#
-# https://github.com/yangao07/TideHunter#tabular-format
-#$RUN_TIDEHUNTER -f 2 chm13.rDNA.fa -t 48 -k 13 > chm13.rDNA.TideHunter.tsv
-#awk '{print(">"$1"_"$7"\n"$11)}' < chm13.rDNA.TideHunter.tsv > chm13.rDNA.TideHunter.fa
 ```
 
 Search the PRDM9 motifs:
 
 ```shell
 RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
-$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/chm13.SST1.TideHunter.fa
+$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.fa
 ```
 
 Convert the output in BED format:
@@ -694,7 +789,7 @@ Convert the output in BED format:
 ```shell
 samtools faidx chm13.SST1.TideHunter.fa
 cat chm13.SST1.TideHunter.fa.fai | awk -v OFS='\t' '{print($1,"0",$2,"SST1","+","0")}' > chm13.SST1.TideHunter.PRDM9.bed
-grep '^Human' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/fimo.tsv | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$5,$8)}' >> chm13.SST1.TideHunter.PRDM9.bed
+grep '^Human' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/fimo.tsv | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$5,$8)}' >> chm13.SST1.TideHunter.PRDM9.bed
 ```
 
 Counts the number of hits in each base pair:
@@ -714,25 +809,25 @@ rm chm13.SST1.TideHunter.PRDM9.w${window_size}.bed
 done
 ```
 
-Plot the number of hits in each window across on the SST1 units:
+Plot the number of hits in each window across on the units:
 
 ```shell
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/chm13.SST1.TideHunter.PRDM9.w${window_size}.bed \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.PRDM9.w${window_size}.bed \
   1 \
   'Position (bp)' \
   '' \
   35 \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/PRDM9motifhits.SST1.TideHunter.w${window_size}.pdf
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/PRDM9motifhits.SST1.TideHunter.w${window_size}.pdf
 ```
 
 Show where the PRDM9 hits are on the SST1 units:
 
 ```shell
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_BED.all_chromosomes.R \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/chm13.SST1.TideHunter.PRDM9.bed \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.PRDM9.bed \
   35 \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/chm13.SST1.TideHunter.PRDM9.pdf
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.PRDM9.pdf
 ```
 
 

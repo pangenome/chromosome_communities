@@ -1,11 +1,3 @@
-require(ggplot2)
-require(gggenes)
-x <- read.delim('~/SST1_region.gggenes.tsv')
-x <- x[x$molecule %in% c('chm13#chr13:11501367-13240010', 'chm13#chr14:6160008-7788409', 'chm13#chr21:8575567-10253313'),]
-p <- ggplot(x, aes(xmin=start, xmax=end, y=molecule, fill=gene, forward=strand)) + geom_gene_arrow()
-ggsave(plot=p, '~/SST1_region.gggenes.subset.png', height=1.5, width=15)
-
-
 library(ggplot2)
 library(ggforce)
 library(tidyverse)

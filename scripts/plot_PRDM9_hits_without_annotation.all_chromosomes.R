@@ -17,7 +17,7 @@ options(scipen = 9)
 x <- read.delim(path_fimo_window_bed, header = F)
 colnames(x) <- c('chrom', 'ref.begin', 'ref.end', 'hits')
 
-x$chrom <- gsub('[:].*$', chrom_suffix, x$chrom)
+#x$chrom <- gsub('[:].*$', chrom_suffix, x$chrom)
 xx <- x
 
 if(length(unique(xx$chrom)) == 5) {
