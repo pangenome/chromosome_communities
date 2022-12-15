@@ -550,13 +550,50 @@ if [[ $(wc -l clones.unaligned.txt | cut -f 1 -d ' ' ) != 0 ]];
   # NOTHING MAPPED!
 fi
 
+# How much PHRs do the mappings cover?
+
+min_id=99 #90 (all) and 99
+
+A_and_B=$(bedtools intersect \
+  -a <(cut -f 1,2,3 /lizardfs/guarracino/chromosome_communities/PHRs/chrACRO_7-Dec-22_PHRs.bed | grep '^chr13\|^chr14\|^chr15\|^chr21\|^chr22' | awk -v OFS='\t' '{print("chm13#"$0,"100.0","PHRs")}' | awk -v min_id=$min_id '$4 >= min_id' | bedtools sort -i -) \
+  -b <(sed 's/id:f://' PMC4257996.clones.vs.CHM13.p90.s1k.n10.N.paf | awk -v OFS='\t' '{print($6,$8,$9,$13,$1)}' | grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' | awk -v min_id=$min_id '$4 >= min_id' | bedtools sort -i -)  | awk '{sum+=$3-$2}END{print(sum)}')
+
+A=$(cut -f 1,2,3 /lizardfs/guarracino/chromosome_communities/PHRs/chrACRO_7-Dec-22_PHRs.bed | grep '^chr13\|^chr14\|^chr15\|^chr21\|^chr22' | awk -v OFS='\t' '{print("chm13#"$0,"100.0","PHRs")}' | awk -v min_id=$min_id '$4 >= min_id' | awk '{sum+=$3-$2}END{print(sum)}')
+B=$(sed 's/id:f://' PMC4257996.clones.vs.CHM13.p90.s1k.n10.N.paf | awk -v OFS='\t' '{print($6,$8,$9,$13,$1)}' | grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' | awk -v min_id=$min_id '$4 >= min_id' | awk '{sum+=$3-$2}END{print(sum)}')
+
+perc_PHRs_covered=$(echo "$A_and_B / $A" | bc -l)
+perc_MAPs_covered=$(echo "$A_and_B / $B" | bc -l)
+echo "A = $A"
+echo "B = $B"
+echo "A and B = $A_and_B"
+echo "%PHRs covered = $perc_PHRs_covered"
+echo "%MAPPING covered$ = $perc_MAPs_covered"
+
+# min_id 90
+A = 18329090
+B = 5673439
+A and B = 4510759
+%PHRs covered = .24609836058418612162
+%MAPPING covered$ = .79506609659502816545
+
+# min_id 99
+A = 18329090
+B = 2285988
+A and B = 1760814
+%PHRs covered = .09606663505935100978
+%MAPPING covered$ = .77026388589966351529
+```
+
+Plots:
+
+```shell
+# Prepare the BED with PHRs, mappings and annotations on the SST1\rDNA
 cat \
   <(cut -f 1,2,3 /lizardfs/guarracino/chromosome_communities/PHRs/chrACRO_7-Dec-22_PHRs.bed | awk -v OFS='\t' '{print("chm13#"$0,"100.0","PHRs")}') \
   <(sed 's/id:f://' PMC4257996.clones.vs.CHM13.p90.s1k.n10.N.paf | awk -v OFS='\t' '{print($6,$8,$9,$13,$1)}') \
-  <(grep SST /lizardfs/guarracino/chromosome_communities/data/annotation/chm13.rDNA.acros.SST1.200kbps.approximate.white_grch38_Ns.bed | grep 2222| cut -f 1,2 -d '#' | cut -f 1,2,3 | awk -v OFS='\t' '{print($0,"100.0","SST1")}') \
-  > chrACRO_7-Dec-22_PHRs+PMC4257996+SST1.bed
-
-
+  <(grep SST /lizardfs/guarracino/chromosome_communities/data/annotation/chm13.rDNA.acros.SST1.200kbps.approximate.white_grch38_Ns.bed | grep 2222 | cut -f 1,2 -d '#' | cut -f 1,2,3 | awk -v OFS='\t' '{print($0,"100.0","SST1")}') \
+  <(grep rDNA /lizardfs/guarracino/chromosome_communities/data/annotation/chm13.rDNA.acros.SST1.200kbps.approximate.white_grch38_Ns.bed | cut -f 1,2 -d '#' | cut -f 1,2,3 | awk -v OFS='\t' '{print($0,"100.0","rDNA")}') \
+  > chrACRO_7-Dec-22_PHRs+PMC4257996+SST1+rDNA.bed
 
 # Use the plot_PHRs_and_clone_CR382332_mappings.R script
 ```
