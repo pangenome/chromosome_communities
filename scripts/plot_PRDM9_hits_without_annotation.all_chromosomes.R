@@ -47,7 +47,7 @@ p <- ggplot(xx, aes(
     legend.position = "right",
     
     #strip.text.x = element_blank(),
-    strip.text.y = element_blank(),
+    #strip.text.y = element_blank(),
     plot.margin = unit(c(0.1,0.1,0.1,0.1), "cm")
   ) + scale_x_continuous(
     #limits = c(x_min, x_max),
