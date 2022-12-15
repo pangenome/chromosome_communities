@@ -64,5 +64,5 @@ p <- ggplot(xx, aes(
   scale_color_manual(values = colors) +
   guides(colour = guide_legend(override.aes = list(size=10)))
 #p
-height <- min(10, length(unique(x$chrom))*4.3)
+height <- min(15, length(unique(x$chrom))*4.3)
 ggsave(plot = p, path_output, width = width, height = height, units = "cm", dpi = 300, bg = "transparent", limitsize = FALSE)
