@@ -505,20 +505,58 @@ cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
 # Robertsonian translocation breakpoints
 
 ```shell
-RUN_WFMASH=/home/guarracino/tools/wfmash/build/bin/wfmash-ad8aebae1be96847839778af534866bc9545adb9
-
 mkdir -p /lizardfs/guarracino/chromosome_communities/robertsonian_translocation
 cd /lizardfs/guarracino/chromosome_communities/robertsonian_translocation
 
-# Download the sequence from https://www.ncbi.nlm.nih.gov/nuccore/CR382332
+# BAC clones from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4257996/
+# Our results from PCR and FISH analysis showed that only the clones CR382285, CR382287,
+# and a small fragment of CR382332 are retained in the examined ROBs. [...].
+# Given our results, we propose localization of the breakpoints in or nearby to clone CR382332. 
+# https://www.ncbi.nlm.nih.gov/nuccore/CR382285
+# https://www.ncbi.nlm.nih.gov/nuccore/CR382287
+# https://www.ncbi.nlm.nih.gov/nuccore/CR381572
+# https://www.ncbi.nlm.nih.gov/nuccore/CR381535
+# https://www.ncbi.nlm.nih.gov/nuccore/CR381653
+# https://www.ncbi.nlm.nih.gov/nuccore/CR382332
+# https://www.ncbi.nlm.nih.gov/nuccore/CR381570
+# https://www.ncbi.nlm.nih.gov/nuccore/CR392039
+# Download the BAC clones:
+# - Put all IDs in a text file, one per line
+# - Go to https://www.ncbi.nlm.nih.gov/sites/batchentrez
+# - Upload the IDs list
+# - Select all files
+# - Download in FASTA format
+# - Rename the file: mv sequence.fasta PMC4257996.clones.fasta
+# - bgzip PMC4257996.clones.fasta
+# - Upload: scp PMC4257996.clones.fasta.gz guarracino@octopus02:/lizardfs/guarracino/chromosome_communities/robertsonian_translocation
 
-$RUN_WFMASH /lizardfs/guarracino/chromosome_communities/assemblies/chm13.fa.gz CR382332.fasta.gz -t 48 \
-  -p 90 -s 1k -n 10 -N -m > CR382332.vs.CHM13.p90.s1k.n10.N.paf
+samtools faidx PMC4257996.clones.fasta.gz
+
+RUN_WFMASH=/home/guarracino/tools/wfmash/build/bin/wfmash-ad8aebae1be96847839778af534866bc9545adb9
+$RUN_WFMASH /lizardfs/guarracino/chromosome_communities/assemblies/chm13.fa.gz PMC4257996.clones.fasta.gz -t 48 \
+  -p 90 -s 1k -n 10 -N -m > PMC4257996.clones.vs.CHM13.p90.s1k.n10.N.paf
+
+# Check which clone(s) are not mapped
+comm -23 \
+  <(cut -f 1 PMC4257996.clones.fasta.gz.fai | sort) \
+  <(cut -f 1 PMC4257996.clones.vs.CHM13.p90.s1k.n10.N.paf | sort | uniq) > clones.unaligned.txt
+if [[ $(wc -l clones.unaligned.txt | cut -f 1 -d ' ' ) != 0 ]];
+    samtools faidx PMC4257996.clones.fasta.gz $(tr '\n' ' ' < clones.unaligned.txt) > clones.unaligned.fa
+    samtools faidx clones.unaligned.fa
+
+    # Allow query split
+    $RUN_WFMASH /lizardfs/guarracino/chromosome_communities/assemblies/chm13.fa.gz clones.unaligned.fa -t 48 \
+  -p 90 -s 1k -n 10 -m > clones.unaligned.vs.CHM13.p90.s1k.n10.N.paf
+  # NOTHING MAPPED!
+fi
 
 cat \
   <(cut -f 1,2,3 /lizardfs/guarracino/chromosome_communities/PHRs/chrACRO_7-Dec-22_PHRs.bed | awk -v OFS='\t' '{print("chm13#"$0,"100.0","PHRs")}') \
-  <(cut -f 6,8,9,13 CR382332.vs.CHM13.p90.s1k.n10.N.paf | sed 's/id:f://' | awk -v OFS='\t' '{print($0,"CR382332")}') \
-  > chrACRO_7-Dec-22_PHRs+CR382332.bed
+  <(sed 's/id:f://' PMC4257996.clones.vs.CHM13.p90.s1k.n10.N.paf | awk -v OFS='\t' '{print($6,$8,$9,$13,$1)}') \
+  <(grep SST /lizardfs/guarracino/chromosome_communities/data/annotation/chm13.rDNA.acros.SST1.200kbps.approximate.white_grch38_Ns.bed | grep 2222| cut -f 1,2 -d '#' | cut -f 1,2,3 | awk -v OFS='\t' '{print($0,"100.0","SST1")}') \
+  > chrACRO_7-Dec-22_PHRs+PMC4257996+SST1.bed
+
+
 
 # Use the plot_PHRs_and_clone_CR382332_mappings.R script
 ```
@@ -771,26 +809,63 @@ RUN_TIDEHUNTER=/home/guarracino/tools/TideHunter-v1.5.4/bin/TideHunter
 $RUN_TIDEHUNTER -f 2 chm13.SST1.fa -t 48 -k 13 > chm13.SST1.TideHunter.tsv
 awk '{print(">"$1"_"$7"\n"$11)}' < chm13.SST1.TideHunter.tsv > chm13.SST1.TideHunter.fa
 
+
 # For making dotplots with Gepard (to check that all the repeat units have the same start/end)
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr13:12301367-12440010_1409 > SST1.chr13.fa
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr14:6960008-6988409/rc_1407 > SST1.chr14rc.fa
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr21:9375567-9453313_1406 > SST1.chr21.fa
 ```
 
-Search the PRDM9 motifs:
 
-```shell
-RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
-$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.fa
+From the PRDM9 motifs found in the whole chromosomes, take those fully covering the repetitive unit:
+
+ ```shell
+# Made manually from cut -f 1,10 chm13.SST1.TideHunter.tsv
+chm13#chr13:12301367-12440010   967,2371
+chm13#chr14:6960008-6988409/rc  758,2163
+chm13#chr21:9375567-9453313     770,2174
+
+
+
+chm13#chr13 12301367+967-1  12440010+2370-1
+chm13#chr14???
+chm13#chr21 9375567+770-1   9453313+2174-1
+
+# To check that the outputs are identical
+samtools faidx chm13.SST1.fa chm13#chr13:12301367-12440010:967-2370
+samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr13:12302334-12303737
+ 
+rm chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.SST1.TideHunter.bed
+cut -f 1 chm13.SST1.TideHunter.tsv | head -n 1 | while read f; do
+  chr=$(echo $f | cut -f 1 -d ':')
+  start=$(echo $f | cut -f 2 -d ':' | cut -f 1 -d '-')
+  end=$(echo $f | cut -f 3 -d ' '| cut -f 2 -d '-')
+  f=$(echo -e "$chr\t$start\t$end")
+  echo "$chr:$start-$end"
+  echo $f
+
+  bedtools intersect \
+    -a <(grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.bed | bedtools sort) \
+    -b <(echo $f | tr ' ' '\t') -f 1.0 | \
+    awk -v chr=$chr -v start=$start -v end=$end -v OFS='\t' '{print(chr":"start"-"end,$2-start,$3-start,$4,$5,$6,$7,$8,$9)}' >> chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.SST1.TideHunter.bed
+done
 ```
 
-Convert the output in BED format:
+-----------------------------------------------------------------------------------------------------------
+ALTERNATIVE APPROACH: it gives much more results, I think because of the p-value correction.
+Having less pvalues (hits) to correct, more values get a p-value adjuster lower than the threshold (1.0E-4).
 
 ```shell
+#Search the PRDM9 motifs
+RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
+$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.fa
+
+#Convert the output in BED format
 samtools faidx chm13.SST1.TideHunter.fa
 cat chm13.SST1.TideHunter.fa.fai | awk -v OFS='\t' '{print($1,"0",$2,"SST1","+","0")}' > chm13.SST1.TideHunter.PRDM9.bed
 grep '^Human' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/fimo.tsv | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$5,$8)}' >> chm13.SST1.TideHunter.PRDM9.bed
 ```
+-----------------------------------------------------------------------------------------------------------
 
 Counts the number of hits in each base pair:
 

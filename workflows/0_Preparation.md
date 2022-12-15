@@ -226,7 +226,7 @@ Collect unmapped contigs and remap them in split mode:
   
   PAF=/lizardfs/guarracino/chromosome_communities/assemblies/partitioning/$HAPLOTYPE.vs.ref.paf
   comm -23 <(cut -f 1 $FASTA.fai | sort) <(cut -f 1 $PAF | sort) > $UNALIGNED.txt
-  if [[ $(wc -l $UNALIGNED.txt | cut -f 1 -d\ ) != 0 ]];
+  if [[ $(wc -l $UNALIGNED.txt | cut -f 1 -d ' ' ) != 0 ]];
   then 
     samtools faidx $FASTA $(tr '\n' ' ' < $UNALIGNED.txt) > $UNALIGNED.fa
     samtools faidx $UNALIGNED.fa

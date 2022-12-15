@@ -17,10 +17,10 @@ options(scipen = 9)
 x <- read.delim(path_fimo_window_bed, header = F)
 colnames(x) <- c('chrom', 'ref.begin', 'ref.end', 'hits')
 
-#x$chrom <- gsub('[:].*$', chrom_suffix, x$chrom)
+x$group <- gsub('[:].*$', chrom_suffix, x$chrom)
 xx <- x
 
-if(length(unique(xx$chrom)) == 5) {
+if(length(unique(xx$chrom)) > 3) {
   colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
 } else {
   # Assume 3 (chr13/chr14/chr21)
@@ -30,10 +30,10 @@ if(length(unique(xx$chrom)) == 5) {
 p <- ggplot(xx, aes(
   x = (ref.begin + (ref.end - ref.begin) / 2) / scale, width = ref.end - ref.begin,
   y=hits,
-  color=chrom)
+  color=group)
 ) +
   geom_step() +
-  facet_wrap(~chrom, scales = "free_y", ncol=1, labeller = labeller(variable = labels)) +
+  facet_wrap(~chrom, scales = "free_y", ncol=1)+#, labeller = labeller(variable = labels)) +
   theme_bw() +
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -46,7 +46,7 @@ p <- ggplot(xx, aes(
     legend.text = element_text(size = 18),
     legend.position = "right",
     
-    strip.text.x = element_blank(),
+    #strip.text.x = element_blank(),
     strip.text.y = element_blank(),
     plot.margin = unit(c(0.1,0.1,0.1,0.1), "cm")
   ) + scale_x_continuous(
@@ -64,4 +64,4 @@ p <- ggplot(xx, aes(
   scale_color_manual(values = colors) +
   guides(colour = guide_legend(override.aes = list(size=10)))
 #p
-ggsave(plot = p, path_output, width = width, height = length(unique(x$chrom))*4, units = "cm", dpi = 300, bg = "transparent", limitsize = FALSE)
+ggsave(plot = p, path_output, width = width, height = length(unique(x$chrom))*4.4, units = "cm", dpi = 300, bg = "transparent", limitsize = FALSE)
