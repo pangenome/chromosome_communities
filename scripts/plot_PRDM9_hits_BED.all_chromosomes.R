@@ -17,8 +17,9 @@ colnames(x) <- c('ref', 'ref.begin', 'ref.end', 'label', 'strand', 'qvalue')
 x$ref <- gsub('[:].*$', '', x$ref)
 
 x$loq10qvalue <- -log10(x$qvalue)
-x[!is.finite(x$loq10qvalue),]$loq10qvalue <- max(x[is.finite(x$loq10qvalue),]$loq10qvalue)
-
+if (sum(!is.finite(x$loq10qvalue)) > 0) {
+  x[!is.finite(x$loq10qvalue),]$loq10qvalue <- max(x[is.finite(x$loq10qvalue),]$loq10qvalue)
+}
 
 colors <- c("#F8766D", "#A3A500", "#00B0F6")
 
