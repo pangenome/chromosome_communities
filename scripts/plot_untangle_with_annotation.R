@@ -68,8 +68,6 @@ if (sum(xx$jaccard > 1) > 0) {
   xx[xx$jaccard > 1,]$jaccard <- 1
 }
 
-x_min <- 12000000
-x_max <- 14000000
 p <- ggplot(
   xx,
   aes(
