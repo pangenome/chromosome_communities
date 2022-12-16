@@ -748,8 +748,8 @@ wget -c https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/CHM13/assemblie
 
 # Get all possible rDNA repetitie units with different lengths (> 40kbps)
 
-cat chm13v1.1.rdna_units.bed | awk -v OFS='\t' '{print($0,($3-$2)/1000)}' | awk '!a[$5]++' | grep \
-  -f <(cat chm13v1.1.rdna_units.bed | awk -v OFS='\t' '{print($0,($3-$2)/1000)}' | cut -f 5 | awk '$1 > 0' | sort | uniq) \
+cat chm13v1.1.rdna_units.bed | awk -v OFS='\t' '{print($0,($3-$2)/1000)}' | awk '!a[$1"-"$5]++' | grep \
+  -f <(cat chm13v1.1.rdna_units.bed | awk -v OFS='\t' '{print($0,($3-$2)/1000))}' | cut -f 5 | awk '$1 > 0' | sort | uniq) \
   > chm13v1.1.rdna_units.unique.bed
 
 bedtools getfasta -fi /lizardfs/guarracino/chromosome_communities/assemblies/chm13.fa -bed <(cat chm13v1.1.rdna_units.unique.bed | cut -f 1,2,3 | sed 's/chr/chm13#chr/g') > chm13v1.1.rdna_units.unique.fa
