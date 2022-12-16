@@ -57,7 +57,7 @@ p <- ggplot(
     #axis.title.x = element_blank(),
     plot.margin = unit(c(0.1,0.1,0.1,0.1), "cm")
   ) +
-  ggtitle('PRDM9 motif hits in the SST1 repeat unit') +
+  #ggtitle('PRDM9 motif hits') +
   scale_x_continuous(
     #limits = c(x_min, x_max),
     breaks = pretty_breaks(n=12),
