@@ -68,10 +68,12 @@ if (sum(xx$jaccard > 1) > 0) {
   xx[xx$jaccard > 1,]$jaccard <- 1
 }
 
+x_min <- 12000000
+x_max <- 14000000
 p <- ggplot(
   xx,
   aes(
-    x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin ,
+    x = ref.begin + (ref.end - ref.begin) / 2, width = ref.end - ref.begin,
     y = ordered(query.hacked, levels = rev(unique(query.hacked))),
     fill = target,
     alpha = estimated_identity

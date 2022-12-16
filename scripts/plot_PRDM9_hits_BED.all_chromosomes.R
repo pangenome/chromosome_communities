@@ -1,7 +1,8 @@
 args <- commandArgs()
 path_fimo_bed <- args[6]
 width <- as.numeric(args[7])
-path_output <- args[8]
+label_color <- args[8]
+path_output <- args[9]
 
 library(ggridges)
 library(ggplot2)
@@ -62,7 +63,7 @@ p <- ggplot(
     breaks = pretty_breaks(n=12),
     expand = c(0.01, 0.01)) +
   scale_fill_manual(values=colors) +
-  labs(x = "Position (bp)", y = '', fill = "Chromosome", alpha = expression("-log"[10]("qvalue")))
+  labs(x = "Position (bp)", y = '', fill = label_color, alpha = expression("-log"[10]("qvalue")))
 #+ scale_alpha_continuous(limits = c(min(1 - x$qvalue), 1))
 #p
 

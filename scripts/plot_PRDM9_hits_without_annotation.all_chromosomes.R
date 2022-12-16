@@ -4,7 +4,8 @@ scale <- as.numeric(args[7])
 x_axis_label <- args[8]
 chrom_suffix <- args[9]
 width <- as.numeric(args[10])
-path_output <- args[11]
+label_color <- args[11]
+path_output <- args[12]
 
 library(ggridges)
 library(ggplot2)
@@ -55,7 +56,7 @@ p <- ggplot(xx, aes(
     expand = c(0.01, 0.01)) + labs(
       x = paste(x_axis_label),
       y = paste('PRDM9 motif hits'),
-      color = "Chromosome"
+      color = label_color
     ) + scale_y_continuous(
       #limits = c(0, max(10, max(xx$hits))),
       breaks=pretty_breaks(n=6)

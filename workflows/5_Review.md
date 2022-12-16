@@ -644,21 +644,23 @@ n=$((n-2))
 head -n $n elife-28383-fig1-data2.txt > PRDM9_motifs.human.txt
 ```
 
-Search the PRDM9 motifs in all acrocentric chromosomes:
+Search the PRDM9 motifs in the whole CHM13 v2.0:
 
 ```shell
-rm /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13.chrACRO.fa
-(seq 13 15; seq 21 22) | while read i; do
-  echo chr$i
+samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz $(grep chm /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz.fai | cut -f 1) > chm13v2.fa
 
-  zcat /lizardfs/guarracino/chromosome_communities/assemblies/chm13.chr$i.fa.gz >> /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13.chrACRO.fa
-done
+#rm /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13.chrACRO.fa
+#(seq 13 15; seq 21 22) | while read i; do
+#  echo chr$i
+#
+#  zcat /lizardfs/guarracino/chromosome_communities/assemblies/chm13.chr$i.fa.gz >> /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13.chrACRO.fa
+#done
 
 #zcat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz \
 #  > /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa
 
 RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
-sbatch -p workers -c 48 --job-name meme-PRDM9 --wrap "hostname; cd /scratch && $RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13.chrACRO.fa"
+sbatch -p workers -c 48 --job-name meme-PRDM9 --wrap "hostname; cd /scratch && $RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.fa"
 ```
 
 Convert the output in BED format:
@@ -669,7 +671,7 @@ Convert the output in BED format:
 #	The end position of the motif occurrence; 1-based sequence coordinates.
 
 # Remove the last lines, remove the header line, remove the last empty line, prepare the columns, and sort the BED file
-grep '^#' fimo.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$6,$5,$7,$8,$9)}' | bedtools sort > chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.bed
+grep '^#' fimo.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$6,$5,$7,$8,$9)}' | bedtools sort > chm13v2.PRDM9.bed
 ```
 
 Counts the number of hits in windows:
@@ -677,17 +679,19 @@ Counts the number of hits in windows:
 ```shell
 #TODO IF NEEDED: separate in Human1 hits, Human2 hits, ...
 
-max_qvalue=1
-window_size=10000
+samtools faidx /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.fa
 
-rm chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed
+max_qvalue=1
+window_size=20000
+
+rm cchm13v2.PRDM9.w${window_size}.bed
 (seq 13 15; seq 21 22) | while read i; do
   echo $i
 
   bedtools intersect \
-    -a <(bedtools makewindows -g <(cat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.fai | grep "chm13#chr$i" | cut -f 1,2) -w $window_size) \
-    -b <(grep chm13#chr$i chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
-    >> chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed
+    -a <(bedtools makewindows -g <(cat /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.fa.fai | grep "chm13#chr$i" | cut -f 1,2) -w $window_size) \
+    -b <(grep chm13#chr$i chm13v2.PRDM9.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+    >> chm13v2.PRDM9.w${window_size}.bed
 done
 ```
 
@@ -695,12 +699,13 @@ Plot the number of hits in each window across the whole chromosomes:
 
 ```shell
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.w${window_size}.bed \
   1000000 \
   'Position (Mbp)' \
   '' \
   35 \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9motifhits.whole_chromosomes.w${window_size}.pdf
+  'Chromosome' \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.w${window_size}.pdf
 ```
 
 Plot the number of hits in each window across a chromosome region, with annotation on the top:
@@ -708,25 +713,25 @@ Plot the number of hits in each window across a chromosome region, with annotati
 ```shell
 (seq 13 15; seq 21 22) | while read i; do
   Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_with_annotation.R \
-    /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed \
+    /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.w${window_size}.bed \
     0 25000000 \
     $i \
     35 \
     /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-    /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9motifhits.chr$i.with_annotation.w${window_size}.pdf
+    /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.chr$i.PRDM9.w${window_size}.pdf
 done
 
 # --delta for white space between the pieces
 pdfjam --delta '0 7' --no-landscape --nup 1x5 \
-  PRDM9motifhits.chr13.with_annotation.w${window_size}.pdf \
-  PRDM9motifhits.chr14.with_annotation.w${window_size}.pdf \
-  PRDM9motifhits.chr15.with_annotation.w${window_size}.pdf \
-  PRDM9motifhits.chr21.with_annotation.w${window_size}.pdf \
-  PRDM9motifhits.chr22.with_annotation.w${window_size}.pdf \
+  chm13v2.chr13.PRDM9.w${window_size}.pdf \
+  chm13v2.chr14.PRDM9.w${window_size}.pdf \
+  chm13v2.chr15.PRDM9.w${window_size}.pdf \
+  chm13v2.chr21.PRDM9.w${window_size}.pdf \
+  chm13v2.chr22.PRDM9.w${window_size}.pdf \
   --outfile output.pdf
 
-pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigureX.PRDM9motifhits.chrACRO.with_annotation.w${window_size}.pdf
-rm output.pdf
+pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigureX.chm13v2.PRDM9.with_annotation.w${window_size}.pdf
+rm output.pdf chm13v2.chr1*.PRDM9.w${window_size}.pdf chm13v2.chr2*.PRDM9.w${window_size}.pdf
 ```
 
 ## rDNA/SST1 array repetitive unit
@@ -761,7 +766,7 @@ bedtools getfasta -fi /lizardfs/guarracino/chromosome_communities/assemblies/chm
 From the PRDM9 motifs found in the whole chromosomes, take those fully covering the repetitive unit:
 
  ```shell
-rm chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.bed
+rm chm13v2.PRDM9.rdna_units.bed
 bedtools sort -i /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v1.1.rdna_units.unique.bed | sed 's/chr/chm13#chr/g' | while read f; do
   chr=$(echo $f | cut -f 1 -d ' ')
   start=$(echo $f | cut -f 2 -d ' ')
@@ -769,16 +774,16 @@ bedtools sort -i /lizardfs/guarracino/chromosome_communities/recombination_hotsp
   echo "$chr:$start-$end"
 
   bedtools intersect \
-    -a <(grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.bed | bedtools sort) \
+    -a <(grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.bed | bedtools sort) \
     -b <(echo $f | tr ' ' '\t') -f 1.0 | \
-    awk -v chr=$chr -v start=$start -v end=$end -v OFS='\t' '{print(chr":"start"-"end,$2-start,$3-start,$4,$5,$6,$7,$8,$9)}' >> chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.bed
+    awk -v chr=$chr -v start=$start -v end=$end -v OFS='\t' '{print(chr":"start"-"end,$2-start,$3-start,$4,$5,$6,$7,$8,$9)}' >> chm13v2.PRDM9.rdna_units.bed
 done
 
 #ALTERNATIVE
 #bedtools intersect \
-#  -a <(grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.bed | bedtools sort) \
+#  -a <(grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.bed | bedtools sort) \
 #  -b <(bedtools sort -i /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v1.1.rdna_units.unique.bed | sed 's/chr/chm13#chr/g') -f 1.0 | \
-#  > chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.bed
+#  > chm13v2.PRDM9.rdna_units.bed
 ```
 
 -----------------------------------------------------------------------------------------------------------
@@ -805,7 +810,7 @@ samtools faidx chm13v1.1.rdna_units.unique.fa
 max_qvalue=1
 window_size=1
 
-rm chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.w${window_size}.bed
+rm chm13v2.PRDM9.rdna_units.w${window_size}.bed
 bedtools sort -i /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v1.1.rdna_units.unique.bed | sed 's/chr/chm13#chr/g' | while read f; do
   chr=$(echo $f | cut -f 1 -d ' ')
   start=$(echo $f | cut -f 2 -d ' ')
@@ -814,8 +819,8 @@ bedtools sort -i /lizardfs/guarracino/chromosome_communities/recombination_hotsp
 
   bedtools intersect \
     -a <(bedtools makewindows -g <(cat chm13v1.1.rdna_units.unique.fa.fai | grep "$chr:$start-$end" | cut -f 1,2) -w $window_size) \
-    -b <(grep chm13#chr$i chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
-    >> chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.w${window_size}.bed
+    -b <(grep chm13#chr$i /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v2.PRDM9.rdna_units.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+    >> chm13v2.PRDM9.rdna_units.w${window_size}.bed
 done
 ```
 
@@ -825,18 +830,23 @@ Plot the number of hits in each window across on the units:
 window_size=1
 
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.w${window_size}.bed\
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v2.PRDM9.rdna_units.w${window_size}.bed \
   1 \
   'Position (bp)' \
   '' \
   45 \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.rdna_units.w${window_size}.pdf
+  'Chromosome' \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v2.PRDM9.rdna_units.w${window_size}.pdf
 ```
 
 ## Adam Phillippy's sequence
 
 ```shell
+mkdir -p /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518
+cd /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518
+
 # Download https://www.ncbi.nlm.nih.gov/nuccore/KY962518
+# mv /home/guarracino/Downloads/sequence.fasta KY962518.fasta
 # scp /home/guarracino/Downloads/KY962518.fasta guarracino@octopus02:/lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518
 
 # Search the PRDM9 motifs (stronger adjusted p-value threshold because, as we are not looking at motifs genome-wide, we are going to correct less p-values)
@@ -852,7 +862,7 @@ samtools faidx KY962518.fasta
 max_qvalue=1
 window_size=1
 
-rm chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.w${window_size}.bed
+rm KY962518.PRDM9.w${window_size}.bed
 (seq 13 15; seq 21 22) | while read i; do
   echo $i
 
@@ -869,6 +879,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_with
   'Position (bp)' \
   '' \
   45 \
+  'Sequence' \
   /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/KY962518.PRDM9.w${window_size}.png
 
 
@@ -876,6 +887,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_with
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_BED.all_chromosomes.R \
   <(cat /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/KY962518.PRDM9.bed | awk -v OFS='\t' '{print($1,$2,$3,$4,$6,$8)}' ) \
   45 \
+  'Sequence' \
   /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/KY962518.PRDM9.png
 ```
 
@@ -986,6 +998,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_with
   'Position (bp)' \
   '' \
   35 \
+  'Chromosome' \
   /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/PRDM9motifhits.SST1.TideHunter.w${window_size}.pdf
 ```
 
@@ -995,6 +1008,7 @@ Show where the PRDM9 hits are on the SST1 units:
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_BED.all_chromosomes.R \
   /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.PRDM9.bed \
   35 \
+  'Chromosome' \
   /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.PRDM9.pdf
 ```
 
