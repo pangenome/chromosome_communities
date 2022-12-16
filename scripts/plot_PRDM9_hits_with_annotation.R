@@ -57,7 +57,7 @@ p <- ggplot(xx, aes(
     
     strip.text.x = element_blank(),
     strip.text.y = element_blank(),
-    plot.margin = unit(c(0.1,0.1,0.1,1.037), "cm")
+    plot.margin = unit(c(0.1,0.1,0.1,1.033), "cm")
   ) + scale_x_continuous(
     #limits = c(x_min, x_max),
     breaks = pretty_breaks(n=20),
