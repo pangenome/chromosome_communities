@@ -175,7 +175,10 @@ p_collapsed_untangle <- ggplot(s_chr_long, aes(x=start, y=value, color=chromosom
     breaks = pretty_breaks(n=20),
     expand = c(0.0, 0.0)
   ) +
-  scale_y_continuous(limits = c(0, max(10, max(s_chr_long$value))), breaks=pretty_breaks(n=6)) +
+  scale_y_continuous(
+    limits = c(-max(10, max(s_chr_long$value))*0.05, max(10, max(s_chr_long$value))),
+    breaks=pretty_breaks(n=6)
+    ) +
   theme_bw() +
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -212,13 +215,13 @@ p_collapsed_untangle <- p_collapsed_untangle +
 p_collapsed_untangle <- p_collapsed_untangle +
   annotate("rect",
            xmin = 16300000, xmax = 17700000,
-           ymin = 0, ymax = max(10, max(s_chr_long$value)),
+           ymin = -max(10, max(s_chr_long$value))*0.05, ymax = max(10, max(s_chr_long$value)),
            fill = "#dc6539", alpha = .0, color = "#ff0000", size = 0.8)
 # xxxxxxxxxxxxxx
 p_collapsed_untangle <- p_collapsed_untangle +
   annotate("rect",
            xmin = 10700000, xmax = 14100000,
-           ymin = 0, ymax = max(10, max(s_chr_long$value)),
+           ymin = -max(10, max(s_chr_long$value))*0.05, ymax = max(10, max(s_chr_long$value)),
            fill = "#dc6539", alpha = .0, color = "#ff0000", size = 0.8)
 
 # Apply filters
@@ -231,7 +234,10 @@ p_entropy_average <- ggplot(e_chr_average, aes(x=start.pos, y=average_sdi, color
     breaks = pretty_breaks(n=20),
     expand = c(0.0, 0.0)
   ) +
-  scale_y_continuous(limits = c(0, min(2, max(e_chr_average$average_sdi, na.rm = T))), breaks=pretty_breaks(n=6)) +
+  scale_y_continuous(
+    limits = c(-min(2, max(e_chr_average$average_sdi, na.rm = T))*0.05, min(2, max(e_chr_average$average_sdi, na.rm = T))),
+    breaks=pretty_breaks(n=6)
+  ) +
   theme_bw() +
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -310,13 +316,13 @@ p_PRDM9 <- ggplot(xx, aes(
   scale_color_manual(values=colors) +
   guides(colour = guide_legend(override.aes = list(size=10)))
 
-xx_min <- 12301367-100000
-xx_max <- 12440010 + 100000
-xx_max <- max(xx[xx$ref.begin >= xx_min & xx$ref.end <= xx_max,]$hits)
+xx_min <- 12301367 - 150000
+xx_max <- 12440010 + 150000
+xxx_max <- max(xx[xx$ref.begin >= xx_min & xx$ref.end <= xx_max,]$hits)
 p_PRDM9 <- p_PRDM9 +
   annotate("rect",
            xmin = xx_min / 1000000, xmax = xx_max / 1000000,
-           ymin = -max(xx$hits)/50, ymax = max(xx$hits),
+           ymin = -xxx_max*0.1, ymax = xxx_max*1.2,
            fill = "#dc6539", alpha = .0, color = "#ff0000", size = 0.8)
 
 # Final panel
@@ -331,7 +337,7 @@ p_panel <- ggpubr::ggarrange(
 #font.label = list(size = 50, color = "black", face = "bold", family = NULL), hjust=-0.1, vjust=+2,
 ggsave(
   plot = p_panel,
-  'fig4.pdf',
+  'fig4.png',
   width = width, height = height,
   units = "cm",
   dpi = 100, bg = "white",
