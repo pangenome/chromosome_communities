@@ -135,6 +135,7 @@ p_panels <- c()
 for (num_chr in c(14, 21)) {
   print(num_chr)
   z <- xx %>% filter(chrom == paste0('chm13#chr', num_chr) & identity >= min_id)
+  
   if (num_chr == 14) {
     z$info <- factor(
       z$info,
@@ -213,9 +214,15 @@ for (num_chr in c(14, 21)) {
         axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         
-        plot.margin = unit(c(0.1,1.3,0.1,0.3), "cm"),
+        plot.margin = unit(c(0.1,0.3,0.1,0.3), "cm"),
         #plot.margin = unit(c(0.1,6.45,0.1,0.3), "cm"),
-      )
+      )+ 
+      annotate("rect",
+               # Centromere
+                  xmin = 12776582, xmax = 10067897,
+                  ymin = 1 - 0.6,
+                  ymax = 11 + 0.6,
+                  fill = "#444444", alpha = .2, color = "#FFFFFF", size = 0)
   } else {
     p <- p + scale_x_continuous(limits = c(x_min, x_max - 1610000), expand = c(0, 0), breaks=pretty_breaks(n=8))
     p <- p +
@@ -237,13 +244,25 @@ for (num_chr in c(14, 21)) {
         strip.text.y = element_blank(),
         axis.title.y = element_blank(),
         
-        plot.margin = unit(c(0.1,1.3,0.1,0.3), "cm"),
-      )
+        plot.margin = unit(c(0.1,0.3,0.1,0.3), "cm"),
+      ) + annotate("rect",
+                   # Centromere
+                     xmin = 10816799, xmax = 11340698,
+                     ymin = 1 - 0.6,
+                     ymax = 10 + 0.6,
+                     fill = "#444444", alpha = .2, color = "#FFFFFF", size = 0)
   }
 
   
   p_panels[[length(p_panels)+1]] <- p
 }
+
+# Approximate centromeres
+#chm13#chr13	13941594	17573031	chr13_q#F8766D
+#chm13#chr14	10067897	12776582	chr14_q#A3A500
+#chm13#chr15	15412039	17709803	chr15_q#00BF7D
+#chm13#chr21	10816799	11340698	chr21_q#00B0F6
+#chm13#chr22	12784333	16188127	chr22_q#E76BF4
 
 p_panel <- ggpubr::ggarrange(
   p_panels[[1]], p_panels[[2]],
