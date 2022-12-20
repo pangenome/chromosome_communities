@@ -97,19 +97,19 @@ p <- ggplot(
     "chr13-SST1"="#0033FF",
     "chr14-SST1"="#0033FF",
     "chr21-SST1"="#0033FF",
-    "chr13-rDNA"="#FF3300",
-    "chr14-rDNA"="#FF3300",
-    "chr15-rDNA"="#FF3300",
-    "chr22-rDNA"="#FF3300",
-    "chr21-rDNA"="#FF3300",
-    "CR382285.2"="#000000",
-    "CR381535.11"="#000000",
-    "CR381572.5"="#000000",
-    "CR392039.8"="#000000",
-    "CR381653.11"="#000000",
-    "CR382287.7"="#000000",
-    "CR382332.15"="#000000",
-    "CR381670.5"="#000000"
+    "chr13-rDNA"="#76b5c5",
+    "chr14-rDNA"="#76b5c5",
+    "chr15-rDNA"="#76b5c5",
+    "chr22-rDNA"="#76b5c5",
+    "chr21-rDNA"="#76b5c5",
+    "CR382285.2"="#00FF00",
+    "CR381535.11"="#FF0000",
+    "CR381572.5"="#00FF00",
+    "CR392039.8"="#FF0000",
+    "CR381653.11"="#FF0000",
+    "CR382287.7"="#00FF00",
+    "CR382332.15"="#FF0000",
+    "CR381670.5"="#FF0000"
     ))
 #p
 ggsave(
@@ -123,5 +123,141 @@ ggsave(
 )
 
 
-library(plotly)
-ggplotly(p)
+# library(plotly)
+#ggplotly(p)
+
+
+
+# Panel chr14 reversed and chr21
+library(ggpubr)
+p_panels <- c()
+
+for (num_chr in c(14, 21)) {
+  print(num_chr)
+  z <- xx %>% filter(chrom == paste0('chm13#chr', num_chr) & identity >= min_id)
+  if (num_chr == 14) {
+    z$info <- factor(
+      z$info,
+      levels = rev(c(
+        "CR382285.2", "CR381535.11", "CR381572.5", "CR392039.8","CR381653.11", "CR382287.7", "CR382332.15", "CR381670.5",
+        "chr13-rDNA", "chr14-rDNA", "chr15-rDNA", "chr21-rDNA", "chr22-rDNA",
+        "chr13-SST1", "chr14-SST1", "chr21-SST1",
+        "chr13-PHRs", "chr14-PHRs", "chr15-PHRs", "chr21-PHRs", "chr22-PHRs"
+      ))
+    )
+  }
+  
+  
+  p <- ggplot(
+    z,
+    aes(
+      x = begin + (end - begin) / 2,
+      width = end - begin,
+      #y = ordered(info, levels = rev(unique(info))),
+      y = info,
+      fill = info,
+      alpha = identity
+    )
+  ) +
+    geom_tile() +
+    #ggtitle(paste(chr, title)) +
+    #facet_grid(~chrom, scales = "free_y", space = "free", labeller = labeller(variable = labels)) +
+    #facet_grid( ~chrom, ncol = 1, scales = "free_y", space = "free_y") +
+    facet_grid(rows = vars(chrom), scales = "free_y", space = "free_y") +
+    theme_bw() +
+    labs(x = "Position (Bp)", fill="Info", alpha='Estimated identity') +
+    scale_alpha(range=c(0.05,1), limits=c(min_id,100)) +
+    scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0), breaks=pretty_breaks(n=8)) +
+    scale_fill_manual(guide = "none", values = c(
+      "chr13-PHRs" = "#F8766D",
+      "chr14-PHRs"="#A3A500",
+      "chr15-PHRs"="#00BF7D",
+      "chr21-PHRs"="#00B0F6",
+      "chr22-PHRs"="#E76BF4",
+      "chr13-SST1"="#0033FF",
+      "chr14-SST1"="#0033FF",
+      "chr21-SST1"="#0033FF",
+      "chr13-rDNA"="#76b5c5",
+      "chr14-rDNA"="#76b5c5",
+      "chr15-rDNA"="#76b5c5",
+      "chr22-rDNA"="#76b5c5",
+      "chr21-rDNA"="#76b5c5",
+      "CR382285.2"="#00FF00",
+      "CR381535.11"="#FF0000",
+      "CR381572.5"="#00FF00",
+      "CR392039.8"="#FF0000",
+      "CR381653.11"="#FF0000",
+      "CR382287.7"="#00FF00",
+      "CR382332.15"="#FF0000",
+      "CR381670.5"="#FF0000"
+    ))
+  if (num_chr == 14) {
+    p <- p + scale_x_reverse(limits = c(x_max, x_min), expand = c(0, 0), breaks=pretty_breaks(n=8))
+    p <- p +
+      theme(
+        plot.title = element_text(hjust = 0.5),
+        
+        text = element_text(size = 18),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 18),
+        legend.position = "top",
+        
+        #panel.spacing = unit(panel_spacing, "lines"),
+        #panel.border = element_rect(color = "grey", fill = NA, size = 1), #element_blank(),
+        
+        strip.text.x = element_blank(),
+        strip.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        
+        plot.margin = unit(c(0.1,6.45,0.1,0.3), "cm"),
+      )
+  } else {
+    p <- p +
+      theme(
+        plot.title = element_text(hjust = 0.5),
+        
+        text = element_text(size = 18),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 18),
+        legend.position = "top",
+        
+        #panel.spacing = unit(panel_spacing, "lines"),
+        #panel.border = element_rect(color = "grey", fill = NA, size = 1), #element_blank(),
+        
+        strip.text.x = element_blank(),
+        strip.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        
+        plot.margin = unit(c(0.1,1.3,0.1,0.3), "cm"),
+      )
+  }
+
+  
+  p_panels[[length(p_panels)+1]] <- p
+}
+
+p_panel <- ggpubr::ggarrange(
+  p_panels[[1]], p_panels[[2]],
+  labels=c('', ''), font.label = list(size = 40, color = "black", face = "bold", family = NULL),
+  heights = c(1, 1),
+  legend = "right", # legend position,
+  common.legend = T,
+  nrow = 2
+)
+p_panel
+
+ggsave(
+  plot = p_panel,
+  file.path(paste0('SupplementaryFigureX10.ROB.clones.id', min_id, '.chr14and21.pdf')),
+  width = 45,
+  height = 0.8 * (xx %>% pull(info) %>% unique() %>% length()),
+  units = "cm",
+  dpi = 300, bg = "white",
+  limitsize = FALSE
+)
