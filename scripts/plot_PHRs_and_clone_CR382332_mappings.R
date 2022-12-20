@@ -167,7 +167,6 @@ for (num_chr in c(14, 21)) {
     theme_bw() +
     labs(x = "Position (Bp)", fill="Info", alpha='Estimated identity') +
     scale_alpha(range=c(0.05,1), limits=c(min_id,100)) +
-    scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0), breaks=pretty_breaks(n=8)) +
     scale_fill_manual(guide = "none", values = c(
       "chr13-PHRs" = "#F8766D",
       "chr14-PHRs"="#A3A500",
@@ -192,13 +191,13 @@ for (num_chr in c(14, 21)) {
       "CR381670.5"="#FF0000"
     ))
   if (num_chr == 14) {
-    p <- p + scale_x_reverse(limits = c(x_max, x_min), expand = c(0, 0), breaks=pretty_breaks(n=8))
+    p <- p + scale_x_reverse(limits = c(x_max - 1610000, x_min), expand = c(0, 0), breaks=pretty_breaks(n=8))
     p <- p +
       theme(
         plot.title = element_text(hjust = 0.5),
         
         text = element_text(size = 18),
-        axis.text.x = element_text(size = 12),
+        axis.text.x =  element_text(size = 12),
         axis.text.y = element_text(size = 12),
         
         legend.title = element_text(size = 18),
@@ -210,11 +209,15 @@ for (num_chr in c(14, 21)) {
         
         strip.text.x = element_blank(),
         strip.text.y = element_blank(),
+        
+        axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         
-        plot.margin = unit(c(0.1,6.45,0.1,0.3), "cm"),
+        plot.margin = unit(c(0.1,1.3,0.1,0.3), "cm"),
+        #plot.margin = unit(c(0.1,6.45,0.1,0.3), "cm"),
       )
   } else {
+    p <- p + scale_x_continuous(limits = c(x_min, x_max - 1610000), expand = c(0, 0), breaks=pretty_breaks(n=8))
     p <- p +
       theme(
         plot.title = element_text(hjust = 0.5),
