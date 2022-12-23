@@ -62,6 +62,18 @@ colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
 
 chromosomes <- c(13, 14, 21)
 
+# SST1 tree
+path_sst1_tree = '/home/guarracino/git/chromosome_communities/data/SST1tree.2022.12.22.png'
+img_sst1_tree <- readPNG(path_sst1_tree)
+p_sst1_tree <- ggplot() +
+  annotation_custom(
+    rasterGrob(img_sst1_tree, width = 1, height = 1),
+    xmin = - Inf, xmax = Inf,
+    ymin = - Inf, ymax = Inf
+  ) + theme(
+    plot.margin = unit(c(13.5,3,13.5,3), "cm")
+  )
+
 
 delta <- 1000000
 
@@ -91,7 +103,7 @@ for (i in seq_along(chromosomes)){
       xmin = - Inf, xmax = Inf,
       ymin = - Inf, ymax = Inf
     ) + theme(
-      plot.margin = unit(c(0,0.5,0,0.59+7.32), "cm")
+      plot.margin = unit(c(0,0.5,0,0.59+7.35), "cm")
     )
   
   # Annotation
@@ -103,7 +115,7 @@ for (i in seq_along(chromosomes)){
       xmin = - Inf, xmax = Inf,
       ymin = - Inf, ymax = Inf
     ) + theme(
-      plot.margin = unit(c(0,0.5,0.1,0.59+2.12), "cm")
+      plot.margin = unit(c(0,0.5,0.1,0.59+3.95), "cm")
     )
   
 
@@ -173,7 +185,7 @@ for (i in seq_along(chromosomes)){
   p_panel <- ggpubr::ggarrange(
     p_karyotype, p_annotation, p_untangle,
     labels=c('', '', ''), font.label = list(size = 40, color = "black", face = "bold", family = NULL),
-    heights = c(0.3, 1.2, 3.5),
+    heights = c(0.18, 0.75, 3.8),
     legend = "right", # legend position,
     common.legend = T,
     nrow = 3
@@ -193,21 +205,35 @@ for (i in seq_along(chromosomes)){
 
 
 # Put panels together
-p_figure <- ggpubr::ggarrange(
+p_figure_B <- ggpubr::ggarrange(
   p_panels[[1]], p_panels[[2]], p_panels[[3]],
-  labels=c('B\nchr13', '\nchr14', '\nchr21'),
-  font.label = list(size = 40, color = "black", face = "bold", family = NULL),
-  hjust=-0.1, vjust=+1.1,
+  labels=c('chr13', 'chr14', 'chr21'),
+  font.label = list(size = 35, color = "black", face = "bold", family = NULL),
+  hjust=-0.5, vjust=+2.3,
   heights = c(1,1,1),
+  
   legend = "right", # legend position,
   common.legend = T,
   nrow = 3, ncol = 1
+) + theme(plot.margin = margin(3,0,3,0, "cm")) 
+
+p_figure_AB <- ggpubr::ggarrange(
+  p_sst1_tree, p_figure_B,
+  labels=c('A', 'B'),
+  font.label = list(size = 40, color = "black", face = "bold", family = NULL),
+  hjust=-0.1, vjust=+1.1,
+  align = c('v'),
+  heights = c(0.1,1),
+  widths = c(0.4, 0.6),
+  legend = "right", # legend position,
+  common.legend = T,
+  nrow = 1, ncol = 2
 )
 
-width <- 70
+width <- 90
 height <- 70
 ggsave(
-  plot = p_figure,
+  plot = p_figure_AB,
   path_output,
   width = width, height = height, # There are 4 NULL plots that have height == height/20
   units = "cm",
