@@ -71,7 +71,7 @@ p_sst1_tree <- ggplot() +
     xmin = - Inf, xmax = Inf,
     ymin = - Inf, ymax = Inf
   ) + theme(
-    plot.margin = unit(c(13.5,3,13.5,3), "cm")
+    plot.margin = unit(c(14.5,2.5,14.5,2.5), "cm")
   )
 
 
