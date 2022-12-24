@@ -23,9 +23,12 @@ xx <- x
 
 if(length(unique(xx$chrom)) > 3) {
   colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
-} else {
-  # Assume 3 (chr13/chr14/chr21)
+} else if (length(unique(xx$chrom)) == 3){
+  # Assume chr13/chr14/chr21
   colors <- c("#F8766D", "#A3A500", "#00B0F6")
+} else {
+  # Assume 2 (chrX/chrY)
+  colors <- c("#E76BF3", "#00BFC4")
 }
 
 p <- ggplot(xx, aes(
