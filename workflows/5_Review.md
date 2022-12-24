@@ -361,95 +361,6 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
 ```
 
 
-# New figure 5 centered in the SST1 region
-
-```shell
-#chm13#chr13	12301367	12440010	SST1#222222
-path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr13.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
-Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
-  $path_grounded_pq_touching_reliable_tsv_gz \
-  11301367 13440010 \
-  90 0.9 7.5 \
-  1.0 \
-  5 1 \
-  13 \
-  0.9 \
-  <(echo 'chm13#chr13' 'grch38#chr13' 'HG002#MAT#chr13.prox' 'HG002#PAT#chr13.prox' 'HG01361#2#JAGYYW010000010.1' 'HG01978#1#JAGYVS010000056.1' 'HG02486#1#JAGYVM010000043.1' 'HG03540#2#JAGYVX010000153.1' | tr ' ' '\n') \
-  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr13_SST1_1Mbps_CenSatAnnDense.png \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr13.SST1.1Mbps.n1.nref1.pdf
-  
-#chm13#chr14  6960008 6988409 SST_Composite#222222
-path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr14.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
-Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
-  $path_grounded_pq_touching_reliable_tsv_gz \
-  5960008 7988409 \
-  90 0.9 7.5 \
-  1.0 \
-  5 1 \
-  14 \
-  0.9 \
-  <(echo 'chm13#chr14' 'grch38#chr14' 'HG002#MAT#chr14.prox' 'HG002#PAT#chr14.prox' 'HG00735#1#JAHBCH010000039.1' 'HG00741#2#JAHALX010000038.1' 'HG01978#1#JAGYVS010000055.1' 'HG03453#2#JAGYVV010000008.1' | tr ' ' '\n') \
-  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr14_SST1_1Mbps_CenSatAnnDense.png \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr14.SST1.1Mbps.n1.nref1.pdf
-
-#chm13#chr21  9375567 9453313   SST1_Composite#222222
-path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr21.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
-Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
-  $path_grounded_pq_touching_reliable_tsv_gz \
-  8375567 10453313 \
-  90 0.9 7.5 \
-  1.0 \
-  5 1 \
-  21 \
-  0.9 \
-  <(echo 'chm13#chr21' 'grch38#chr21' 'HG002#MAT#chr21.prox' 'HG002#PAT#chr21.prox' 'HG00735#2#JAHBCG010000066.1' 'HG02886#1#JAHAOU010000106.1' 'NA18906#1#JAHEOO010000072.1' 'NA19240#2#JAHEOL010000065.1' | tr ' ' '\n') \
-  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr21_SST1_1Mbps_CenSatAnnDense.png \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr21.SST1.1Mbps.n1.nref1.pdf
-
-
-#chm13#chr13	12301367	12440010	SST1#222222
-path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr13.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
-Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
-  $path_grounded_pq_touching_reliable_tsv_gz \
-  9301367 15440010 \
-  90 0.9 7.5 \
-  1.0 \
-  5 1 \
-  13 \
-  0.9 \
-  <(echo 'chm13#chr13' 'grch38#chr13' 'HG002#MAT#chr13.prox' 'HG002#PAT#chr13.prox' 'HG01361#2#JAGYYW010000010.1' 'HG01978#1#JAGYVS010000056.1' 'HG02486#1#JAGYVM010000043.1' 'HG03540#2#JAGYVX010000153.1' | tr ' ' '\n') \
-  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr13_SST1_3Mbps_CenSatAnnDense.png \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr13.SST1.3Mbps.n1.nref1.pdf
-  
-#chm13#chr14  6960008 6988409 SST_Composite#222222
-path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr14.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
-Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
-  $path_grounded_pq_touching_reliable_tsv_gz \
-  3960008 9988409 \
-  90 0.9 7.5 \
-  1.0 \
-  5 1 \
-  14 \
-  0.9 \
-  <(echo 'chm13#chr14' 'grch38#chr14' 'HG002#MAT#chr14.prox' 'HG002#PAT#chr14.prox' 'HG00735#1#JAHBCH010000039.1' 'HG00741#2#JAHALX010000038.1' 'HG01978#1#JAGYVS010000055.1' 'HG03453#2#JAGYVV010000008.1' | tr ' ' '\n') \
-  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr14_SST1_3Mbps_CenSatAnnDense.png \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr14.SST1.3Mbps.n1.nref1.pdf
-
-#chm13#chr21  9375567 9453313   SST1_Composite#222222
-path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr21.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
-Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
-  $path_grounded_pq_touching_reliable_tsv_gz \
-  6375567 12453313 \
-  90 0.9 7.5 \
-  1.0 \
-  5 1 \
-  21 \
-  0.9 \
-  <(echo 'chm13#chr21' 'grch38#chr21' 'HG002#MAT#chr21.prox' 'HG002#PAT#chr21.prox' 'HG00735#2#JAHBCG010000066.1' 'HG02886#1#JAHAOU010000106.1' 'NA18906#1#JAHEOO010000072.1' 'NA19240#2#JAHEOL010000065.1' | tr ' ' '\n') \
-  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr21_SST1_3Mbps_CenSatAnnDense.png \
-  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr21.SST1.3Mbps.n1.nref1.pdf
-```
-
 # Evolutionary strata
 
 ```shell
@@ -599,7 +510,7 @@ cat \
 ```
 
 
-# Recombination hotspots
+# Recombination hotspots (PRDM9)
 
 Prepare the tools:
 
@@ -620,7 +531,7 @@ cd TideHunter-v1.5.4
 make
 ```
 
-Prepare PRDM9 motifs (downloaded from [here](https://pubmed.ncbi.nlm.nih.gov/29072575/)):
+Prepare PRDM9 motifs (downloaded from [here](https://pubmed.ncbi.nlm.nih.gov/29072575/):
 
 ```shell
 mkdir -p /lizardfs/guarracino/chromosome_communities/recombination_hotspots
@@ -649,16 +560,6 @@ Search the PRDM9 motifs in the whole CHM13 v2.0:
 ```shell
 samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz $(grep chm /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz.fai | cut -f 1) > chm13v2.fa
 
-#rm /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13.chrACRO.fa
-#(seq 13 15; seq 21 22) | while read i; do
-#  echo chr$i
-#
-#  zcat /lizardfs/guarracino/chromosome_communities/assemblies/chm13.chr$i.fa.gz >> /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13.chrACRO.fa
-#done
-
-#zcat /lizardfs/guarracino/chromosome_communities/pq_contigs/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz \
-#  > /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa
-
 RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
 sbatch -p workers -c 48 --job-name meme-PRDM9 --wrap "hostname; cd /scratch && $RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.fa"
 ```
@@ -666,12 +567,19 @@ sbatch -p workers -c 48 --job-name meme-PRDM9 --wrap "hostname; cd /scratch && $
 Convert the output in BED format:
 
 ```shell
+# Rename all files
+mv fimo.gff chm13v2.PRDM9.gff
+mv fimo.html chm13v2.PRDM9.html
+mv fimo.tsv chm13v2.PRDM9.tsv
+mv fimo.xml chm13v2.PRDM9.xml
+mv cisml.xml cisml.chm13v2.PRDM9.xml
+
 # https://meme-suite.org/meme/doc/fimo-output-format.html#tsv_results
 #	The start position of the motif occurrence; 1-based sequence coordinates.
 #	The end position of the motif occurrence; 1-based sequence coordinates.
 
 # Remove the last lines, remove the header line, remove the last empty line, prepare the columns, and sort the BED file
-grep '^#' fimo.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$6,$5,$7,$8,$9)}' | bedtools sort > chm13v2.PRDM9.bed
+grep '^#' chm13v2.PRDM9.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$6,$5,$7,$8,$9)}' | bedtools sort > chm13v2.PRDM9.bed
 ```
 
 Counts the number of hits in windows:
@@ -684,14 +592,24 @@ samtools faidx /lizardfs/guarracino/chromosome_communities/recombination_hotspot
 max_qvalue=1
 window_size=20000
 
-rm cchm13v2.PRDM9.w${window_size}.bed
+rm chm13v2.PRDM9.chrACRO.w${window_size}.bed
 (seq 13 15; seq 21 22) | while read i; do
   echo $i
 
   bedtools intersect \
     -a <(bedtools makewindows -g <(cat /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.fa.fai | grep "chm13#chr$i" | cut -f 1,2) -w $window_size) \
     -b <(grep chm13#chr$i chm13v2.PRDM9.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
-    >> chm13v2.PRDM9.w${window_size}.bed
+    >> chm13v2.PRDM9.chrACRO.w${window_size}.bed
+done
+
+rm chm13v2.PRDM9.chrSEX.w${window_size}.bed
+(echo X; echo Y) | while read i; do
+  echo $i
+
+  bedtools intersect \
+    -a <(bedtools makewindows -g <(cat /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.fa.fai | grep "chm13#chr$i" | cut -f 1,2) -w $window_size) \
+    -b <(grep chm13#chr$i chm13v2.PRDM9.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+    >> chm13v2.PRDM9.chrSEX.w${window_size}.bed
 done
 ```
 
@@ -699,13 +617,22 @@ Plot the number of hits in each window across the whole chromosomes:
 
 ```shell
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.w${window_size}.bed \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.chrACRO.w${window_size}.bed \
   1000000 \
   'Position (Mbp)' \
   '' \
   35 \
   'Chromosome' \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.w${window_size}.pdf
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.chrACRO.w${window_size}.pdf
+
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.chrSEX.w${window_size}.bed \
+  1000000 \
+  'Position (Mbp)' \
+  '' \
+  35 \
+  'Chromosome' \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.chrSEX.w${window_size}.pdf
 ```
 
 Plot the number of hits in each window across a chromosome region, with annotation on the top:
@@ -713,7 +640,7 @@ Plot the number of hits in each window across a chromosome region, with annotati
 ```shell
 (seq 13 15; seq 21 22) | while read i; do
   Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_with_annotation.R \
-    /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.w${window_size}.bed \
+    /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.chrACRO.w${window_size}.bed \
     0 25000000 \
     $i \
     35 \
@@ -730,7 +657,7 @@ pdfjam --delta '0 7' --no-landscape --nup 1x5 \
   chm13v2.chr22.PRDM9.w${window_size}.pdf \
   --outfile output.pdf
 
-pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigureX.chm13v2.PRDM9.with_annotation.w${window_size}.pdf
+pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigureX.chm13v2.PRDM9.chrACRO.with_annotation.w${window_size}.pdf
 rm output.pdf chm13v2.chr1*.PRDM9.w${window_size}.pdf chm13v2.chr2*.PRDM9.w${window_size}.pdf
 ```
 
@@ -788,7 +715,7 @@ done
 
 -----------------------------------------------------------------------------------------------------------
 ALTERNATIVE APPROACH: it gives much more results, I think because of the p-value correction.
-Having less pvalues (hits) to correct, more values get a p-value adjuster lower than the threshold (1.0E-4).
+Having less pvalues (hits) to correct, more values get an adjusted p-value lower than the threshold (1.0E-4).
 
 ```shell
 # Search the PRDM9 motifs (stronger adjusted p-value threshold because, as we are not looking at motifs genome-wide, we are going to correct less p-values)
@@ -819,7 +746,7 @@ bedtools sort -i /lizardfs/guarracino/chromosome_communities/recombination_hotsp
 
   bedtools intersect \
     -a <(bedtools makewindows -g <(cat chm13v1.1.rdna_units.unique.fa.fai | grep "$chr:$start-$end" | cut -f 1,2) -w $window_size) \
-    -b <(grep chm13#chr$i /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v2.PRDM9.rdna_units.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+    -b <(grep $chr /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v2.PRDM9.rdna_units.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
     >> chm13v2.PRDM9.rdna_units.w${window_size}.bed
 done
 ```
@@ -892,8 +819,6 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_BED.
 ```
 
 
-
-
 ### SST1
 
 Obtain the repetitive unit of the array:
@@ -912,58 +837,65 @@ RUN_TIDEHUNTER=/home/guarracino/tools/TideHunter-v1.5.4/bin/TideHunter
 
 # https://github.com/yangao07/TideHunter#tabular-format
 $RUN_TIDEHUNTER -f 2 chm13.SST1.fa -t 48 -k 13 > chm13.SST1.TideHunter.tsv
-awk '{print(">"$1"_"$7"\n"$11)}' < chm13.SST1.TideHunter.tsv > chm13.SST1.TideHunter.fa
 
 
 # For making dotplots with Gepard (to check that all the repeat units have the same start/end)
+awk '{print(">"$1"_"$7"\n"$11)}' < chm13.SST1.TideHunter.tsv > chm13.SST1.TideHunter.fa
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr13:12301367-12440010_1409 > SST1.chr13.fa
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr14:6960008-6988409/rc_1407 > SST1.chr14rc.fa
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr21:9375567-9453313_1406 > SST1.chr21.fa
 ```
 
-
 From the PRDM9 motifs found in the whole chromosomes, take those fully covering the repetitive unit:
 
  ```shell
-# Made manually from cut -f 1,10 chm13.SST1.TideHunter.tsv
-chm13#chr13:12301367-12440010   967,2371
-chm13#chr14:6960008-6988409/rc  758,2163
-chm13#chr21:9375567-9453313     770,2174
-
-
-
-chm13#chr13 12301367+967-1  12440010+2370-1
-chm13#chr14???
-chm13#chr21 9375567+770-1   9453313+2174-1
+cut -f 1,10 chm13.SST1.TideHunter.tsv | cut -f 1,2 -d ','
+#chm13#chr13:12301367-12440010	967,2371  => chm13#chr13 12301367+967-1  12301367+2370-1
+#chm13#chr14:6960008-6988409/rc	758,2163  => chm13#chr14 6988409-2163+1  6988409-758+1
+#chm13#chr21:9375567-9453313	770,2174    => chm13#chr21 9375567+770-1   9375567+2174-1
 
 # To check that the outputs are identical
-samtools faidx chm13.SST1.fa chm13#chr13:12301367-12440010:967-2370
-samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr13:12302334-12303737
+diff \
+  <(samtools faidx chm13.SST1.fa chm13#chr13:12301367-12440010:967-2370) \
+  <(samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr13:12302333-12303736)
+diff \
+  <(samtools faidx chm13.SST1.fa chm13#chr14:6960008-6988409/rc:758-2163) \
+  <(samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr14:6986247-6987652 -i)
+diff \
+  <(samtools faidx chm13.SST1.fa chm13#chr21:9375567-9453313:770-2174) \
+  <(samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr21:9376336-9377740)
  
-rm chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.SST1.TideHunter.bed
-cut -f 1 chm13.SST1.TideHunter.tsv | head -n 1 | while read f; do
+
+#chm13#chr13:12301367-12440010	967,2371  => chm13#chr13 12301367+967-1  12301367+2370-1
+#chm13#chr14:6960008-6988409/rc	758,2163  => chm13#chr14 6988409-2163+1  6988409-758+1
+#chm13#chr21:9375567-9453313	770,2174    => chm13#chr21 9375567+770-1   9375567+2174-1
+
+rm chm13v2.PRDM9.SST1.bed
+#(echo chm13#chr13:12302333-12303736; echo chm13#chr14:6986247-6987652; echo chm13#chr21:9376336-9377740) | while read f; do
+(echo chm13#chr13:12301367-12440010; echo chm13#chr14:6960008-6988409; echo chm13#chr21:9375567-9453313) | while read f; do
   chr=$(echo $f | cut -f 1 -d ':')
   start=$(echo $f | cut -f 2 -d ':' | cut -f 1 -d '-')
-  end=$(echo $f | cut -f 3 -d ' '| cut -f 2 -d '-')
-  f=$(echo -e "$chr\t$start\t$end")
+  end=$(echo $f | cut -f 2 -d ':' | cut -f 2 -d '-')
   echo "$chr:$start-$end"
-  echo $f
+
+  start1=$((start-50))
+  end1=$(($end+50))
 
   bedtools intersect \
-    -a <(grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.bed | bedtools sort) \
-    -b <(echo $f | tr ' ' '\t') -f 1.0 | \
-    awk -v chr=$chr -v start=$start -v end=$end -v OFS='\t' '{print(chr":"start"-"end,$2-start,$3-start,$4,$5,$6,$7,$8,$9)}' >> chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.PRDM9.SST1.TideHunter.bed
+    -a <(grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.bed | bedtools sort) \
+    -b <(echo $chr $start $end | tr ' ' '\t') -f 1.0 | \
+    awk -v chr=$chr -v start=$start -v end=$end -v OFS='\t' '{print(chr":"start"-"end,$2-start,$3-start,$4,$5,$6,$7,$8,$9)}' >> chm13v2.PRDM9.SST1.bed
 done
 ```
 
 -----------------------------------------------------------------------------------------------------------
 ALTERNATIVE APPROACH: it gives much more results, I think because of the p-value correction.
-Having less pvalues (hits) to correct, more values get a p-value adjuster lower than the threshold (1.0E-4).
+Having less pvalues (hits) to correct, more values get an adjusted p-value lower than the threshold (1.0E-4).
 
 ```shell
 #Search the PRDM9 motifs
 RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
-$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.fa
+$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/ --verbosity 1 --thresh 1.0E-8 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.fa
 
 #Convert the output in BED format
 samtools faidx chm13.SST1.TideHunter.fa
@@ -975,17 +907,22 @@ grep '^Human' /lizardfs/guarracino/chromosome_communities/recombination_hotspots
 Counts the number of hits in each base pair:
 
 ```shell
+samtools faidx chm13.SST1.fa
+
 max_qvalue=1
 window_size=1
 
-rm chm13.SST1.TideHunter.PRDM9.w${window_size}.bed
-(echo 13; echo 14; echo 21) | while read i; do
-  echo $i
+rm chm13v2.PRDM9.SST1.w${window_size}.bed
+cat chm13v2.PRDM9.SST1.bed | cut -f 1 | sort | uniq | while read f; do
+  chr=$(echo $f | cut -f 1 -d ':')
+  start=$(echo $f | cut -f 2 -d ':' | cut -f 1 -d '-')
+  end=$(echo $f | cut -f 2 -d ':' | cut -f 2 -d '-')
+  echo "$chr:$start-$end"
 
   bedtools intersect \
-    -a <(bedtools makewindows -g <(cat chm13.SST1.TideHunter.fa.fai | grep "chm13#chr$i" | cut -f 1,2) -w $window_size) \
-    -b <(grep chm13#chr$i chm13.SST1.TideHunter.PRDM9.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$6 <= max_qvalue && $4 != "') -c \
-    >> chm13.SST1.TideHunter.PRDM9.w${window_size}.bed
+    -a <(bedtools makewindows -g <(sed 's/\/rc//g' chm13.SST1.fa.fai | grep "$chr:$start-$end" | cut -f 1,2) -w $window_size) \
+    -b <(grep $chr /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+    >> chm13v2.PRDM9.SST1.w${window_size}.bed
 done
 ```
 
@@ -993,28 +930,28 @@ Plot the number of hits in each window across on the units:
 
 ```shell
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.PRDM9.w${window_size}.bed \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.w${window_size}.bed \
   1 \
   'Position (bp)' \
   '' \
   35 \
   'Chromosome' \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/PRDM9motifhits.SST1.TideHunter.w${window_size}.pdf
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.w${window_size}.pdf
 ```
 
 Show where the PRDM9 hits are on the SST1 units:
 
 ```shell
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_BED.all_chromosomes.R \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.PRDM9.bed \
+  <(cat /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.bed | awk -v OFS='\t' '{print($1,$2,$3,$4,$6,$8)}' ) \
   35 \
   'Chromosome' \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.PRDM9.pdf
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.pdf
 ```
 
 
 NOT USED
-Alrenative plots of the hits across in the untangle space:
+Alternative plots of the hits across in the untangle space:
 
 ```shell
 # List of contigs with at least one match
@@ -1096,4 +1033,94 @@ for e in 50000; do
       e$e.m$m.annot.chr*.pdf e$e.m$m.annot.chrACRO.pdf
   done
 done
+```
+
+
+# NOT USED: new figure 5 centered in the SST1 region
+
+```shell
+#chm13#chr13	12301367	12440010	SST1#222222
+path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr13.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  11301367 13440010 \
+  90 0.9 7.5 \
+  1.0 \
+  5 1 \
+  13 \
+  0.9 \
+  <(echo 'chm13#chr13' 'grch38#chr13' 'HG002#MAT#chr13.prox' 'HG002#PAT#chr13.prox' 'HG01361#2#JAGYYW010000010.1' 'HG01978#1#JAGYVS010000056.1' 'HG02486#1#JAGYVM010000043.1' 'HG03540#2#JAGYVX010000153.1' | tr ' ' '\n') \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr13_SST1_1Mbps_CenSatAnnDense.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr13.SST1.1Mbps.n1.nref1.pdf
+  
+#chm13#chr14  6960008 6988409 SST_Composite#222222
+path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr14.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  5960008 7988409 \
+  90 0.9 7.5 \
+  1.0 \
+  5 1 \
+  14 \
+  0.9 \
+  <(echo 'chm13#chr14' 'grch38#chr14' 'HG002#MAT#chr14.prox' 'HG002#PAT#chr14.prox' 'HG00735#1#JAHBCH010000039.1' 'HG00741#2#JAHALX010000038.1' 'HG01978#1#JAGYVS010000055.1' 'HG03453#2#JAGYVV010000008.1' | tr ' ' '\n') \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr14_SST1_1Mbps_CenSatAnnDense.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr14.SST1.1Mbps.n1.nref1.pdf
+
+#chm13#chr21  9375567 9453313   SST1_Composite#222222
+path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr21.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  8375567 10453313 \
+  90 0.9 7.5 \
+  1.0 \
+  5 1 \
+  21 \
+  0.9 \
+  <(echo 'chm13#chr21' 'grch38#chr21' 'HG002#MAT#chr21.prox' 'HG002#PAT#chr21.prox' 'HG00735#2#JAHBCG010000066.1' 'HG02886#1#JAHAOU010000106.1' 'NA18906#1#JAHEOO010000072.1' 'NA19240#2#JAHEOL010000065.1' | tr ' ' '\n') \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr21_SST1_1Mbps_CenSatAnnDense.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr21.SST1.1Mbps.n1.nref1.pdf
+
+
+#chm13#chr13	12301367	12440010	SST1#222222
+path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr13.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  9301367 15440010 \
+  90 0.9 7.5 \
+  1.0 \
+  5 1 \
+  13 \
+  0.9 \
+  <(echo 'chm13#chr13' 'grch38#chr13' 'HG002#MAT#chr13.prox' 'HG002#PAT#chr13.prox' 'HG01361#2#JAGYYW010000010.1' 'HG01978#1#JAGYVS010000056.1' 'HG02486#1#JAGYVM010000043.1' 'HG03540#2#JAGYVX010000153.1' | tr ' ' '\n') \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr13_SST1_3Mbps_CenSatAnnDense.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr13.SST1.3Mbps.n1.nref1.pdf
+  
+#chm13#chr14  6960008 6988409 SST_Composite#222222
+path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr14.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  3960008 9988409 \
+  90 0.9 7.5 \
+  1.0 \
+  5 1 \
+  14 \
+  0.9 \
+  <(echo 'chm13#chr14' 'grch38#chr14' 'HG002#MAT#chr14.prox' 'HG002#PAT#chr14.prox' 'HG00735#1#JAHBCH010000039.1' 'HG00741#2#JAHALX010000038.1' 'HG01978#1#JAGYVS010000055.1' 'HG03453#2#JAGYVV010000008.1' | tr ' ' '\n') \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr14_SST1_3Mbps_CenSatAnnDense.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr14.SST1.3Mbps.n1.nref1.pdf
+
+#chm13#chr21  9375567 9453313   SST1_Composite#222222
+path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chr21.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_with_annotation_SST1.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  6375567 12453313 \
+  90 0.9 7.5 \
+  1.0 \
+  5 1 \
+  21 \
+  0.9 \
+  <(echo 'chm13#chr21' 'grch38#chr21' 'HG002#MAT#chr21.prox' 'HG002#PAT#chr21.prox' 'HG00735#2#JAHBCG010000066.1' 'HG02886#1#JAHAOU010000106.1' 'NA18906#1#JAHEOO010000072.1' 'NA19240#2#JAHEOL010000065.1' | tr ' ' '\n') \
+  /lizardfs/guarracino/chromosome_communities/data/annotation/genome_browser_chr21_SST1_3Mbps_CenSatAnnDense.png \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/Figure5.chr21.SST1.3Mbps.n1.nref1.pdf
 ```
