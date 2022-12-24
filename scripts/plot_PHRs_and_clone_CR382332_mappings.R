@@ -97,11 +97,11 @@ p <- ggplot(
     "chr13-SST1"="#0033FF",
     "chr14-SST1"="#0033FF",
     "chr21-SST1"="#0033FF",
-    "chr13-rDNA"="#76b5c5",
-    "chr14-rDNA"="#76b5c5",
-    "chr15-rDNA"="#76b5c5",
-    "chr22-rDNA"="#76b5c5",
-    "chr21-rDNA"="#76b5c5",
+    "chr13-rDNA"="#808184",
+    "chr14-rDNA"="#808184",
+    "chr15-rDNA"="#808184",
+    "chr22-rDNA"="#808184",
+    "chr21-rDNA"="#808184",
     "CR382285.2"="#00FF00",
     "CR381535.11"="#FF0000",
     "CR381572.5"="#00FF00",
@@ -177,11 +177,11 @@ for (num_chr in c(14, 21)) {
       "chr13-SST1"="#0033FF",
       "chr14-SST1"="#0033FF",
       "chr21-SST1"="#0033FF",
-      "chr13-rDNA"="#76b5c5",
-      "chr14-rDNA"="#76b5c5",
-      "chr15-rDNA"="#76b5c5",
-      "chr22-rDNA"="#76b5c5",
-      "chr21-rDNA"="#76b5c5",
+      "chr13-rDNA"="#000000",
+      "chr14-rDNA"="#000000",
+      "chr15-rDNA"="#000000",
+      "chr22-rDNA"="#000000",
+      "chr21-rDNA"="#000000",
       "CR382285.2"="#00FF00",
       "CR381535.11"="#FF0000",
       "CR381572.5"="#00FF00",
@@ -222,7 +222,7 @@ for (num_chr in c(14, 21)) {
                   xmin = 12776582, xmax = 10067897,
                   ymin = 1 - 0.6,
                   ymax = 11 + 0.6,
-                  fill = "#444444", alpha = .2, color = "#FFFFFF", size = 0)
+                  fill = "#f8ec32", alpha = .2, color = "#f8ec32", size = 0)
   } else {
     p <- p + scale_x_continuous(limits = c(x_min, x_max - 1610000), expand = c(0, 0), breaks=pretty_breaks(n=8))
     p <- p +
@@ -250,7 +250,7 @@ for (num_chr in c(14, 21)) {
                      xmin = 10816799, xmax = 11340698,
                      ymin = 1 - 0.6,
                      ymax = 10 + 0.6,
-                     fill = "#444444", alpha = .2, color = "#FFFFFF", size = 0)
+                     fill = "#f8ec32", alpha = .2, color = "#f8ec32", size = 0)
   }
 
   
@@ -268,7 +268,7 @@ p_panel <- ggpubr::ggarrange(
   p_panels[[1]], p_panels[[2]],
   labels=c('', ''), font.label = list(size = 40, color = "black", face = "bold", family = NULL),
   heights = c(1, 1),
-  legend = "right", # legend position,
+  legend = "top", # legend position,
   common.legend = T,
   nrow = 2
 )
@@ -276,7 +276,7 @@ p_panel
 
 ggsave(
   plot = p_panel,
-  file.path(paste0('SupplementaryFigureX10.ROB.clones.id', min_id, '.chr14and21.pdf')),
+  file.path(paste0('SupplementaryFigureX10.ROB.clones.id', min_id, '.chr14inv_and_chr21.pdf')),
   width = 45,
   height = 0.8 * (xx %>% pull(info) %>% unique() %>% length()),
   units = "cm",
