@@ -16,7 +16,11 @@ library(scales) # for pretty_breaks()
 options(scipen = 9)
 
 x <- read.delim(path_fimo_window_bed, header = F)
-colnames(x) <- c('chrom', 'ref.begin', 'ref.end', 'hits')
+colnames(x) <- c('chrom', 'ref.begin', 'ref.end', 'motif.hits', 'motif')
+
+x <- x %>% 
+  group_by(chrom, ref.begin, ref.end, ) %>% 
+  summarise(hits = sum(motif.hits))
 
 #x$chrom <- gsub('[:].*$','', x$chrom)
 
