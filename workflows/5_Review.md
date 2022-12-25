@@ -585,8 +585,6 @@ grep '^#' chm13v2.PRDM9.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{prin
 Counts the number of hits in windows:
 
 ```shell
-#TODO IF NEEDED: separate in Human1 hits, Human2 hits, ...
-
 samtools faidx /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.fa
 
 max_qvalue=1
@@ -598,7 +596,7 @@ rm chm13v2.PRDM9.w${window_size}.bed
     echo $i $MOTIF
     bedtools intersect \
       -a <(bedtools makewindows -g <(cat /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.fa.fai | grep -P "chm13#chr$i\t" | cut -f 1,2) -w $window_size) \
-      -b <(grep -P "^chm13#chr$i\t" chm13v2.PRDM9.bed | grep -P "$MOTIF\t" | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c |
+      -b <(grep -P "^chm13#chr$i\t" chm13v2.PRDM9.bed | grep -P "$MOTIF\t" | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c | \
       awk -v OFS='\t' -v motif=$MOTIF '{print($0,motif)}' \
       >> chm13v2.PRDM9.w${window_size}.bed
   done
@@ -615,7 +613,7 @@ Plot the number of hits in each window across the whole chromosomes:
 
 ```shell
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
-  <(grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.w${window_size}.bed) \
+  <(grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.w${window_size}.bed | grep -P 'Human1[5-7]$' -v) \
   1000000 \
   'Position (Mbp)' \
   '' \
@@ -624,7 +622,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_with
   /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.chrACRO.w${window_size}.pdf
 
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
-  <(grep '^chm13#chrX\|^chm13#chrY' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.w${window_size}.bed) \
+  <(grep '^chm13#chrX\|^chm13#chrY' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.w${window_size}.bed | grep -P 'Human1[5-7]$' -v) \
   1000000 \
   'Position (Mbp)' \
   '' \
@@ -638,7 +636,7 @@ Plot the number of hits in each window across a chromosome region, with annotati
 ```shell
 (seq 13 15; seq 21 22) | while read i; do
   Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_with_annotation.R \
-    /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.chrACRO.w${window_size}.bed \
+    <(grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.w${window_size}.bed | grep -P 'Human1[5-7]$' -v) \
     0 25000000 \
     $i \
     35 \
@@ -729,7 +727,6 @@ grep '^#' fimo.tsv -v | sed '1d' | sed '/^$/d' | awk -v OFS='\t' '{print($2,$3-1
 Counts the number of hits in windows:
 
 ```shell
-#TODO IF NEEDED: separate in Human1 hits, Human2 hits, ...
 samtools faidx chm13v1.1.rdna_units.unique.fa
 
 max_qvalue=1
@@ -740,12 +737,22 @@ bedtools sort -i /lizardfs/guarracino/chromosome_communities/recombination_hotsp
   chr=$(echo $f | cut -f 1 -d ' ')
   start=$(echo $f | cut -f 2 -d ' ')
   end=$(echo $f | cut -f 3 -d ' ')
-  echo "$chr:$start-$end"
 
-  bedtools intersect \
-    -a <(bedtools makewindows -g <(cat chm13v1.1.rdna_units.unique.fa.fai | grep "$chr:$start-$end" | cut -f 1,2) -w $window_size) \
-    -b <(grep $chr /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v2.PRDM9.rdna_units.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
-    >> chm13v2.PRDM9.rdna_units.w${window_size}.bed
+  grep '^MOTIF' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt | cut -f 2 -d ' ' | while read MOTIF; do
+    echo "$chr:$start-$end" $MOTIF
+
+    bedtools intersect \
+      -a <(bedtools makewindows -g <(cat chm13v1.1.rdna_units.unique.fa.fai | grep -P "$chr:$start-$end\t" | cut -f 1,2) -w $window_size) \
+      -b <(grep $chr /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v2.PRDM9.rdna_units.bed | grep -P "$MOTIF\t" | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c | \
+      awk -v OFS='\t' -v motif=$MOTIF '{print($0,motif)}' \
+      >> chm13v2.PRDM9.rdna_units.w${window_size}.bed
+  done
+
+  # All together
+  #bedtools intersect \
+  #  -a <(bedtools makewindows -g <(cat chm13v1.1.rdna_units.unique.fa.fai | grep "$chr:$start-$end" | cut -f 1,2) -w $window_size) \
+  #  -b <(grep $chr /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v2.PRDM9.rdna_units.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+  #  >> chm13v2.PRDM9.rdna_units.w${window_size}.bed
 done
 ```
 
@@ -755,7 +762,7 @@ Plot the number of hits in each window across on the units:
 window_size=1
 
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v2.PRDM9.rdna_units.w${window_size}.bed \
+  <(grep -P 'Human1[5-7]$' -v /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v2.PRDM9.rdna_units.w${window_size}.bed) \
   1 \
   'Position (bp)' \
   '' \
@@ -788,18 +795,27 @@ max_qvalue=1
 window_size=1
 
 rm KY962518.PRDM9.w${window_size}.bed
-(seq 13 15; seq 21 22) | while read i; do
-  echo $i
+grep '^MOTIF' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt | cut -f 2 -d ' ' | while read MOTIF; do
+  echo $MOTIF
 
   bedtools intersect \
     -a <(bedtools makewindows -g <(cat KY962518.fasta.fai | cut -f 1,2) -w $window_size) \
-    -b <(grep -P 'Human[1-7]*[0-9]\t' KY962518.PRDM9.bed | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+    -b <(grep -P 'Human[1-7]*[0-9]\t' KY962518.PRDM9.bed | grep -P "$MOTIF\t" | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c | \
+      awk -v OFS='\t' -v motif=$MOTIF '{print($0,motif)}' \
     >> KY962518.PRDM9.w${window_size}.bed
 done
 
+#bedtools intersect \
+#  -a <(bedtools makewindows -g <(cat KY962518.fasta.fai | cut -f 1,2) -w $window_size) \
+#  -b <(grep -P 'Human[1-7]*[0-9]\t' KY962518.PRDM9.bed | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+#  >> KY962518.PRDM9.w${window_size}.bed
+
+
+
 window_size=1
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/KY962518.PRDM9.w${window_size}.bed \
+  <(grep -P 'Human1[5-7]$' -v /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518/KY962518.PRDM9.w${window_size}.bed) \
+  \
   1 \
   'Position (bp)' \
   '' \
