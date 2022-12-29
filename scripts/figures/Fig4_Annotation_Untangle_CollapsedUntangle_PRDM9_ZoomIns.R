@@ -308,7 +308,11 @@ p_ordered_entropy <- ggplot(
   geom_step(aes(
     alpha=num.queries # It is complicated to get a shared legen with also
     )) +
-  scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0, 0, 0)) +
+  scale_x_continuous(
+    limits = c(x_min, x_max),
+    breaks = pretty_breaks(n=20),
+    expand = c(0.0, 0.0)
+  ) +
   scale_y_continuous(limits = c(0, max(2, max(oe2$shannon_div_index))), breaks=pretty_breaks(n=6)) +
   theme_bw() +
   theme(
