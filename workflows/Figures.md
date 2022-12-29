@@ -4,13 +4,36 @@
 
 ### Figure 4
 
+#### Revision 1
+
+```shell
+path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/Fig4_Annotation_Untangle_CollapsedUntangle_PRDM9_ZoomIns.R \
+  $path_grounded_pq_touching_reliable_tsv_gz \
+  <(zgrep '^HG002#1\|^HG002#2' -v $path_grounded_pq_touching_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq) \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.support.dedup.eid0900.n1.nref1.tsv.gz \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy.by_contig.eid0900.w50000.n1.nref1.tsv \
+  /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n5.tsv \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.w20000.bed
+  /lizardfs/guarracino/chromosome_communities/data/annotation/ \
+  13 \
+  ~/Figure5.pdf
+```
+
+
+path_query_to_consider <- '/home/guarracino/Downloads/Pangenomics/chromosome_communities/Review1/paths_to_consider.txt'
+
+
+
+#### Old
+
 For each chromosome:
 - top: annotation bars;
 - middle: collapsed untangling output;
 - bottom: average entropy.
 
 ```shell
-Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/Fig4_Annotation_CollapsedUntangle_AggregatedEntropy.R \
+Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/OldFig4_Annotation_CollapsedUntangle_AggregatedEntropy.R \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.support.dedup.eid0900.n1.nref1.tsv.gz \
   /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy.by_contig.eid0900.w50000.n1.nref1.tsv \
   /lizardfs/guarracino/chromosome_communities/data/annotation/ \
@@ -92,6 +115,8 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BE
 ```
 
 ## Figure 19 (20,21,22,23)
+
+```shell
 # --delta for white space between the pieces
 pdfjam --delta '0 7' --no-landscape --nup 1x5 \
   chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrSEX.e50000.m1000.grounded.reliable.entropy.eid0900.w50000.n1.nref1.chrX.pdf \
@@ -100,7 +125,7 @@ pdfjam --delta '0 7' --no-landscape --nup 1x5 \
 
 pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigure12.chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrSEX.e50000.m1000.grounded.reliable.entropy.eid0900.w50000.n1.nref1.chrSEX.pdf
 rm output.pdf
-
+```
 
 ## Figure 14, 15, 16, 17, 18
 
@@ -133,6 +158,8 @@ done
 
 
 ## Figure 19 (20,21,22,23)
+
+```shell
 # --delta for white space between the pieces
 pdfjam --delta '0 7' --no-landscape --nup 1x5 \
   chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n5.chr13.pdf \
@@ -144,8 +171,11 @@ pdfjam --delta '0 7' --no-landscape --nup 1x5 \
 
 pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigure19.chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n5.chrACRO.pdf
 rm output.pdf
+```
 
 ## Figure 24 (25)
+
+```shell
 # --delta for white space between the pieces
 pdfjam --delta '0 7' --no-landscape --nup 1x5 \
   chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n2.chrX.pdf \
@@ -154,7 +184,7 @@ pdfjam --delta '0 7' --no-landscape --nup 1x5 \
 
 pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigure24.chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n2.chrSEX.pdf
 rm output.pdf
-
+```
 
 ## Figure 28, 29, 30, 31, 32
 
