@@ -9,7 +9,7 @@
 ```shell
 path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle/grounded/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.ALL.e50000.m1000.grounded.pq_touching.reliable.tsv.gz
 
-<(zgrep '^HG002#1\|^HG002#2' -v $path_grounded_pq_touching_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq > ~/Figure5.paths_to_consider.txt
+zgrep '^HG002#1\|^HG002#2' -v $path_grounded_pq_touching_reliable_tsv_gz | sed '1d' | cut -f 1 | sort | uniq > ~/Figure5.paths_to_consider.txt
 
 (seq 13 15; seq 21 22) | while read i; do
   echo chr$i
@@ -21,7 +21,7 @@ path_grounded_pq_touching_reliable_tsv_gz=/lizardfs/guarracino/chromosome_commun
     /lizardfs/guarracino/chromosome_communities/untangle/grounded/entropy/chrACRO+refs.pq_contigs.1kbps.hg002prox.hg002hifi.fa.gz.7ef1ba2.04f1c29.ebc49e1.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n5.tsv \
     /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.w20000.bed \
     /lizardfs/guarracino/chromosome_communities/data/annotation/ \
-    13 \
+    $i \
     ~/Figure5.chr$i.pdf
 done
 
