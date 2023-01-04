@@ -40,7 +40,10 @@ mkdir -p /lizardfs/guarracino/chromosome_communities/graphs
 RUN_PGGB=/home/guarracino/tools/pggb/pggb-a4a6668d9ece42c80ce69dc354f0cb59a849286f
 
 num_of_haplotypes=$(cut -f 1,2 -d '#' /lizardfs/guarracino/chromosome_communities/assemblies/chrSEX+refs.fa.gz.fai | sort | uniq | wc -l)
+
 sbatch -p highmem -c 48 --job-name sexpggb --wrap "hostname; cd /scratch && $RUN_PGGB -i /lizardfs/guarracino/chromosome_communities/assemblies/chrSEX+refs.fa.gz -o chrSEX+refs.s50k.l250k.p98.n${num_of_haplotypes} -t 48 -s 50k -l 250k -p 98 -n ${num_of_haplotypes} -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrSEX+refs.s50k.l250k.p98.n${num_of_haplotypes} /lizardfs/guarracino/chromosome_communities/graphs";
+
+sbatch -p highmem -c 48 --job-name sexpggb --wrap "hostname; cd /scratch && $RUN_PGGB -i /lizardfs/guarracino/chromosome_communities/assemblies/chrSEX+refs.fa.gz -o chrSEX+refs.s50k.l250k.p90.n${num_of_haplotypes} -t 48 -s 50k -l 250k -p 90 -n ${num_of_haplotypes} -k 311 -G 13117,13219 -O 0.03 -T 48 -v -V chm13:#,grch38:#; mv /scratch/chrSEX+refs.s50k.l250k.p90.n${num_of_haplotypes} /lizardfs/guarracino/chromosome_communities/graphs";
 ```
 
 
@@ -55,6 +58,7 @@ grep chm13 $path_fasta_fai | cut -f 1 > $path_targets_txt
 
 
 path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrSEX+refs.s50k.l250k.p98.n102/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.og
+path_input_og=/lizardfs/guarracino/chromosome_communities/graphs/chrSEX+refs.s50k.l250k.p90.n102/chrSEX+refs.fa.gz.d1ae18e.04f1c29.d09fe3b.smooth.final.og
 prefix=$(basename $path_input_og .og)
 
 RUN_ODGI=/home/guarracino/tools/odgi/bin/odgi-454197fa29b772050c3135d5de47c816ce38e62c
@@ -192,11 +196,82 @@ cat \
             <(echo -e NA20129#2#JAHEPD010000373.1"\t"chm13#chrX) \
             <(echo -e NA21309#1#JAHEPC010000484.1"\t"chm13#chrX) \
             <(echo -e NA21309#1#JAHEPC010000136.1"\t"chm13#chrX) \
+            <(echo -e HG005#1#JAHEPO010000137.1"\t"chm13#chrY) \
+            <(echo -e HG005#1#JAHEPO010000240.1"\t"chm13#chrY) \
+            <(echo -e HG005#1#JAHEPO010000251.1"\t"chm13#chrY) \
+            <(echo -e HG005#1#JAHEPO010000358.1"\t"chm13#chrY) \
+            <(echo -e HG005#1#JAHEPO010000287.1"\t"chm13#chrX) \
+            <(echo -e HG005#2#JAHEPN010000184.1"\t"chm13#chrX) \
+            <(echo -e HG005#2#JAHEPN010000184.1"\t"chm13#chrX) \
+            <(echo -e HG005#1#JAHEPO010000150.1"\t"chm13#chrY) \
+            <(echo -e HG002#1#JAHKSE010000138.1"\t"chm13#chrY) \
+            <(echo -e HG005#1#JAHEPO010000129.1"\t"chm13#chrY) \
+            <(echo -e HG005#1#JAHEPO010000146.1"\t"chm13#chrY) \
+            <(echo -e HG00673#1#JAHBBZ010000301.1"\t"chm13#chrY) \
+            <(echo -e HG00673#1#JAHBBZ010000306.1"\t"chm13#chrY) \
+            <(echo -e HG00673#2#JAHBBY010000140.1"\t"chm13#chrX) \
+            <(echo -e HG00673#2#JAHBBY010000140.1"\t"chm13#chrX) \
+            <(echo -e HHG00733#1#JAHEPQ010000190.1"\t"chm13#chrX) \
+            <(echo -e HG00673#2#JAHBBY010000210.1"\t"chm13#chrX) \
+            <(echo -e HG00733#1#JAHEPQ010000190.1"\t"chm13#chrX) \
+            <(echo -e HG00733#2#JAHEPP010000392.1"\t"chm13#chrX) \
+            <(echo -e HG005#1#JAHEPO010000178.1"\t"chm13#chrY) \
+            <(echo -e HG00673#1#JAHBBZ010000257.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000218.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000263.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000278.1"\t"chm13#chrY) \
+            <(echo -e HG01109#1#JAHEPA010000428.1"\t"chm13#chrY) \
+            <(echo -e G01123#1#JAGYYZ010000259.1"\t"chm13#chrX) \
+            <(echo -e HG01175#2#JAHALZ010000133.1"\t"chm13#chrX) \
+            <(echo -e HG01243#1#JAHEOY010000179.1"\t"chm13#chrY) \
+            <(echo -e HG01258#1#JAGYYV010000194.1"\t"chm13#chrY) \
+            <(echo -e HG01952#1#JAHAME010000216.1"\t"chm13#chrY) \
+            <(echo -e HG01952#2#JAHAMD010000259.1"\t"chm13#chrX) \
+            <(echo -e HG01978#2#JAGYVR010000154.1"\t"chm13#chrX) \
+            <(echo -e HG02055#1#JAHEPK010000168.1"\t"chm13#chrY) \
+            <(echo -e HG02055#1#JAHEPK010000257.1"\t"chm13#chrY) \
+            <(echo -e HG02055#1#JAHEPK010000314.1"\t"chm13#chrY) \
+            <(echo -e HG02145#1#JAHKSG010000262.1"\t"chm13#chrY) \
+            <(echo -e HG02145#1#JAHKSG010000342.1"\t"chm13#chrY) \
+            <(echo -e HG02145#1#JAHKSG010000399.1"\t"chm13#chrY) \
+            <(echo -e HG02145#1#JAHKSG010000547.1"\t"chm13#chrY) \
+            <(echo -e HG02145#1#JAHKSG010000739.1"\t"chm13#chrY) \
+            <(echo -e HG02145#1#JAHKSG010000785.1"\t"chm13#chrY) \
+            <(echo -e HG02257#1#JAGYVI010000079.1"\t"chm13#chrX) \
+            <(echo -e HG02486#1#JAGYVM010000128.1"\t"chm13#chrY) \
+            <(echo -e HG02486#1#JAGYVM010000157.1"\t"chm13#chrY) \
+            <(echo -e HG02486#1#JAGYVM010000169.1"\t"chm13#chrY) \
+            <(echo -e HG02486#1#JAGYVM010000291.1"\t"chm13#chrY) \
+            <(echo -e HG02572#1#JAHAOW010000392.1"\t"chm13#chrY) \
+            <(echo -e HG02572#1#JAHAOW010000399.1"\t"chm13#chrY) \
+            <(echo -e HG02572#1#JAHAOW010000420.1"\t"chm13#chrY) \
+            <(echo -e HG02572#1#JAHAOW010000474.1"\t"chm13#chrY) \
+            <(echo -e HG02572#1#JAHAOW010000567.1"\t"chm13#chrY) \
+            <(echo -e HG02717#1#JAHAOS010000264.1"\t"chm13#chrY) \
+            <(echo -e HG02717#1#JAHAOS010000281.1"\t"chm13#chrY) \
+            <(echo -e HG02717#1#JAHAOS010000282.1"\t"chm13#chrY) \
+            <(echo -e HG02723#1#JAHEOU010000219.1"\t"chm13#chrX) \
+            <(echo -e HG02886#2#JAHAOT010000399.1"\t"chm13#chrX) \
+            <(echo -e HG03098#1#JAHEPM010000164.1"\t"chm13#chrY) \
+            <(echo -e HG03098#1#JAHEPM010000254.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000041.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000272.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000452.1"\t"chm13#chrY) \
+            <(echo -e HG03492#1#JAHEPI010000487.1"\t"chm13#chrY) \
+            <(echo -e HG03579#1#JAGYVU010000262.1"\t"chm13#chrY) \
+            <(echo -e HG03579#1#JAGYVU010000323.1"\t"chm13#chrY) \
+            <(echo -e HG03579#1#JAGYVU010000368.1"\t"chm13#chrY) \
+            <(echo -e HG03579#1#JAGYVU010000373.1"\t"chm13#chrY) \
+            <(echo -e HG03579#1#JAGYVU010000417.1"\t"chm13#chrY) \
+            <(echo -e HG01123#1#JAGYYZ010000259.1"\t"chm13#chrX) \
             <(echo -e HG002-bakeoff#PAT#scaffold_235"\t"chm13#chrY) \
+            <(echo -e HG002-bakeoff#PAT#SY_unloc_11"\t"chm13#chrY) \
+            <(echo -e HG002-bakeoff#PAT#SY_unloc_2"\t"chm13#chrY) \
             <(echo -e chm13#chrX"\t"chm13#chrX) \
             <(echo -e chm13#chrY"\t"chm13#chrY) \
             <(echo -e grch38#chrX"\t"chm13#chrX) \
             <(echo -e grch38#chrY"\t"chm13#chrY) > /lizardfs/guarracino/chromosome_communities/untangle_sex/partitioning.contig2chr.tsv
+
 
 for e in 50000; do
   for m in 1000 ; do
@@ -212,7 +287,8 @@ for e in 50000; do
   done
 done
 
-# Fixed 13900 hits covering 21791399 bps on the queries.
+# -p 98: Fixed 13900 hits covering 21791399 bps on the queries.
+# -p 90: Fixed 12380 hits covering 20549819 bps on the queries.
 ```
 
 
@@ -230,7 +306,7 @@ for e in 50000; do
       if [[ ! -s ${path_ref_bed_gz} ]]; then
         path_cut_points_txt=/lizardfs/guarracino/chromosome_communities/untangle_sex/$prefix.untangle.chm13#SEX.e$e.m$m.j0.n100.cut_points.txt
         
-        sbatch -p workers -c 48 --job-name sexuntangle --wrap "\time -v $RUN_ODGI untangle -t 48 -P -i $path_input_og -r $ref -e $e -m $m --cut-points-input $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_ref_bed_gz"
+        sbatch -p workers -w octopus07 -c 48 --job-name sexuntangle --wrap "\time -v $RUN_ODGI untangle -t 48 -P -i $path_input_og -r $ref -e $e -m $m --cut-points-input $path_cut_points_txt -j 0 -n 100 | pigz -c > $path_ref_bed_gz"
       fi
     done
   done
@@ -525,9 +601,9 @@ for e in 50000; do
               0 \
               2 $refn \
               $i \
-              0.9 \
+              0.7 \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
-              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n2.nref${refn}.pdf
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n2.nref${refn}.eid07.pdf
         else           
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_reliable_tsv_gz \
@@ -536,9 +612,9 @@ for e in 50000; do
               0 \
               2 $refn \
               $i \
-              0.9 \
+              0.7 \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
-              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n2.nref${refn}.pdf
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n2.nref${refn}.eid07.pdf
         fi
       done
     done
