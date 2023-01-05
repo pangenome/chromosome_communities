@@ -7,6 +7,7 @@ num_chr <- args[10]
 path_annotation_bed <- args[11]
 path_output <- args[12]
 
+options(scipen = 9)
 
 library(ggplot2)
 library(ggforce)
@@ -122,7 +123,7 @@ p <- ggplot(yy, aes(x=start.pos, y=average_sdi, color=ground.target)) +
   theme(
     plot.title = element_text(hjust = 0.5),
     
-    text = element_text(size = 32),
+    text = element_text(size = 24),
     axis.text.x = element_text(size = 18),
     axis.text.y = element_text(size = 18),
     
@@ -135,7 +136,7 @@ p <- ggplot(yy, aes(x=start.pos, y=average_sdi, color=ground.target)) +
     plot.margin = unit(c(0,0,0,0.5), "cm")
   ) + labs(
     x = paste('Position'),
-    y = paste('Entropy\n'),
+    y = paste('Regional\nhomology\nentropy'),
     color = 'Target'
   ) +
   scale_color_manual(values=colors) +
@@ -161,7 +162,7 @@ p_ann <- ggplot(
   theme(
     plot.title = element_text(hjust = 0.5),
     
-    text = element_text(size = 32),
+    text = element_text(size = 24),
     axis.text.x = element_text(size = 18),
     axis.text.y = element_text(size = 18),
     
@@ -176,7 +177,7 @@ p_ann <- ggplot(
     strip.text.y = element_blank(),
     axis.title.y = element_blank(),
     axis.title.x = element_blank(),
-    plot.margin = unit(c(0.5,0,0.5,0.5), "cm")
+    plot.margin = unit(c(0.5,0,0.5,0.865), "cm")
   ) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values=colors) +
@@ -201,3 +202,4 @@ ggsave(
   dpi = 100, bg = "white",
   limitsize = FALSE
 )
+
