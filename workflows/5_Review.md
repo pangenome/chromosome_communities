@@ -59,7 +59,7 @@ for e in 50000; do
   done
 done
 
-# Supplementary Figures
+# Supplementary Figures 7-11
 for e in 50000; do
   for m in 1000 ; do
     (seq 13 15; seq 21 22) | while read i; do
@@ -74,7 +74,7 @@ for e in 50000; do
         $i \
         0.9 \
         /lizardfs/guarracino/chromosome_communities/data/annotation/hgt_genome_euro_chr${i}_0_25Mbp.png \
-        SupplementaryFigureX.e$e.m$m.annot.chr$i.pdf
+        SupplementaryFigure.e$e.m$m.annot.chr$i.pdf
     done
     
     # Merge chromosomes's PDF files

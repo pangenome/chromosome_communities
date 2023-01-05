@@ -257,10 +257,10 @@ p_entropy_average <- ggplot(e_chr_average, aes(x=start.pos, y=average_sdi, color
     axis.title.x = element_blank(),
     #axis.title.y = element_blank(),
     
-    plot.margin = unit(c(0,0.5,0,4.825), "cm")
+    plot.margin = unit(c(0,0.5,0,3.91), "cm")
   ) + labs(
     x = paste('Position'),
-    y = paste('Entropy\n')
+    y = paste('Regional\nhomology\nentropy')
   ) +
   scale_color_manual(values=colors) +
   guides(colour = guide_legend(override.aes = list(size=10)))
@@ -332,10 +332,10 @@ p_ordered_entropy <- ggplot(
     axis.title.x = element_blank(),
     #axis.title.y = element_blank(),
     
-    plot.margin = unit(c(0,0.5,0,4.825), "cm")
+    plot.margin = unit(c(0,0.5,0,3.91), "cm")
   ) + labs(
     x = paste('Position'),
-    y = paste('Order\nentropy'),
+    y = paste('Positional\nhomology\nentropy'),
     color = 'Target',
     alpha = '# contigs'
   ) +
@@ -443,7 +443,4 @@ ggsave(
   limitsize = FALSE
 )
 #ggsave(plot = p, path_output, width = width, height = length(unique(x$chrom))*4, units = "cm", dpi = 300, bg = "transparent", limitsize = FALSE)
-
-
-
 
