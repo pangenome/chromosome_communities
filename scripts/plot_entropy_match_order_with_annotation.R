@@ -59,10 +59,10 @@ p <- ggplot(xx, aes(x=start, y=shannon_div_index, color=ground.target)) +
     
     strip.text.x = element_blank(),
     strip.text.y = element_blank(),
-    plot.margin = unit(c(0,0.98,0,4.9), "cm")
+    plot.margin = unit(c(0,0.98,0,4.01), "cm")
   ) + labs(
     x = paste('Position'),
-    y = paste('Order entropy\n'),
+    y = paste('Positional\nhomology\nentropy'),
     color = 'Target',
     alpha = '# contigs'
   ) +
