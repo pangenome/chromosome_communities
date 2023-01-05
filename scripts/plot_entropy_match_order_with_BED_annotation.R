@@ -51,7 +51,7 @@ p <- ggplot(xx, aes(x=start, y=shannon_div_index, color=ground.target)) +
   theme(
     plot.title = element_text(hjust = 0.5),
     
-    text = element_text(size = 32),
+    text = element_text(size = 22),
     axis.text.x = element_text(size = 18),
     axis.text.y = element_text(size = 18),
     
@@ -61,10 +61,10 @@ p <- ggplot(xx, aes(x=start, y=shannon_div_index, color=ground.target)) +
     
     strip.text.x = element_blank(),
     strip.text.y = element_blank(),
-    plot.margin = unit(c(0,0,0,0.5), "cm")
+    plot.margin = unit(c(0,0,0,0.36), "cm")
   ) + labs(
     x = paste('Position'),
-    y = paste('Order entropy\n'),
+    y = paste('Positional\nhomology\nentropy'),
     color = 'Target',
     alpha = '# contigs'
   ) +
@@ -132,3 +132,4 @@ ggsave(
   dpi = 100, bg = "white",
   limitsize = FALSE
 )
+
