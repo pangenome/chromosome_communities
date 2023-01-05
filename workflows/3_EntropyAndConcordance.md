@@ -310,6 +310,8 @@ done
 Plots:
 
 ```shell
+n=2
+
 #guix install r-dplyr
 for e in 50000; do
   for m in 1000; do

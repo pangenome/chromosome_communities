@@ -180,7 +180,7 @@ pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigure27.chrACRO+refs.pq_con
 rm output.pdf
 ```
 
-## Figure 24 (25)
+## Figure 30
 
 ```shell
 # --delta for white space between the pieces
@@ -189,7 +189,7 @@ pdfjam --delta '0 7' --no-landscape --nup 1x5 \
   chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n2.chrY.pdf \
   --outfile output.pdf
 
-pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigure24.chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n2.chrSEX.pdf
+pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigure30.chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrACRO.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n2.chrSEX.pdf
 rm output.pdf
 ```
 
