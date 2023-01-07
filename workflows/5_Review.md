@@ -949,13 +949,28 @@ cat chm13v2.PRDM9.SST1.bed | cut -f 1 | sort | uniq | while read f; do
   #  -b <(grep $chr /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
   #  >> chm13v2.PRDM9.SST1.w${window_size}.bed
 done
+
+# Invert coordinates for chr14 (this helps for visualization)
+grep chr14 chm13.SST1.repeat_unit.fa.fai # chm13#chr14:6986247-6987652	1406	1488	60	61
+
+grep chr13 chm13v2.PRDM9.SST1.w${window_size}.bed > tmp.bed
+grep chr21 chm13v2.PRDM9.SST1.w${window_size}.bed >> tmp.bed
+grep chr14 chm13v2.PRDM9.SST1.w${window_size}.bed | awk -v OFS='\t' '{print($1,1406-$3,1406-$2,$4,$5)}' >> tmp.bed
+bedtools sort -i tmp.bed > chm13v2.PRDM9.SST1.w${window_size}.chr14inv.bed
+rm tmp.bed
+
+grep chr13 chm13v2.PRDM9.SST1.bed > tmp.bed
+grep chr21 chm13v2.PRDM9.SST1.bed >> tmp.bed
+grep chr14 chm13v2.PRDM9.SST1.bed | awk -v OFS='\t' '{print($1,1406-$3,1406-$2,$4,$5,$6,$7,$8,$9)}' >> tmp.bed
+bedtools sort -i tmp.bed > chm13v2.PRDM9.SST1.chr14inv.bed
+rm tmp.bed
 ```
 
 Plot the number of hits in each window across on the units:
 
 ```shell
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_without_annotation.all_chromosomes.R \
-  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.w${window_size}.bed \
+  /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.w${window_size}.chr14inv.bed \
   1 \
   'Position (bp)' \
   '' \
@@ -968,7 +983,7 @@ Show where the PRDM9 hits are on the SST1 units:
 
 ```shell
 Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_BED.all_chromosomes.R \
-  <(cat /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.bed | awk -v OFS='\t' '{print($1,$2,$3,$4,$6,$8)}' ) \
+  <(cat /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.chr14inv.bed | awk -v OFS='\t' '{print($1,$2,$3,$4,$6,$8)}' ) \
   35 \
   'Chromosome' \
   /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.pdf

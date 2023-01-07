@@ -70,7 +70,7 @@ p <- ggplot(
 ggsave(
   plot = p,
   path_output,
-  width = width, height = length(unique(x$ref))*7,
+  width = width, height = length(unique(x$ref))*5,
   units = "cm",
   dpi = 300, bg = "transparent",
   limitsize = FALSE
