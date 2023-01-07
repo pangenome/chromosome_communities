@@ -35,7 +35,7 @@ p <- ggplot(
   )
 ) +
   geom_tile() +
-  facet_wrap(~ref, scales = "free", ncol=1, labeller = labeller(variable = labels)) +
+  facet_wrap(~ref, scales = "free_y", ncol=1, labeller = labeller(variable = labels)) +
   theme_bw() +
   theme(
     plot.title = element_text(hjust = 0.5),

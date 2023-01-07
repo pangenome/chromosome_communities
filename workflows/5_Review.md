@@ -681,9 +681,10 @@ bedtools getfasta -fi /lizardfs/guarracino/chromosome_communities/assemblies/chm
 # IT DOES NOT WORK
 #samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr13:5770549-9348041 chm13#chr14:2099538-2817811 chm13#chr15:2506443-4707485 chm13#chr21:3108299-5612715 chm13#chr22:4793795-5720650 > chm13.rDNA.fa
 #
-# https://github.com/yangao07/TideHunter#tabular-format
+#RUN_TIDEHUNTER=/home/guarracino/tools/TideHunter-v1.5.4/bin/TideHunter
 #$RUN_TIDEHUNTER -f 2 chm13.rDNA.fa -t 48 -k 13 > chm13.rDNA.TideHunter.tsv
 #awk '{print(">"$1"_"$7"\n"$11)}' < chm13.rDNA.TideHunter.tsv > chm13.rDNA.TideHunter.fa
+# https://github.com/yangao07/TideHunter#tabular-format
 ```
 
 From the PRDM9 motifs found in the whole chromosomes, take those fully covering the repetitive unit:
@@ -771,7 +772,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_PRDM9_hits_with
   /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/rDNA/chm13v2.PRDM9.rdna_units.w${window_size}.pdf
 ```
 
-## Adam Phillippy's sequence
+#### Adam Phillippy's sequence
 
 ```shell
 mkdir -p /lizardfs/guarracino/chromosome_communities/recombination_hotspots/KY962518
@@ -848,10 +849,8 @@ samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+gr
 samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr21:9375567-9453313 >> chm13.SST1.fa
 
 RUN_TIDEHUNTER=/home/guarracino/tools/TideHunter-v1.5.4/bin/TideHunter
-
-# https://github.com/yangao07/TideHunter#tabular-format
 $RUN_TIDEHUNTER -f 2 chm13.SST1.fa -t 48 -k 13 > chm13.SST1.TideHunter.tsv
-
+# https://github.com/yangao07/TideHunter#tabular-format
 
 # For making dotplots with Gepard (to check that all the repeat units have the same start/end)
 awk '{print(">"$1"_"$7"\n"$11)}' < chm13.SST1.TideHunter.tsv > chm13.SST1.TideHunter.fa
@@ -864,9 +863,9 @@ From the PRDM9 motifs found in the whole chromosomes, take those fully covering 
 
  ```shell
 cut -f 1,10 chm13.SST1.TideHunter.tsv | cut -f 1,2 -d ','
-#chm13#chr13:12301367-12440010	967,2371  => chm13#chr13 12301367+967-1  12301367+2370-1
-#chm13#chr14:6960008-6988409/rc	758,2163  => chm13#chr14 6988409-2163+1  6988409-758+1
-#chm13#chr21:9375567-9453313	770,2174    => chm13#chr21 9375567+770-1   9375567+2174-1
+#chm13#chr13:12301367-12440010	967,2371  => chm13#chr13 12301367+967-1  12301367+2370-1 = 12302333 12303736
+#chm13#chr14:6960008-6988409/rc	758,2163  => chm13#chr14 6988409-2163+1  6988409-758+1   =  6986247  6987652
+#chm13#chr21:9375567-9453313	770,2174    => chm13#chr21 9375567+770-1   9375567+2174-1  =  9376336  9377740
 
 # To check that the outputs are identical
 diff \
@@ -878,22 +877,22 @@ diff \
 diff \
   <(samtools faidx chm13.SST1.fa chm13#chr21:9375567-9453313:770-2174) \
   <(samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr21:9376336-9377740)
- 
 
-#chm13#chr13:12301367-12440010	967,2371  => chm13#chr13 12301367+967-1  12301367+2370-1
-#chm13#chr14:6960008-6988409/rc	758,2163  => chm13#chr14 6988409-2163+1  6988409-758+1
-#chm13#chr21:9375567-9453313	770,2174    => chm13#chr21 9375567+770-1   9375567+2174-1
+samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr13:12302333-12303736 > chm13.SST1.repeat_unit.fa
+samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr14:6986247-6987652 >> chm13.SST1.repeat_unit.fa
+samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+grch38masked.fa.gz chm13#chr21:9376336-9377740 >> chm13.SST1.repeat_unit.fa
 
 rm chm13v2.PRDM9.SST1.bed
-#(echo chm13#chr13:12302333-12303736; echo chm13#chr14:6986247-6987652; echo chm13#chr21:9376336-9377740) | while read f; do
-(echo chm13#chr13:12301367-12440010; echo chm13#chr14:6960008-6988409; echo chm13#chr21:9375567-9453313) | while read f; do
+# Single units (first line of code) or full arrays (second line of code)
+(echo chm13#chr13:12302333-12303736; echo chm13#chr14:6986247-6987652; echo chm13#chr21:9376336-9377740) | while read f; do
+#(echo chm13#chr13:12301367-12440010; echo chm13#chr14:6960008-6988409; echo chm13#chr21:9375567-9453313) | while read f; do
   chr=$(echo $f | cut -f 1 -d ':')
   start=$(echo $f | cut -f 2 -d ':' | cut -f 1 -d '-')
   end=$(echo $f | cut -f 2 -d ':' | cut -f 2 -d '-')
   echo "$chr:$start-$end"
 
-  start1=$((start-50))
-  end1=$(($end+50))
+  start1=$((start-0))
+  end1=$(($end+0))
 
   bedtools intersect \
     -a <(grep '^chm13#chr13\|^chm13#chr14\|^chm13#chr15\|^chm13#chr21\|^chm13#chr22' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/chm13v2.PRDM9.bed | bedtools sort) \
@@ -922,6 +921,7 @@ Counts the number of hits in each base pair:
 
 ```shell
 samtools faidx chm13.SST1.fa
+samtools faidx chm13.SST1.repeat_unit.fa
 
 max_qvalue=1
 window_size=1
@@ -933,10 +933,21 @@ cat chm13v2.PRDM9.SST1.bed | cut -f 1 | sort | uniq | while read f; do
   end=$(echo $f | cut -f 2 -d ':' | cut -f 2 -d '-')
   echo "$chr:$start-$end"
 
-  bedtools intersect \
-    -a <(bedtools makewindows -g <(sed 's/\/rc//g' chm13.SST1.fa.fai | grep "$chr:$start-$end" | cut -f 1,2) -w $window_size) \
-    -b <(grep $chr /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
-    >> chm13v2.PRDM9.SST1.w${window_size}.bed
+  grep '^MOTIF' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt | cut -f 2 -d ' ' | while read MOTIF; do
+    echo "$chr:$start-$end" $MOTIF
+
+    bedtools intersect \
+      -a <(bedtools makewindows -g <(sed 's/\/rc//g' chm13.SST1.repeat_unit.fa.fai | grep "$chr:$start-$end" | cut -f 1,2) -w $window_size) \
+      -b <(grep $chr /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c | \
+      awk -v OFS='\t' -v motif=$MOTIF '{print($0,motif)}' \
+      >> chm13v2.PRDM9.SST1.w${window_size}.bed
+  done
+
+  # All together
+  #bedtools intersect \
+  #  -a <(bedtools makewindows -g <(sed 's/\/rc//g' chm13.SST1.repeat_unit.fa.fai | grep "$chr:$start-$end" | cut -f 1,2) -w $window_size) \
+  #  -b <(grep $chr /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c \
+  #  >> chm13v2.PRDM9.SST1.w${window_size}.bed
 done
 ```
 

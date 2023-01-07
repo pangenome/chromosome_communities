@@ -94,9 +94,9 @@ p <- ggplot(
     "chr15-PHRs"="#00BF7D",
     "chr21-PHRs"="#00B0F6",
     "chr22-PHRs"="#E76BF4",
-    "chr13-SST1"="#0033FF",
-    "chr14-SST1"="#0033FF",
-    "chr21-SST1"="#0033FF",
+    "chr13-SST1"="#000000",
+    "chr14-SST1"="#000000",
+    "chr21-SST1"="#000000",
     "chr13-rDNA"="#000000",
     "chr14-rDNA"="#000000",
     "chr15-rDNA"="#000000",
@@ -130,6 +130,9 @@ ggsave(
 
 # Panel chr14 reversed and chr21
 library(ggpubr)
+
+delta <- 1000000
+
 p_panels <- c()
 
 for (num_chr in c(14, 21)) {
@@ -174,9 +177,9 @@ for (num_chr in c(14, 21)) {
       "chr15-PHRs"="#00BF7D",
       "chr21-PHRs"="#00B0F6",
       "chr22-PHRs"="#E76BF4",
-      "chr13-SST1"="#0033FF",
-      "chr14-SST1"="#0033FF",
-      "chr21-SST1"="#0033FF",
+      "chr13-SST1"="#000000",
+      "chr14-SST1"="#000000",
+      "chr21-SST1"="#000000",
       "chr13-rDNA"="#000000",
       "chr14-rDNA"="#000000",
       "chr15-rDNA"="#000000",
@@ -216,13 +219,18 @@ for (num_chr in c(14, 21)) {
         
         plot.margin = unit(c(0.1,0.3,0.1,0.3), "cm"),
         #plot.margin = unit(c(0.1,6.45,0.1,0.3), "cm"),
-      )+ 
-      annotate("rect",
-               # Centromere
-                  xmin = 12776582, xmax = 10067897,
-                  ymin = 1 - 0.6,
-                  ymax = 11 + 0.6,
-                  fill = "#f8ec32", alpha = .2, color = "#f8ec32", size = 0)
+      ) +
+      # Centromere
+      geom_vline(xintercept=12776582, color='black', alpha=0.3, size=1) +
+      geom_vline(xintercept=10067897, color='black', alpha=0.3, size=1) +
+      # SST1 +- 1Mbp
+      geom_vline(xintercept=6960008 - delta, color='black', alpha=1, size=1) +
+      geom_vline(xintercept=6988409 + delta, color='black', alpha=1, size=1)
+      #annotate("rect",
+      #            xmin = 12776582, xmax = 10067897,
+      #            ymin = 1 - 0.6,
+      #            ymax = 11 + 0.6,
+      #            fill = "#f8ec32", alpha = .2, color = "#f8ec32", size = 0)
   } else {
     p <- p + scale_x_continuous(limits = c(x_min, x_max - 1610000), expand = c(0, 0), breaks=pretty_breaks(n=8))
     p <- p +
@@ -245,12 +253,18 @@ for (num_chr in c(14, 21)) {
         axis.title.y = element_blank(),
         
         plot.margin = unit(c(0.1,0.3,0.1,0.3), "cm"),
-      ) + annotate("rect",
-                   # Centromere
-                     xmin = 10816799, xmax = 11340698,
-                     ymin = 1 - 0.6,
-                     ymax = 10 + 0.6,
-                     fill = "#f8ec32", alpha = .2, color = "#f8ec32", size = 0)
+      ) +
+      # Centromere
+      geom_vline(xintercept=10816799, color='black', alpha=0.3, size=1) +
+      geom_vline(xintercept=11340698, color='black', alpha=0.3, size=1) +
+      # SST1 +- 1Mbp
+      geom_vline(xintercept=9375567 - delta, color='black', alpha=1, size=1) +
+      geom_vline(xintercept=9453313 + delta, color='black', alpha=1, size=1)
+      #annotate("rect",
+      #               xmin = 10816799, xmax = 11340698,
+      #               ymin = 1 - 0.6,
+      #               ymax = 10 + 0.6,
+      #               fill = "#f8ec32", alpha = .2, color = "#f8ec32", size = 0)
   }
 
   
@@ -276,10 +290,11 @@ p_panel
 
 ggsave(
   plot = p_panel,
-  file.path(paste0('SupplementaryFigureX10.ROB.clones.id', min_id, '.chr14inv_and_chr21.pdf')),
+  file.path(paste0('Figure4C.ROB.clones.id', min_id, '.chr14inv_and_chr21.pdf')),
   width = 45,
   height = 0.8 * (xx %>% pull(info) %>% unique() %>% length()),
   units = "cm",
   dpi = 300, bg = "white",
   limitsize = FALSE
 )
+

@@ -1,8 +1,6 @@
-# Figures
+# Main figures
 
-## Main figures
-
-### Figure 3
+## Figure 3
 
 #### Revision 1
 
@@ -53,7 +51,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/Fig4_Annotat
   ~/Figure4.w100k.pdf
 ```
 
-### Figure 5
+## Old figure 5
 
 For each chromosome:
 - top: annotation bars;
@@ -67,7 +65,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/OldFig5_Anno
   ~/Figure5.pdf
 ```
 
-## Supplementary figures
+# Supplementary figures
 
 ## Figure 6, 7, 8, 9, 10
 
@@ -98,6 +96,7 @@ n=6
 done
 ```
 
+
 ## Figure 12 (and 13)
 
 Average entropy across chrX and Y:
@@ -121,7 +120,8 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_entropy_with_BE
   ~/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrSEX.e50000.m1000.grounded.reliable.entropy.eid0900.w50000.n1.nref1.chrY.pdf
 ```
 
-## Figure 19 (20,21,22,23)
+
+## Figure 21
 
 ```shell
 # --delta for white space between the pieces
@@ -133,6 +133,7 @@ pdfjam --delta '0 7' --no-landscape --nup 1x5 \
 pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigure21.chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrSEX.e50000.m1000.grounded.reliable.entropy.eid0900.w50000.n1.nref1.chrSEX.pdf
 rm output.pdf
 ```
+
 
 ## Figure 14, 15, 16, 17, 18
 
@@ -180,6 +181,7 @@ pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigure27.chrACRO+refs.pq_con
 rm output.pdf
 ```
 
+
 ## Figure 30
 
 ```shell
@@ -208,6 +210,7 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/figures/SuppFig_Anno
   /lizardfs/guarracino/chromosome_communities/data/annotation/ \
   ~
 ```
+
 
 
 ## Figure XXX
