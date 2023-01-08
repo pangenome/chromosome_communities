@@ -394,7 +394,7 @@ rm x.tsv # Cleaning
 for e in 50000; do
   for m in 1000; do
     cat $path_targets_txt | while read ref; do
-               path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.tsv.gz
+      path_grounded_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.tsv.gz
       path_grounded_reliable_tsv_gz=/lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$prefix.untangle.$ref.e$e.m$m.grounded.reliable.tsv.gz
 
       if [[ ! -s ${path_grounded_reliable_tsv_gz} ]]; then
