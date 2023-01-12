@@ -439,7 +439,7 @@ Plot (`[start-500kbps,end+500kbps]` centered in the PARs/XTRs regions):
 # PAR1/2/3
 # https://link.springer.com/article/10.1007/s10142-013-0323-6/figures/1
 
-n=1
+n=2
 
 for e in 50000; do
   for m in 1000; do
@@ -480,7 +480,7 @@ for e in 50000; do
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n$n.nref${refn}.PAR2.pdf
               
-            # chrX#PAR2:87642550-91570785
+            # chrX#XTR:87642550-91570785
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_reliable_tsv_gz \
               87142550 92070785 \
@@ -491,7 +491,29 @@ for e in 50000; do
               0.9 \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
               /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n$n.nref${refn}.XTR.pdf
-        
+
+            # chrX#EV_STRATA_5_4:2394410-8500000
+            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
+              $path_grounded_reliable_tsv_gz \
+              0 8500000 \
+              90 0.4 \
+              0 \
+              $n $refn \
+              $i \
+              0.9 \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n$n.nref${refn}.EV_STRATA_5_4.pdf  
+            Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
+              $path_grounded_reliable_tsv_gz \
+              0 8500000 \
+              90 0.4 \
+              0 \
+              $n $refn \
+              $i \
+              0.7 \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.query_to_consider.txt \
+              /lizardfs/guarracino/chromosome_communities/untangle_sex/grounded/$PREFIX.n$n.nref${refn}.EV_STRATA_5_4.eid07.pdf 
+
             # Full chromosome X
             Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_without_annotation.R \
               $path_grounded_reliable_tsv_gz \
@@ -578,7 +600,7 @@ for e in 50000; do
 done
 
 
-# Full chromosome X
+# Only full chromosome X
 for e in 50000; do
   for m in 1000; do
     for refn in 1; do

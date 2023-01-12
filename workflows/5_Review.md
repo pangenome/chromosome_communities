@@ -363,6 +363,46 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangled_SST1_
 
 # Evolutionary strata
 
+Color contigs touching the evolutionary stratas 5 and 4:
+
+```shell
+evolutionary_strata_4_and_5.bed
+chm13#chrX	2394410	8500000
+grch38#chrX	2699520	8500000
+
+
+ls /lizardfs/erikg/HPRC/year1v2genbank/approx_mappings/*.vs.ref.paf | while read PAF; do
+  HAPLOTYPE=$(basename $PAF .paf | cut -f 1,2 -d '.');
+  echo $HAPLOTYPE
+  
+  # This instruction helps with PAF files made by enabling the mapping split in wfmash (no `-N` option).
+  # With unsplit PAF files, this instruction has no effect
+  cat $PAF | awk -v OFS='\t' '{ print $1,$11,$0 }' | sort -n -r -k 1,2 | \
+    awk -v OFS='\t' '$1 != last { print($3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15); last = $1; }' | \
+    awk -v OFS='\t' '{print($6,$8,$9,$1)}' > $HAPLOTYPE.vs.ref.bed
+
+  bedtools intersect \
+    -a <(cat $HAPLOTYPE.vs.ref.bed | bedtools sort) \
+    -b <(cat evolutionary_strata_4_and_5.bed | bedtools sort) | cut -f 4 | sort > $HAPLOTYPE.vs.ref.ev_strata_4_and_5.txt
+ 
+  rm $HAPLOTYPE.vs.ref.bed
+done
+
+cat *.vs.ref.ev_strata_4_and_5.txt > FULL_HPRC.ev_strata_4_and_5.txt
+
+# Hack to color later in gephi (set all grey and color nodes with ColorOfNode field equals to #FF0000)
+grep HPRCy1v2genbank+chm13v2.self.s50k.l250k.p95.n3.h0001.big_w.l1000000.paf.nodes.X.csv -f FULL_HPRC.ev_strata_4_and_5.txt -v > HPRCy1v2genbank+chm13v2.self.s50k.l250k.p95.n3.h0001.big_w.l1000000.paf.nodes.csv
+grep HPRCy1v2genbank+chm13v2.self.s50k.l250k.p95.n3.h0001.big_w.l1000000.paf.nodes.X.csv -f FULL_HPRC.ev_strata_4_and_5.txt | sed 's/#9590FF/#FF0000/g' >> HPRCy1v2genbank+chm13v2.self.s50k.l250k.p95.n3.h0001.big_w.l1000000.paf.nodes.csv
+
+# Colors for the 2 sex communities
+chrX+Y #05a0f9
+chrXp  #0b8da9
+```
+
+```shell
+sbatch -p workers --wrap '\time -v /home/guarracino/tools/wfmash/build/bin/wfmash-cb0ce952a9bec3f2c8c78b98679375e5275e05db chm13.chrX.fa chm13.chrY.fa -p 70 -t 48 > /lizardfs/guarracino/chromosome_communities/chm13.chrY.vs.chrX.paf'
+```
+
 ```shell
 e=50000
 m=1000
@@ -850,10 +890,10 @@ samtools faidx /lizardfs/guarracino/chromosome_communities/assemblies/chm13v2+gr
 
 RUN_TIDEHUNTER=/home/guarracino/tools/TideHunter-v1.5.4/bin/TideHunter
 $RUN_TIDEHUNTER -f 2 chm13.SST1.fa -t 48 -k 13 > chm13.SST1.TideHunter.tsv
+awk '{print(">"$1"\n"$11)}' < chm13.SST1.TideHunter.tsv > chm13.SST1.TideHunter.fa
 # https://github.com/yangao07/TideHunter#tabular-format
 
 # For making dotplots with Gepard (to check that all the repeat units have the same start/end)
-awk '{print(">"$1"_"$7"\n"$11)}' < chm13.SST1.TideHunter.tsv > chm13.SST1.TideHunter.fa
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr13:12301367-12440010_1409 > SST1.chr13.fa
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr14:6960008-6988409/rc_1407 > SST1.chr14rc.fa
 samtools faidx chm13.SST1.TideHunter.fa chm13#chr21:9375567-9453313_1406 > SST1.chr21.fa
@@ -908,12 +948,12 @@ Having less pvalues (hits) to correct, more values get an adjusted p-value lower
 ```shell
 #Search the PRDM9 motifs
 RUN_FIMO=/home/guarracino/tools/meme-5.5.0/src/fimo
-$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/ --verbosity 1 --thresh 1.0E-8 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.fa
+$RUN_FIMO --oc /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/ --verbosity 1 --thresh 1.0E-4 /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13.SST1.TideHunter.fa
 
 #Convert the output in BED format
 samtools faidx chm13.SST1.TideHunter.fa
-cat chm13.SST1.TideHunter.fa.fai | awk -v OFS='\t' '{print($1,"0",$2,"SST1","+","0")}' > chm13.SST1.TideHunter.PRDM9.bed
-grep '^Human' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/fimo.tsv | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$5,$8)}' >> chm13.SST1.TideHunter.PRDM9.bed
+#cat chm13.SST1.TideHunter.fa.fai | awk -v OFS='\t' '{print($1,"0",$2,"SST1","+","0")}' > chm13v2.PRDM9.SST1.bed
+grep '^Human' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/fimo.tsv | awk -v OFS='\t' '{print($2,$3-1,$4,$1,$6,$5,$7,$8,$9)}' | sed 's/\/rc//g' > chm13v2.PRDM9.SST1.bed
 ```
 -----------------------------------------------------------------------------------------------------------
 
@@ -922,6 +962,7 @@ Counts the number of hits in each base pair:
 ```shell
 samtools faidx chm13.SST1.fa
 samtools faidx chm13.SST1.repeat_unit.fa
+samtools faidx chm13.SST1.TideHunter.fa
 
 max_qvalue=1
 window_size=1
@@ -930,7 +971,7 @@ rm chm13v2.PRDM9.SST1.w${window_size}.bed
 cat chm13v2.PRDM9.SST1.bed | cut -f 1 | sort | uniq | while read f; do
   chr=$(echo $f | cut -f 1 -d ':')
   start=$(echo $f | cut -f 2 -d ':' | cut -f 1 -d '-')
-  end=$(echo $f | cut -f 2 -d ':' | cut -f 2 -d '-')
+  end=$(echo $f | cut -f 2 -d ':' | cut -f 2 -d '-' | cut -f 1 -d '_')
   echo "$chr:$start-$end"
 
   grep '^MOTIF' /lizardfs/guarracino/chromosome_communities/recombination_hotspots/PRDM9_motifs.human.txt | cut -f 2 -d ' ' | while read MOTIF; do
@@ -938,7 +979,7 @@ cat chm13v2.PRDM9.SST1.bed | cut -f 1 | sort | uniq | while read f; do
 
     bedtools intersect \
       -a <(bedtools makewindows -g <(sed 's/\/rc//g' chm13.SST1.repeat_unit.fa.fai | grep "$chr:$start-$end" | cut -f 1,2) -w $window_size) \
-      -b <(grep $chr /lizardfs/guarracino/chromosome_communities/recombination_hotspots/repeat_unit/SST1/chm13v2.PRDM9.SST1.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c | \
+      -b <(grep $chr chm13v2.PRDM9.SST1.bed | grep -P 'Human[1-7]*[0-9]\t' | awk -v max_qvalue=$max_qvalue '$8 <= max_qvalue') -c | \
       awk -v OFS='\t' -v motif=$MOTIF '{print($0,motif)}' \
       >> chm13v2.PRDM9.SST1.w${window_size}.bed
   done
@@ -951,6 +992,7 @@ cat chm13v2.PRDM9.SST1.bed | cut -f 1 | sort | uniq | while read f; do
 done
 
 # Invert coordinates for chr14 (this helps for visualization)
+grep chr14 chm13.SST1.fa.fai # chm13#chr14:6960008-6988409/rc	28402	141018	60	61
 grep chr14 chm13.SST1.repeat_unit.fa.fai # chm13#chr14:6986247-6987652	1406	1488	60	61
 
 grep chr13 chm13v2.PRDM9.SST1.w${window_size}.bed > tmp.bed
