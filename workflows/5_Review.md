@@ -456,8 +456,8 @@ Su XTR sforiamo un poco di 2636 bp sulla destra.
 
 path_entropy_match_order_tsv=/home/guarracino/Downloads/Pangenomics/chromosome_communities/Review1/evolutionary_strata/chrSEX+refs.fa.gz.2ed2c67.04f1c29.22fc5c8.smooth.final.untangle.chm13#chrSEX.e50000.m1000.grounded.pq_touching.reliable.entropy_match_order.eid0900.n2.tsv
 cat $path_entropy_match_order_tsv | sed '1d' | awk '$4 > 0 && $5 > 0' | \
-  bedtools merge -i - -d 10000 -c 4,5 -o mean | \
-  awk '$3 - $2 > 0' | sed 's/chm13#//' > chrSEX_29-Nov-22_PHRs.bed # Supplementary Table
+  bedtools merge -i - -d 30000 -c 4,5 -o mean | \
+  awk '$3 - $2 > 0' | sed 's/chm13#//' > chrSEX_7-Dec-22_PHRs.bed # Supplementary Table
 ```
 
 
