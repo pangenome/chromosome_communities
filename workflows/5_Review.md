@@ -401,6 +401,14 @@ chrXp  #0b8da9
 
 ```shell
 sbatch -p workers --wrap '\time -v /home/guarracino/tools/wfmash/build/bin/wfmash-cb0ce952a9bec3f2c8c78b98679375e5275e05db chm13.chrX.fa chm13.chrY.fa -p 70 -t 48 > /lizardfs/guarracino/chromosome_communities/chm13.chrY.vs.chrX.paf'
+
+paf=chm13.chrY.vs.chrX.paf
+./rb trim-paf $paf `#trims back alignments that align the same query sequence more than once` \
+    | ./rb break-paf --max-size 5000 `#breaks the alignment into smaller pieces on indels of 5000 bases or more` \
+    | ./rb orient `#orients each contig so that the majority of bases are forward aligned` \
+    | ./rb filter --paired-len 100000 `#filters for query sequences that have at least 100,000 bases aligned to a target across all alignments.` \
+    | ./rb stats --paf `#calculates statistics from the trimmed paf file` \
+    > $paf.saffire
 ```
 
 ```shell
