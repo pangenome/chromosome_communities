@@ -1,0 +1,11 @@
+chr	start	end	Region	Genes(PreviousRegion)
+chrX	0	1780000	PAR	
+chrX	1780000	5040000	Strata9/PAR	XG(PAR); GYG2(Strata4/Strata5); ARSD(Strata4/Strata5); ARSE(Strata4/Strata5); ARSH(Strata4/Strata5); ARSF(Strata4/Strata5); MXRA5(Strata4/Strata5); PRKX(Strata4/Strata5)
+chrX	5040000	8430000	Strata8	NLGN4X(Strata4); VCX3B(Strata4); STS(Strata4); VCX(Strata4); PNPLA4(Strata4); KAL1(Strata4)
+chrX	8430000	30620000	Strata7	TBL1X(Strata3/Strata4); GPR143(Strata3/Strata4); SHROOM2(Strata3/Strata4); AMELX(Strata3/Strata4); TSMB4X(Strata3/Strata4); OFD1(Strata3); TXNLG(Strata3); EIF1AX(Strata3); ZFX(Strata3); TAB3(Strata3)
+chrX	30620000	55780000	Strata6	BCOR(Strata3); USP9X(Strata3); DDX3X(Strata3); CASK(Strata3); KDM6A(Strata3); UBE1X(Strata2/Strata1); KDM5C(Strata1/Strata1)
+chrX	55780000	75530000	Strata5	RPS4X(Strata1)
+chrX	75530000	99980000	Strata4	None
+chrX	99980000	130820000	Strata3	XKRX(Strata1);
+chrX	130820000	145730000	Strata2	RBMX(Strata1); SOX3(Strata1)
+chrX	145730000	155720000	Strata1;PAR2	HSFX(Strata1); SPRY3(PAR2)
