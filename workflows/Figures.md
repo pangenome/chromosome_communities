@@ -248,3 +248,16 @@ Rscript /lizardfs/guarracino/chromosome_communities/scripts/plot_untangle_dot_pl
   0.9 \
   ~/SuppFigureXX.DotPlots.0_25Mbps.eid090.pdf
 ```
+
+
+## Figure PHRs X and Y
+
+```shell
+pdfjam --delta '0 7' --no-landscape --nup 1x5 \
+  chrX.pdf chrY.pdf \
+  --outfile output.pdf
+
+pdfcrop --margins "1 1 1 1" output.pdf SupplementaryFigureX.PHRs.chrXY.pdf
+rm output.pdf
+
+```

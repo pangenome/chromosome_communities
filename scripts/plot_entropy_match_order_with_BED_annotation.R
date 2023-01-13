@@ -61,7 +61,7 @@ p <- ggplot(xx, aes(x=start, y=shannon_div_index, color=ground.target)) +
     
     strip.text.x = element_blank(),
     strip.text.y = element_blank(),
-    plot.margin = unit(c(0,0,0,0.36), "cm")
+    plot.margin = unit(c(0,0,0,0.43), "cm")
   ) + labs(
     x = paste('Position'),
     y = paste('Positional\nhomology\nentropy'),
@@ -112,7 +112,7 @@ p_ann <- ggplot(
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
   scale_fill_manual(values=colors) +
   labs(x = "Position")
-
+p_ann
 
 library(ggpubr)
 p_with_annotation <- ggpubr::ggarrange(
@@ -127,7 +127,7 @@ p_with_annotation <- ggpubr::ggarrange(
 ggsave(
   plot = p_with_annotation,
   path_output,
-  width = width, height = 10,
+  width = width, height = 12,
   units = "cm",
   dpi = 100, bg = "white",
   limitsize = FALSE

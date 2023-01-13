@@ -65,12 +65,12 @@ z$chrom <- factor(
   ))
 )
 
-
+grp <- 'chrY'
 p <- ggplot(
-  z,
+  z %>% filter(group == grp),
   aes(
-    x = begin + (end - begin) / 2,
-    width = end - begin,
+    x = (begin + (end - begin) / 2) / 1000000,
+    width = (end - begin) / 1000000,
     #y = ordered(info, levels = rev(unique(info))),
     y = chrom,
     fill = color
@@ -102,8 +102,8 @@ p <- ggplot(
     
     plot.margin = unit(c(0.1,1.3,0.1,0.3), "cm"),
   ) +
-  labs(x = "Position (Bp)", fill="Info", alpha='Estimated identity') +
-  scale_x_continuous(expand = c(0, 0), breaks=pretty_breaks(n=8)) +
+  labs(x = "Position (Mbp)", fill="Info", alpha='Estimated identity') +
+  scale_x_continuous(expand = c(0, 0), breaks=pretty_breaks(n=30)) +
   scale_fill_manual(guide = "none", values = c(
     "chrX" = "#E76BF3",
     "chrY" = "#00BFC4",
@@ -113,9 +113,9 @@ p
 
 ggsave(
   plot = p,
-  file.path(paste0('XXX.pdf')),
-  width = 100,
-  height = 6,
+  file.path(paste0(grp, '.pdf')),
+  width = 50,
+  height = 4,
   units = "cm",
   dpi = 300, bg = "white",
   limitsize = FALSE
