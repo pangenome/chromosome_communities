@@ -3,11 +3,11 @@ path_untangle_grounded_tsv <- args[6]
 dir_annotation <- args[7]
 path_output <- args[8]
 
-height_bar <- 0.9
-panel_spacing <- 0
+height_bar <- 0.5
+panel_spacing <- 0.5
 
 estimated_identity_threshold <- 0.9
-nth_best <- 5
+nth_best <- 3
 ref_nth_best <- 1
 
 
@@ -17,6 +17,7 @@ library(tidyverse)
 library(png)
 library(grid)
 library(ggpubr)
+library(magick) #install.packages("magick")
 
 query_to_consider <- c()
 query_to_consider[[length(query_to_consider)+1]] <- c(
@@ -24,27 +25,27 @@ query_to_consider[[length(query_to_consider)+1]] <- c(
   'HG002#MAT#chr13.prox',
   'HG002#PAT#chr13.prox',
   'HG01361#2#JAGYYW010000010.1',
-  'HG01978#1#JAGYVS010000056.1',
-  'HG02486#1#JAGYVM010000043.1',
-  'HG03540#2#JAGYVX010000153.1'
+  'HG01978#1#JAGYVS010000056.1'
+  #'HG02486#1#JAGYVM010000043.1'
+  #'HG03540#2#JAGYVX010000153.1'
 )
 query_to_consider[[length(query_to_consider)+1]] <- c(
   'chm13#chr14',
   'HG002#MAT#chr14.prox',
   'HG002#PAT#chr14.prox',
   'HG00735#1#JAHBCH010000039.1',
-  'HG00741#2#JAHALX010000038.1',
-  'HG01106#2#JAHAMB010000013.1',
-  'HG01978#1#JAGYVS010000055.1'
+  'HG00741#2#JAHALX010000038.1'
+  #'HG01106#2#JAHAMB010000013.1',
+  #'HG01978#1#JAGYVS010000055.1'
 )
 query_to_consider[[length(query_to_consider)+1]] <- c(
   'chm13#chr21',
   'HG002#MAT#chr21.prox',
   'HG002#PAT#chr21.prox',
   'HG00735#2#JAHBCG010000066.1',
-  'HG02886#1#JAHAOU010000106.1',
-  'NA18906#1#JAHEOO010000072.1',
-  'NA19240#2#JAHEOL010000065.1'
+  'HG02886#1#JAHAOU010000106.1'
+  #'NA18906#1#JAHEOO010000072.1'
+  #'NA19240#2#JAHEOL010000065.1'
 )
 
 x <- read.delim(path_untangle_grounded_tsv) %>%
@@ -58,25 +59,43 @@ x$estimated_identity <- exp((1.0 + log(2.0 * x$jaccard/(1.0+x$jaccard)))-1.0)
 
 x <- x[x$estimated_identity >= estimated_identity_threshold,]
 
+
 colors <- c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF4")
 
 chromosomes <- c(13, 14, 21)
 
-# SST1 tree
-path_sst1_tree = '/home/guarracino/git/chromosome_communities/data/SST1tree.2022.12.22.png'
-img_sst1_tree <- readPNG(path_sst1_tree)
-p_sst1_tree <- ggplot() +
-  annotation_custom(
-    rasterGrob(img_sst1_tree, width = 1, height = 1),
+if(FALSE){
+  # SST1 tree
+  path_sst1_tree = '/home/guarracino/git/chromosome_communities/data/SST1tree.2022.12.22.png'
+  img_sst1_tree <- readPNG(path_sst1_tree)
+  p_sst1_tree <- ggplot() +
+    annotation_custom(
+      rasterGrob(img_sst1_tree, width = 1, height = 1),
+      xmin = - Inf, xmax = Inf,
+      ymin = - Inf, ymax = Inf
+    ) + theme(
+      plot.margin = unit(c(7,1,7,1), "cm")
+    )
+}
+
+
+path_sst1_tree = '/home/guarracino/git/chromosome_communities/data/SST1_Tree_BigLabels.pdf'
+img_sst1_tree <- image_read_pdf(path_sst1_tree, density = 300)
+img_sst1_tree <- as.raster(img_sst1_tree)
+p_sst1_tree <- ggplot() + 
+  annotation_raster(
+    img_sst1_tree,
     xmin = - Inf, xmax = Inf,
-    ymin = - Inf, ymax = Inf
-  ) + theme(
-    plot.margin = unit(c(14.5,2.5,14.5,2.5), "cm")
+    ymin = - Inf, ymax = Inf,
+    interpolate = FALSE
+    ) +
+  theme_void() + theme(
+    plot.margin = unit(c(2.5,2.0,2.5,2.0), "cm")
   )
 
 
 delta <- 1000000
-
+options(scipen = 999)
 p_panels <- c()
 for (i in seq_along(chromosomes)){
   num_chr <- chromosomes[[i]]
@@ -95,7 +114,7 @@ for (i in seq_along(chromosomes)){
   print(num_chr)
 
   # Karyotype
-  path_karyotype <- file.path(dir_annotation, paste0('genome_browser_chr', num_chr, '_SST1_1Mbps.karyo.png'))
+  path_karyotype <- file.path(dir_annotation, paste0('genome_browser_chr', num_chr, '_SST1_1Mbps.karyo.NoLabels.png'))
   img_karyo <- readPNG(path_karyotype)
   p_karyotype <- ggplot() +
     annotation_custom(
@@ -103,11 +122,11 @@ for (i in seq_along(chromosomes)){
       xmin = - Inf, xmax = Inf,
       ymin = - Inf, ymax = Inf
     ) + theme(
-      plot.margin = unit(c(0,0.5,0,0.59+7.35), "cm")
+      plot.margin = unit(c(0,0,0,0.59+5.65), "cm")
     )
   
   # Annotation
-  path_annotation <- file.path(dir_annotation, paste0('genome_browser_chr', num_chr, '_SST1_1Mbps_CenSatAnnDense.png'))
+  path_annotation <- file.path(dir_annotation, paste0('genome_browser_chr', num_chr, '_SST1_1Mbps_CenSatAnnDense.NoLabels.png'))
   img <- readPNG(path_annotation)
   p_annotation <- ggplot() +
     annotation_custom(
@@ -115,7 +134,7 @@ for (i in seq_along(chromosomes)){
       xmin = - Inf, xmax = Inf,
       ymin = - Inf, ymax = Inf
     ) + theme(
-      plot.margin = unit(c(0,0.5,0.1,0.59+3.95), "cm")
+      plot.margin = unit(c(0,0,0.1,-1.25), "cm")
     )
   
 
@@ -124,7 +143,7 @@ for (i in seq_along(chromosomes)){
   # Apply filters
   xx <- x %>%
     filter(grounded.target == chr & (query %in% query_to_consider[[i]]))
-
+  xx$query <- gsub("(^[^#]*#[^#]*).*", "\\1", xx$query)
   # Do not consider dedicated annotation bars
   # Do not consider other acros references
   xx <- xx %>%
@@ -154,12 +173,12 @@ for (i in seq_along(chromosomes)){
     theme(
       plot.title = element_text(hjust = 0.5),
       
-      text = element_text(size = 24),
-      axis.text.x = element_text(size = 13),
-      axis.text.y = element_text(size = 13),
+      text = element_text(size = 34),
+      axis.text.x = element_text(size = 34),
+      axis.text.y = element_text(size = 24),
       
-      legend.title = element_text(size = 30),
-      legend.text = element_text(size = 30),
+      legend.title = element_text(size = 34),
+      legend.text = element_text(size = 34),
       legend.position = "none",
       
       panel.spacing = unit(panel_spacing, "lines"),
@@ -168,14 +187,14 @@ for (i in seq_along(chromosomes)){
       strip.text.x = element_blank(),
       strip.text.y = element_blank(),
       
-      #axis.title.x = element_blank(),
+      axis.title.x = element_text(size=34),
       axis.title.y = element_blank(),
       
-      plot.margin = unit(c(0,0.5,0,0), "cm"),
+      plot.margin = unit(c(0,0,0.3,0), "cm"),
     ) +
     scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
     scale_fill_manual(values = colors) +
-    labs(x = "Position")+
+    labs(x = "Position (bp)",)+
     guides(
       fill = guide_legend(title="Target", override.aes = list(size=10)),
       alpha = guide_legend(title="Estimated identity", override.aes = list(size=10))
@@ -185,8 +204,8 @@ for (i in seq_along(chromosomes)){
   p_panel <- ggpubr::ggarrange(
     p_karyotype, p_annotation, p_untangle,
     labels=c('', '', ''), font.label = list(size = 40, color = "black", face = "bold", family = NULL),
-    heights = c(0.18, 0.75, 3.8),
-    legend = "right", # legend position,
+    heights = c(0.2, 0.6, 2.5),
+    legend = "none", # legend position,
     common.legend = T,
     nrow = 3
   )
@@ -203,37 +222,69 @@ for (i in seq_along(chromosomes)){
   p_panels[[length(p_panels)+1]] <- p_panel
 }
 
-
 # Put panels together
 p_figure_B <- ggpubr::ggarrange(
   p_panels[[1]], p_panels[[2]], p_panels[[3]],
   labels=c('chr13', 'chr14', 'chr21'),
-  font.label = list(size = 35, color = "black", face = "bold", family = NULL),
-  hjust=-0.5, vjust=+2.3,
+  font.label = list(size = 40, color = "black", face = "bold", family = NULL),
+  hjust=-0.5, vjust=+1.3,
   heights = c(1,1,1),
   
   legend = "right", # legend position,
   common.legend = T,
   nrow = 3, ncol = 1
-) + theme(plot.margin = margin(3,0,3,0, "cm")) 
+) + theme(plot.margin = margin(0,0,0,0, "cm")) 
 
 p_figure_AB <- ggpubr::ggarrange(
   p_sst1_tree, p_figure_B,
-  labels=c('A', 'B'),
+  labels=c('', ''),
   font.label = list(size = 40, color = "black", face = "bold", family = NULL),
-  hjust=-0.1, vjust=+1.1,
-  align = c('v'),
+  #hjust=-0.1, vjust=+1.1,
+  #align = c('v'),
   heights = c(0.1,1),
-  widths = c(0.4, 0.6),
-  legend = "right", # legend position,
-  common.legend = T,
+  widths = c(0.5, 0.5),
+  legend = "none", # legend position,
+  common.legend = F,
   nrow = 1, ncol = 2
-)
+) + theme(plot.margin = margin(0,0.0,0,0, "cm")) 
+
+
+
+path_ROB_tree = '/home/guarracino/git/chromosome_communities/data/Figure4D.pdf'
+path_ROB_tree = '/home/guarracino/git/chromosome_communities/data/Figure4C.ROB.clones.id90.chr14inv_and_chr21.pdf'
+
+img_ROB_tree <- image_read_pdf(path_ROB_tree, density = 300)
+imgROB_tree <- as.raster(img_ROB_tree)
+p_ROB_tree <- ggplot() + 
+  annotation_raster(
+    img_ROB_tree,
+    xmin = - Inf, xmax = Inf,
+    ymin = - Inf, ymax = Inf,
+    interpolate = FALSE
+  ) +
+  theme_void() + theme(
+    plot.margin = unit(c(0,10,0,10), "cm")
+  )
+
+
+p_figure_ABC <- ggpubr::ggarrange(
+  p_figure_AB, p_ROB_tree,
+  labels=c('', ''),
+  font.label = list(size = 40, color = "black", face = "bold", family = NULL),
+  #hjust=-0.1, vjust=+1.1,
+  #align = c('v'),
+  heights = c(1,0.4),
+  widths = c(0.5, 0.5),
+  legend = "none", # legend position,
+  common.legend = F,
+  nrow = 2, ncol = 1
+) + theme(plot.margin = margin(0,0.0,0,0, "cm")) 
+
 
 width <- 90
-height <- 70
+height <- 83
 ggsave(
-  plot = p_figure_AB,
+  plot = p_figure_ABC,
   path_output,
   width = width, height = height, # There are 4 NULL plots that have height == height/20
   units = "cm",

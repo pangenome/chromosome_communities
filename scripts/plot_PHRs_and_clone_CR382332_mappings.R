@@ -200,12 +200,12 @@ for (num_chr in c(14, 21)) {
       theme(
         plot.title = element_text(hjust = 0.5),
         
-        text = element_text(size = 18),
-        axis.text.x =  element_text(size = 12),
-        axis.text.y = element_text(size = 12),
+        text = element_text(size = 22),
+        axis.text.x =  element_text(size = 22),
+        axis.text.y = element_text(size = 19),
         
-        legend.title = element_text(size = 18),
-        legend.text = element_text(size = 18),
+        legend.title = element_text(size = 22),
+        legend.text = element_text(size = 22),
         legend.position = "top",
         
         #panel.spacing = unit(panel_spacing, "lines"),
@@ -237,12 +237,12 @@ for (num_chr in c(14, 21)) {
       theme(
         plot.title = element_text(hjust = 0.5),
         
-        text = element_text(size = 18),
-        axis.text.x = element_text(size = 12),
-        axis.text.y = element_text(size = 12),
+        text = element_text(size = 22),
+        axis.text.x = element_text(size = 22),
+        axis.text.y = element_text(size = 19),
         
-        legend.title = element_text(size = 18),
-        legend.text = element_text(size = 18),
+        legend.title = element_text(size = 22),
+        legend.text = element_text(size = 22),
         legend.position = "top",
         
         #panel.spacing = unit(panel_spacing, "lines"),
@@ -266,7 +266,6 @@ for (num_chr in c(14, 21)) {
       #               ymax = 10 + 0.6,
       #               fill = "#f8ec32", alpha = .2, color = "#f8ec32", size = 0)
   }
-
   
   p_panels[[length(p_panels)+1]] <- p
 }
@@ -282,7 +281,7 @@ p_panel <- ggpubr::ggarrange(
   p_panels[[1]], p_panels[[2]],
   labels=c('', ''), font.label = list(size = 40, color = "black", face = "bold", family = NULL),
   heights = c(1, 1),
-  legend = "top", # legend position,
+  legend = "none", # legend position,
   common.legend = T,
   nrow = 2
 )
@@ -292,7 +291,7 @@ ggsave(
   plot = p_panel,
   file.path(paste0('Figure4C.ROB.clones.id', min_id, '.chr14inv_and_chr21.pdf')),
   width = 45,
-  height = 0.8 * (xx %>% pull(info) %>% unique() %>% length()),
+  height = 0.75 * (xx %>% pull(info) %>% unique() %>% length()),
   units = "cm",
   dpi = 300, bg = "white",
   limitsize = FALSE
