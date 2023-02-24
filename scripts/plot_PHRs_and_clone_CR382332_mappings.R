@@ -85,7 +85,7 @@ p <- ggplot(
     
     plot.margin = unit(c(0.1,1.3,0.1,0.3), "cm"),
   ) +
-  labs(x = "Position (Bp)", fill="Info", alpha='Estimated identity') +
+  labs(x = "Position (bp)", fill="Info", alpha='Estimated identity') +
   scale_alpha(range=c(0.05,1), limits=c(min_id,100)) +
   scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0), breaks=pretty_breaks(n=8)) +
   scale_fill_manual(guide = "none", values = c(
@@ -169,7 +169,7 @@ for (num_chr in c(14, 21)) {
     #facet_grid( ~chrom, ncol = 1, scales = "free_y", space = "free_y") +
     facet_grid(rows = vars(chrom), scales = "free_y", space = "free_y") +
     theme_bw() +
-    labs(x = "Position (Bp)", fill="Info", alpha='Estimated identity') +
+    labs(x = "Position (bp)", fill="Info", alpha='Estimated identity') +
     scale_alpha(range=c(0.05,1), limits=c(min_id,100)) +
     scale_fill_manual(guide = "none", values = c(
       "chr13-PHRs" = "#F8766D",
@@ -200,12 +200,12 @@ for (num_chr in c(14, 21)) {
       theme(
         plot.title = element_text(hjust = 0.5),
         
-        text = element_text(size = 22),
-        axis.text.x =  element_text(size = 22),
+        text = element_text(size = 21),
+        axis.text.x =  element_text(size = 21),
         axis.text.y = element_text(size = 19),
         
-        legend.title = element_text(size = 22),
-        legend.text = element_text(size = 22),
+        legend.title = element_text(size = 21),
+        legend.text = element_text(size = 21),
         legend.position = "top",
         
         #panel.spacing = unit(panel_spacing, "lines"),
@@ -237,12 +237,12 @@ for (num_chr in c(14, 21)) {
       theme(
         plot.title = element_text(hjust = 0.5),
         
-        text = element_text(size = 22),
-        axis.text.x = element_text(size = 22),
+        text = element_text(size = 21),
+        axis.text.x = element_text(size = 21),
         axis.text.y = element_text(size = 19),
         
-        legend.title = element_text(size = 22),
-        legend.text = element_text(size = 22),
+        legend.title = element_text(size = 21),
+        legend.text = element_text(size = 21),
         legend.position = "top",
         
         #panel.spacing = unit(panel_spacing, "lines"),
