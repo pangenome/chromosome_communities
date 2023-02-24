@@ -8,9 +8,9 @@ library(ggplot2)
 library(tidyverse)
 
 x <- read.table(path_community_table, header = T) %>%
-  rename(`Not partitioned` = not.partitioned)
+  rename(`Unassigned` = not.partitioned)
 
-x$community.of <- gsub("not.partitioned_", "Not partitioned - ", x$community.of)
+x$community.of <- gsub("not.partitioned_", "Unassigned - ", x$community.of)
 x$community.of <- gsub("_", " - ", x$community.of)
 
 # Respect and reverted the order in the file
@@ -20,7 +20,7 @@ x$community.of <- factor(x$community.of, levels=rev(mylevels))
 y <- read.table(path_community_2_size, header = F)
 colnames(y) <- c('num.community', 'variable', 'sequence.content.bp')
 y$variable <- as.character(y$variable)
-y[y$variable == 'unmapped',]$variable <- "Not partitioned"
+y[y$variable == 'unmapped',]$variable <- "Unassigned"
 y$variable <- as.factor(y$variable)
 
 library(reshape2)
@@ -29,6 +29,8 @@ xy <- merge(
   y,
   by = c('num.community', 'variable')
 )
+
+#xy$value[xy$value > 100] <- ''
 
 # Info grouped by community
 #xy %>% group_by(num.community) %>% summarise(num.contigs.comm = sum(value)) %>% View()
@@ -49,31 +51,38 @@ p <- ggplot(
   scale_fill_gradient(low = "#FAFAFA", high = "red") +
   theme_bw() +
   theme(
-    plot.title = element_text(hjust = 0.5),
+    #plot.title = element_text(hjust = 0.5),
     
-    text = element_text(size = 16),
-    axis.text.x = element_text(size = 12, angle = 90, vjust = 0.5, hjust=1),
-    axis.text.y = element_text(size = 12),
+    text = element_text(size = 21),
+    axis.text.x = element_text(size = 19, angle = 90, vjust = 0.5, hjust=1),
+    axis.text.y = element_text(size = 19),
     
-    legend.title = element_text(size = 16),
-    legend.text = element_text(size = 16),
+    legend.title = element_text(size = 19),
+    legend.text = element_text(size = 19),
     legend.position = "right",
     
     #axis.title.y=element_blank()
-    panel.grid.major = element_blank(), panel.grid.minor = element_blank()
+    panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+    
+    axis.title.x = element_text(margin = margin(t = -20)),
+    axis.title.y = element_text(margin = margin(r = -20))
   ) +
   labs(x = "Chromosome", y = 'Community', fill = '% seq') + 
-  theme(aspect.ratio=1)
+  #theme(aspect.ratio=1) + 
+  theme(
+    plot.margin = unit(c(0,0,0,0), "cm")
+  )
 p <- p +
   #geom_text(aes(label=round(sequence.content.bp / total_sequence_content_bp, digits = 10)), size=2.5, color="red") + 
-  geom_text(aes(label=value), size=2.9, color="black")
+  geom_text(aes(label=value), size=5.5, color="black")
 
 ggsave(
   plot = p,
   path_output,
-  width = 25, height = 25, units = "cm", dpi = 300, bg = "transparent", limitsize = F)
+  width = 34, height = 25, units = "cm", dpi = 300, bg = "transparent", limitsize = F)
 
 # OLD CODE
 #x$community.of <- factor(x$community.of, levels=unique(x[order(as.integer(gsub("[^0-9]", "", x$community.of))),'community.of']))
 #co <- melt(x%>% select(-num.community), id.vars = 'community.of')
 #num_contigs <- sum(co$value)
+
