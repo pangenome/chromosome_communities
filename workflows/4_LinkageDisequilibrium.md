@@ -135,6 +135,5 @@ done
 #### Visualization
 
 ```shell
-Rscript ../scripts/plot_ld_1.R 'ld/*.ld' 100 4000 Figure6.pdf
-Rscript ../scripts/plot_ld_1.R 'ld/*.ld' 100 4000 Figure6.png
+Rscript ../scripts/plot_ld_1.R 'ld/*.ld' 100 4000 ExtendedDataFigure11.pdf
 ```
