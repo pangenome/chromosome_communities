@@ -1,0 +1,16 @@
+wfmash, ad8aeba, https://github.com/waveygang/wfmash
+seqwish, 706ef7e, https://github.com/ekg/seqwish
+smoothxg, b3f4578, https://github.com/pangenome/smoothxg
+vg, 1.40.0, https://github.com/vgteam/vg
+GFAffix, 0.1.3	https://github.com/marschall-lab/GFAffix
+odgi, 454197f, ttps://github.com/pangenome/odgi
+pggb, a4a6668, https://github.com/pangenome/pggb
+fastix, 331c115, https://github.com/ekg/fastix.git
+igraph, 0.10.1, https://igraph.org/
+gephi, 0.9.4, https://gephi.org/
+PLINK, 1.90p, https://www.cog-genomics.org/plink/
+verkko, vd3f0b, https://github.com/marbl/verkko
+R, 4.2.1, https://www.r-project.org/
+InkScape, 1.2.2, https://inkscape.org/
+MEME Suite, 5.5.0, https://meme-suite.org/
+Jmodeltest2, 2.1.10, https://github.com/ddarriba/jmodeltest2

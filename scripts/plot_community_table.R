@@ -4,6 +4,11 @@ path_community_2_size <- args[7]
 total_sequence_content_bp <- as.numeric(args[8])
 path_output <- args[9]
 
+path_community_table <- '/home/guarracino/Desktop/HPRCy1v2genbank.self.s50k.l250k.p95.n93.h0001.l1000000.paf.community.leiden.tsv'
+path_community_2_size <- '/home/guarracino/Desktop/HPRCy1v2genbank.self.s50k.l250k.p95.n93.h0001.l1000000.paf.community2size.tsv'
+total_sequence_content_bp <- 2.83434e+11
+path_output <- 'x.pdf'
+
 library(ggplot2)
 library(tidyverse)
 
