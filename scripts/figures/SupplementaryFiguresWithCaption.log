@@ -1,0 +1,16 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdftex 2022.12.13)  27 FEB 2023 14:22
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**SupplementaryFiguresWithCaption.tex
+(./SupplementaryFiguresWithCaption.tex
+! Undefined control sequence.
+l.1 \documentclass
+                  {article}
+? 
+! Emergency stop.
+l.1 \documentclass
+                  {article}
+End of file on the terminal!
+
+!  ==> Fatal error occurred, no output PDF file produced!
