@@ -1,17 +1,17 @@
-args <- commandArgs()
-path_community_table <- args[6]
-path_community_2_size <- args[7]
-total_sequence_content_bp <- as.numeric(args[8])
-path_output <- args[9]
-
-path_community_table <- '/home/guarracino/Desktop/HPRCy1v2genbank.self.s50k.l250k.p95.n93.h0001.l1000000.paf.community.leiden.tsv'
-path_community_2_size <- '/home/guarracino/Desktop/HPRCy1v2genbank.self.s50k.l250k.p95.n93.h0001.l1000000.paf.community2size.tsv'
-total_sequence_content_bp <- 2.83434e+11
-path_output <- 'x.pdf'
-
 library(ggplot2)
 library(tidyverse)
 
+# install ggrepel from git
+#install.packages("devtools")
+#devtools::install_github("slowkow/ggrepel")
+
+
+#path_community_table <- 'HPRCy1v2genbank.self.s50k.l250k.p95.n93.h0001.l1000000.paf.community.leiden.tsv'
+#path_community_2_size <- 'HPRCy1v2genbank.self.s50k.l250k.p95.n93.h0001.l1000000.paf.community2size.tsv'
+#total_sequence_content_bp <- 2.83434e+11
+#path_output <- 'x.pdf'
+
+# read in data
 x <- read.table(path_community_table, header = T) %>%
   rename(`Unassigned` = not.partitioned)
 
@@ -34,6 +34,8 @@ xy <- merge(
   y,
   by = c('num.community', 'variable')
 )
+
+summary(xy)
 
 #xy$value[xy$value > 100] <- ''
 
@@ -78,13 +80,17 @@ p <- ggplot(
     plot.margin = unit(c(0,0,0,0), "cm")
   )
 p <- p +
-  #geom_text(aes(label=round(sequence.content.bp / total_sequence_content_bp, digits = 10)), size=2.5, color="red") + 
-  geom_text(aes(label=value), size=5.5, color="black")
-
+  #geom_text(aes(label=round(sequence.content.bp / total_sequence_content_bp, digits = 10)), size=2.5, color="red") +
+  # angled text labels
+  with(xy, geom_text(aes(label=value),
+                     size=6.5, color="black",
+                     # the angle should depend on if we're in the last column to the right
+                     angle = ifelse(variable == "Unassigned", 0, 45),
+                     hjust=0.5, vjust=0.5))
 ggsave(
   plot = p,
   path_output,
-  width = 34, height = 25, units = "cm", dpi = 300, bg = "transparent", limitsize = F)
+  width = 34, height = 30, units = "cm", dpi = 300, bg = "transparent", limitsize = F)
 
 # OLD CODE
 #x$community.of <- factor(x$community.of, levels=unique(x[order(as.integer(gsub("[^0-9]", "", x$community.of))),'community.of']))
