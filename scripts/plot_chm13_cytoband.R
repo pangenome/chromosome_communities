@@ -5,10 +5,10 @@ custom.genome <- toGRanges("/home/guarracino/git/chromosome_communities/data/chm
 #https://github.com/marbl/CHM13/issues/47
 #https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=T2T/CHM13/assemblies/annotation/
 #Add header and set the extension to `txt` to avoid problems with `toGRanges`
-custom.cytobands <- toGRanges("/home/guarracino/git/chromosome_communities/data/chm13v2.0_cytobands_allchrs.tsv")
+custom.cytobands <- toGRanges("/home/guarracino/git/chromosome_communities/data/chm13v2.0_cytobands_allchrs.modified.txt")
 
 #Open the device
-png("Acros.cytobands.pq_arms.png", width = 1600, height = 700, bg = "transparent")
+pdf("Acros.cytobands.pq_arms.pdf", width = 1600, height = 700, bg = "transparent")
 
 #Draw
 p_arms <- toGRanges(
@@ -28,10 +28,10 @@ q_arms <- toGRanges(
 plot.params <- getDefaultPlotParams(plot.type = 2)
 plot.params$data1height <- 100
 
-kp <- plotKaryotype(genome = custom.genome, cytobands = custom.cytobands, plot.params = plot.params, cex=3)
+kp <- plotKaryotype(genome = custom.genome, cytobands = custom.cytobands, plot.params = plot.params, cex=2)
 kpPlotRegions(kp, p_arms, col="#CCFFAA", r1=0.3)
 kpPlotRegions(kp, q_arms, col="#CCFFAA", r1=0.3)
-kpAddBaseNumbers(kp, tick.dist=5000000)
+kpAddBaseNumbers(kp, tick.dist=5000000, cex=1)
 
 #Close the device
 dev.off()
