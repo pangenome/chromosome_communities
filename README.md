@@ -1,8 +1,9 @@
 # Chromosome communities in the human pangenome
 
-## Preprint
+## Citation
 
-**Recombination between heterologous human acrocentric chromosomes** at [https://doi.org/10.1101/2022.08.15.504037](https://doi.org/10.1101/2022.08.15.504037).
+Guarracino *et al.*, 2023. **Recombination between heterologous human acrocentric chromosomes**, Nature, [https://doi.org/10.1038/s41586-023-05976-y](https://doi.org/10.1038/s41586-023-05976-y)
+
 
 ## Workflows
 
