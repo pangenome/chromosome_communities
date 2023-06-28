@@ -1,4 +1,4 @@
-# Chromosome communities in the human pangenome
+# Recombination between heterologous human acrocentric chromosomes
 
 ## Citation
 
