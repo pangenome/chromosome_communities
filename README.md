@@ -1,7 +1,5 @@
 # Recombination between heterologous human acrocentric chromosomes
 
-https://docs.google.com/presentation/d/1etNEcPc4h64X9z_dPu6eWYW8B6GfITwocc1qudk5bpc/edit?usp=sharing
-
 ## Citation
 
 Guarracino *et al.*, 2023. **Recombination between heterologous human acrocentric chromosomes**, Nature, [https://doi.org/10.1038/s41586-023-05976-y](https://doi.org/10.1038/s41586-023-05976-y)
